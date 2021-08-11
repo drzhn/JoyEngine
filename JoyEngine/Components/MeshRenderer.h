@@ -4,13 +4,15 @@
 #include "Component.h"
 #include "MeshRendererTypes.h"
 #include "SceneManager/Transform.h"
+#include "Utils/GUIDUtils.h"
 
 namespace JoyEngine {
     class MeshRenderer : public Component {
     public:
-        explicit MeshRenderer(Transform t):m_transform(t){
+        explicit MeshRenderer(Transform t) : m_transform(t) {
 
         }
+
         void Enable() override {
             // Register in render list
         }
@@ -19,12 +21,29 @@ namespace JoyEngine {
             // Unregister in render list
         };
 
-        ~MeshRenderer(){
+        ~MeshRenderer() {
             // if enabled - disable
             // tell resource manager to free resources;
         }
+
+        void SetMesh(const char *filename, GUID guid) {
+
+        }
+
+        void SetTexture(const char *filename, GUID guid) {
+
+        }
+
+        void SetVertShader(const char *filename, GUID guid) {
+
+        }
+
+        void SetFragShader(const char *filename, GUID guid) {
+
+        }
+
     private:
-        const Transform& m_transform;
+        const Transform &m_transform;
         uint32_t m_index;
         Mesh m_mesh;
         Texture m_texture;

@@ -6,7 +6,9 @@
 #include <Libs/glm/glm/glm.hpp>
 
 #include "FileUtils.h"
+#include "GUIDUtils.h"
 #include "SceneManager/GameObject.h"
+#include "Components/MeshRenderer.h"
 #include "rapidjson/document.h"
 
 namespace JoyEngine {
@@ -31,13 +33,17 @@ namespace JoyEngine {
                 GameObject *go = new GameObject(v["name"].GetString());
 
                 rapidjson::Value &transformValue = v["transform"];
-                go->GetTransform()->SetPosition(GetVectorValueFromNameField(transformValue, "localPosition"));
-                go->GetTransform()->SetRotation(GetVectorValueFromNameField(transformValue, "localRotation"));
-                go->GetTransform()->SetScale(GetVectorValueFromNameField(transformValue, "localScale"));
+                go->GetTransform()->SetPosition(GetVectorValueFromField(transformValue, "localPosition"));
+                go->GetTransform()->SetRotation(GetVectorValueFromField(transformValue, "localRotation"));
+                go->GetTransform()->SetScale(GetVectorValueFromField(transformValue, "localScale"));
 
                 for (auto &c : v["components"].GetArray()) {
                     if (std::string(c["type"].GetString()) == "renderer") {
-
+                        MeshRenderer *mr = go->AddMeshRenderer();
+                        mr->SetMesh(c["model"]["path"].GetString(), GUID::StringToGuid(c["model"]["fileId"].GetString()));
+                        mr->SetTexture(c["texture"]["path"].GetString(), GUID::StringToGuid(c["model"]["fileId"].GetString()));
+                        mr->SetVertShader(c["vertexShader"]["path"].GetString(), GUID::StringToGuid(c["model"]["fileId"].GetString()));
+                        mr->SetFragShader(c["fragmentShader"]["path"].GetString(), GUID::StringToGuid(c["model"]["fileId"].GetString()));
                     }
 
                 }
@@ -47,7 +53,7 @@ namespace JoyEngine {
             return objects;
         }
 
-        static glm::vec3 GetVectorValueFromNameField(rapidjson::Value &val, const char *name) {
+        static glm::vec3 GetVectorValueFromField(rapidjson::Value &val, const char *name) {
             return {val[name]["x"].GetFloat(), val[name]["y"].GetFloat(), val[name]["z"].GetFloat()};
         }
 

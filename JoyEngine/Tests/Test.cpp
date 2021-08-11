@@ -68,15 +68,15 @@ int main() {
 //    size_t b= sizeof(unsigned int  );
     // 1. Parse a JSON string into DOM.
 //    const char* json = "{\"project\":\"rapidjson\",\"stars\":10}";
-    std::vector<char> json = JoyEngine::readFile(filename);
-    Document document;
-    document.Parse<rapidjson::kParseStopWhenDoneFlag>(json.data());
-
-    Value &val = document["guid"];
-    const char* guidStr = val.GetString();
-    JoyEngine::GUID guid = JoyEngine::GUID::StringToGuid(guidStr);
-    std::map<JoyEngine::GUID, int> map;
-    map.insert({guid,4});
+//    std::vector<char> json = JoyEngine::readFile(filename);
+//    Document document;
+//    document.Parse<rapidjson::kParseStopWhenDoneFlag>(json.data());
+//
+//    Value &val = document["guid"];
+//    const char* guidStr = val.GetString();
+//    JoyEngine::GUID guid = JoyEngine::GUID::StringToGuid(guidStr);
+//    std::map<JoyEngine::GUID, int> map;
+//    map.insert({guid,4});
 
     // 2. Modify it by DOM.
 //    Value &s = document["stars"];

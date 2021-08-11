@@ -20,7 +20,7 @@ namespace JoyEngine {
 //                m_scene(nullptr) {}
 
         void Init() {
-            LoadScene(R"(D:\CppProjects\JoyGFXWin32\JoyData\scenes\room.json)");
+            LoadScene(R"(D:\CppProjects\JoyEngine\JoyData\scenes\room.json)");
         }
 
         void Start() {}
@@ -35,6 +35,7 @@ namespace JoyEngine {
             if (m_scene != nullptr) {
                 UnloadScene();
             }
+            delete m_scene;
         }
 
     private:
