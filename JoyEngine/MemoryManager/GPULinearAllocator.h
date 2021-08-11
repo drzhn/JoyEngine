@@ -1,0 +1,8 @@
+//
+// Created by kleve on 10.08.2021.
+//
+
+#ifndef GPULINEARALLOCATOR_H
+#define GPULINEARALLOCATOR_H
+
+#endif //GPULINEARALLOCATOR_H

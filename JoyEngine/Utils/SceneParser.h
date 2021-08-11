@@ -1,0 +1,59 @@
+#ifndef SCENE_PARSER_H
+#define SCENE_PARSER_H
+
+#include <string>
+#include <iostream>
+#include <Libs/glm/glm/glm.hpp>
+
+#include "FileUtils.h"
+#include "SceneManager/GameObject.h"
+#include "rapidjson/document.h"
+
+namespace JoyEngine {
+
+
+    class SceneParser {
+    public:
+        SceneParser(const char *filename) {
+            std::vector<char> json = JoyEngine::readFile(filename);
+            m_document.Parse<rapidjson::kParseStopWhenDoneFlag>(json.data());
+        }
+
+        std::string GetName() {
+            rapidjson::Value &val = m_document["name"];
+            return val.GetString();
+        }
+
+        std::vector<GameObject *> GetObjects() {
+            rapidjson::Value &val = m_document["objects"];
+            std::vector<GameObject *> objects;
+            for (auto &v : val.GetArray()) {
+                GameObject *go = new GameObject(v["name"].GetString());
+
+                rapidjson::Value &transformValue = v["transform"];
+                go->GetTransform()->SetPosition(GetVectorValueFromNameField(transformValue, "localPosition"));
+                go->GetTransform()->SetRotation(GetVectorValueFromNameField(transformValue, "localRotation"));
+                go->GetTransform()->SetScale(GetVectorValueFromNameField(transformValue, "localScale"));
+
+                for (auto &c : v["components"].GetArray()) {
+                    if (std::string(c["type"].GetString()) == "renderer") {
+
+                    }
+
+                }
+
+                objects.push_back(go);
+            }
+            return objects;
+        }
+
+        static glm::vec3 GetVectorValueFromNameField(rapidjson::Value &val, const char *name) {
+            return {val[name]["x"].GetFloat(), val[name]["y"].GetFloat(), val[name]["z"].GetFloat()};
+        }
+
+    private:
+        rapidjson::Document m_document;
+    };
+}
+
+#endif //SCENE_PARSER_H

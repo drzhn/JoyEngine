@@ -1,0 +1,48 @@
+{
+  "type": "scene",
+  "name": "roomScene",
+  "guid": "11dcfeba-c2b6-4c2e-a3c7-51054ff06f1d",
+  "objects": [
+    {
+      "name": "room",
+      "transform": {
+        "localPosition": {
+          "x": 0.0,
+          "y": 0.0,
+          "z": 0.0
+        },
+        "localRotation": {
+          "x": 0.0,
+          "y": 0.0,
+          "z": 0.0
+        },
+        "localScale": {
+          "x": 1.0,
+          "y": 1.0,
+          "z": 1.0
+        }
+      },
+      "components": [
+        {
+          "type": "renderer",
+          "model": {
+            "fileId": "fc972e06-70d9-4271-8615-825003b43f74",
+            "path": "../JoyData/models/viking_room.obj"
+          },
+          "texture": {
+            "fileId": "1d451f58-3f84-4b2b-8c6f-fe8e2821d7f0",
+            "path": "../JoyData/textures/viking_room.png"
+          },
+          "vertexShader": {
+            "fileId": "183d6cfe-ca85-4e0b-ab36-7b1ca0f99d34",
+            "path": "../JoyData/shaders/vert.spv"
+          },
+          "fragmentShader": {
+            "fileId": "b05cf5b9-9916-4b5a-bc84-82368d84143e",
+            "path": "../JoyData/shaders/frag.spv"
+          }
+        }
+      ]
+    }
+  ]
+}
