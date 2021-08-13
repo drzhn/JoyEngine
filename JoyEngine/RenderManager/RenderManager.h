@@ -17,11 +17,27 @@
 #include "Utils/FileUtils.h"
 
 namespace JoyEngine {
+
+    class IJoyGraphicsContext{
+    public :
+        [[nodiscard]] virtual HINSTANCE GetHINSTANCE() const noexcept = 0;
+        [[nodiscard]] virtual HWND GetHWND() const noexcept = 0;
+        [[nodiscard]] virtual Allocator *GetAllocator() const noexcept = 0;
+        [[nodiscard]] virtual VkInstance GetVkInstance() const noexcept = 0;
+        [[nodiscard]] virtual VkPhysicalDevice GetVkPhysicalDevice() const noexcept = 0;
+        [[nodiscard]] virtual VkDevice GetVkDevice() const noexcept = 0;
+        [[nodiscard]] virtual VkDebugUtilsMessengerEXT GetVkDebugUtilsMessengerEXT() const noexcept = 0;
+        [[nodiscard]] virtual VkSurfaceKHR GetVkSurfaceKHR() const noexcept = 0;
+        [[nodiscard]] virtual VkQueue GetGraphicsVkQueue() const noexcept = 0;
+        [[nodiscard]] virtual VkQueue GetPresentVkQueue() const noexcept = 0;
+        [[nodiscard]] virtual VkCommandPool GetVkCommandPool() const noexcept = 0;
+    };
+
     class RenderManager {
     public:
         RenderManager() = default;
 
-        RenderManager(HINSTANCE instance, HWND windowHandle);
+        RenderManager(const IJoyGraphicsContext& graphicsContext);
 
         ~RenderManager() {
 
@@ -38,16 +54,6 @@ namespace JoyEngine {
 
         const int MAX_FRAMES_IN_FLIGHT = 2;
 
-        void CreateInstance();
-
-        void SetupDebugMessenger();
-
-        void CreateSurface();
-
-        void PickPhysicalDevice();
-
-        void CreateLogicalDevice();
-
         void CreateSwapChain();
 
         void CreateImageViews();
@@ -57,23 +63,7 @@ namespace JoyEngine {
         VkImageView createImageView(VkImage image, VkFormat format, VkImageAspectFlags aspectFlags);
 
     private:
-        const std::vector<const char *> deviceExtensions = {
-                VK_KHR_SWAPCHAIN_EXTENSION_NAME
-        };
-        const char *validationLayerName = "VK_LAYER_KHRONOS_validation";
-
-        HINSTANCE m_instance;
-        HWND m_windowHandle;
-
-        VkInstance instance;
-        VkPhysicalDevice physicalDevice = VK_NULL_HANDLE;
-        VkDebugUtilsMessengerEXT debugMessenger;
-        VkSurfaceKHR surface;
-
-        VkDevice logicalDevice;
-        VkQueue graphicsQueue;
-        VkQueue presentQueue;
-
+        const IJoyGraphicsContext& m_graphicsContext;
         VkSwapchainKHR swapChain;
         std::vector<VkImage> swapChainImages;
         VkFormat swapChainImageFormat;
@@ -121,7 +111,6 @@ namespace JoyEngine {
 //        VkDeviceMemory depthImageMemory;
 //        VkImageView depthImageView;
 
-        Allocator *allocator_;
     };
 
 

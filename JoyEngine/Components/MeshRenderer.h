@@ -4,7 +4,7 @@
 #include "Component.h"
 #include "MeshRendererTypes.h"
 #include "SceneManager/Transform.h"
-#include "Utils/GUIDUtils.h"
+#include "Utils/GUID.h"
 
 namespace JoyEngine {
     class MeshRenderer : public Component {
@@ -45,10 +45,10 @@ namespace JoyEngine {
     private:
         const Transform &m_transform;
         uint32_t m_index;
-        Mesh m_mesh;
-        Texture m_texture;
-        Shader m_vertShader;
-        Shader m_fragShader;
+        //Mesh m_mesh;
+        //Texture m_texture;
+        //Shader m_vertShader;
+        //Shader m_fragShader;
     };
 }
 

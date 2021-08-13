@@ -6,7 +6,7 @@
 #include <Libs/glm/glm/glm.hpp>
 
 #include "FileUtils.h"
-#include "GUIDUtils.h"
+#include "GUID.h"
 #include "SceneManager/GameObject.h"
 #include "Components/MeshRenderer.h"
 #include "rapidjson/document.h"

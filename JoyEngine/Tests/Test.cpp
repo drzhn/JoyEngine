@@ -54,7 +54,7 @@
 #include <windows.h>
 #include <Combaseapi.h>
 #include "Utils/FileUtils.h"
-#include"Utils/GUIDUtils.h"
+#include"Utils/GUID.h"
 #include <map>
 #include <unordered_map>
 

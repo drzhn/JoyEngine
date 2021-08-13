@@ -6,7 +6,7 @@
 //#include "ResourceManager/ResourceManager.h"
 
 #include "Scene.h"
-#include "Utils/GUIDUtils.h"
+#include "Utils/GUID.h"
 
 namespace JoyEngine {
 //    class ResourceManager;

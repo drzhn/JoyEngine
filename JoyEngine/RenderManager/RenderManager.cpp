@@ -22,173 +22,30 @@
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
 #define TINYOBJLOADER_IMPLEMENTATION
 
-#ifdef NDEBUG
-const bool enableValidationLayers = false;
-#else
-const bool enableValidationLayers = true;
-#endif
-
 namespace JoyEngine {
 
-    RenderManager::RenderManager(HINSTANCE instance, HWND windowHandle) :
-            m_instance(instance),
-            m_windowHandle(windowHandle) {
-
-        CreateInstance();
-        SetupDebugMessenger();
-        CreateSurface();
-        PickPhysicalDevice();
-        CreateLogicalDevice();
+    RenderManager::RenderManager(const IJoyGraphicsContext &graphicsContext) :
+            m_graphicsContext(graphicsContext) {
         CreateSwapChain();
         CreateImageViews();
         CreateRenderPass();
-
-    }
-
-    void RenderManager::CreateInstance() {
-        allocator_ = new Allocator();
-        if (enableValidationLayers && !checkValidationLayerSupport(validationLayerName)) {
-            throw std::runtime_error("validation layers requested, but not available!");
-        }
-
-        VkApplicationInfo appInfo{};
-        appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
-        appInfo.pApplicationName = "Joy Instance";
-        appInfo.applicationVersion = VK_MAKE_VERSION(1, 0, 0);
-        appInfo.pEngineName = "Joy Engine";
-        appInfo.engineVersion = VK_MAKE_VERSION(1, 0, 0);
-        appInfo.apiVersion = VK_API_VERSION_1_0;
-
-        VkInstanceCreateInfo createInfo{};
-        createInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
-        createInfo.pApplicationInfo = &appInfo;
-
-        auto extensions = getRequiredExtensions(enableValidationLayers);
-        createInfo.enabledExtensionCount = static_cast<uint32_t>(extensions.size());
-        createInfo.ppEnabledExtensionNames = extensions.data();
-
-        VkDebugUtilsMessengerCreateInfoEXT debugCreateInfo;
-        if (enableValidationLayers) {
-            createInfo.enabledLayerCount = 1;
-            createInfo.ppEnabledLayerNames = &validationLayerName;
-
-            populateDebugMessengerCreateInfo(debugCreateInfo);
-            createInfo.pNext = (VkDebugUtilsMessengerCreateInfoEXT *) &debugCreateInfo;
-        } else {
-            createInfo.enabledLayerCount = 0;
-
-            createInfo.pNext = allocator_->GetAllocationCallbacks();
-        }
-
-        if (vkCreateInstance(&createInfo, allocator_->GetAllocationCallbacks(), &instance) != VK_SUCCESS) {
-            throw std::runtime_error("failed to create instance!");
-        }
-    }
-
-    void RenderManager::SetupDebugMessenger() {
-        if (!enableValidationLayers) return;
-
-        VkDebugUtilsMessengerCreateInfoEXT createInfo;
-        populateDebugMessengerCreateInfo(createInfo);
-
-        if (CreateDebugUtilsMessengerEXT(instance, &createInfo, allocator_->GetAllocationCallbacks(), &debugMessenger) != VK_SUCCESS) {
-            throw std::runtime_error("failed to set up debug messenger!");
-        }
-    }
-
-    void RenderManager::CreateSurface() {
-        VkWin32SurfaceCreateInfoKHR surfaceCreateInfoKhr = {
-                VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR,
-                nullptr,
-                0,
-                m_instance,
-                m_windowHandle,
-        };
-        VkResult res = vkCreateWin32SurfaceKHR(instance, &surfaceCreateInfoKhr, allocator_->GetAllocationCallbacks(), &surface);
-        if (res != VK_SUCCESS) {
-            throw std::runtime_error("failed to create window surface!");
-        }
-    }
-
-    void RenderManager::PickPhysicalDevice() {
-        uint32_t deviceCount = 0;
-        vkEnumeratePhysicalDevices(instance, &deviceCount, nullptr);
-        if (deviceCount == 0) {
-            throw std::runtime_error("failed to find GPUs with Vulkan support!");
-        }
-        std::vector<VkPhysicalDevice> devices(deviceCount);
-        vkEnumeratePhysicalDevices(instance, &deviceCount, devices.data());
-        for (const auto &device : devices) {
-            if (isPhysicalDeviceSuitable(device,surface,deviceExtensions)) {
-                physicalDevice = device;
-                break;
-            }
-        }
-        if (physicalDevice == VK_NULL_HANDLE) {
-            throw std::runtime_error("failed to find a suitable GPU!");
-        }
-    }
-
-    void RenderManager::CreateLogicalDevice() {
-        QueueFamilyIndices indices = findQueueFamilies(physicalDevice, surface);
-
-        std::vector<VkDeviceQueueCreateInfo> queueCreateInfos;
-        std::set<uint32_t> uniqueQueueFamilies = {indices.graphicsFamily.value(), indices.presentFamily.value()};
-
-        float queuePriority = 1.0f;
-        for (uint32_t queueFamily : uniqueQueueFamilies) {
-            VkDeviceQueueCreateInfo queueCreateInfo{};
-            queueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
-            queueCreateInfo.queueFamilyIndex = queueFamily;
-            queueCreateInfo.queueCount = 1;
-            queueCreateInfo.pQueuePriorities = &queuePriority;
-            queueCreateInfos.push_back(queueCreateInfo);
-        }
-
-        VkPhysicalDeviceFeatures deviceFeatures{};
-        deviceFeatures.samplerAnisotropy = VK_TRUE;
-
-        VkDeviceCreateInfo createInfo{};
-        createInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
-
-        createInfo.queueCreateInfoCount = static_cast<uint32_t>(queueCreateInfos.size());
-        createInfo.pQueueCreateInfos = queueCreateInfos.data();
-
-        createInfo.pEnabledFeatures = &deviceFeatures;
-
-        createInfo.enabledExtensionCount = static_cast<uint32_t>(deviceExtensions.size());
-        createInfo.ppEnabledExtensionNames = deviceExtensions.data();
-
-        if (enableValidationLayers) {
-            createInfo.enabledLayerCount = 1;
-            createInfo.ppEnabledLayerNames = &validationLayerName;
-        } else {
-            createInfo.enabledLayerCount = 0;
-        }
-
-        if (vkCreateDevice(physicalDevice, &createInfo, allocator_->GetAllocationCallbacks(), &logicalDevice) != VK_SUCCESS) {
-            throw std::runtime_error("failed to create logical device!");
-        }
-
-        vkGetDeviceQueue(logicalDevice, indices.graphicsFamily.value(), 0, &graphicsQueue);
-        vkGetDeviceQueue(logicalDevice, indices.presentFamily.value(), 0, &presentQueue);
     }
 
     void RenderManager::CreateSwapChain() {
-        SwapChainSupportDetails swapChainSupport = querySwapChainSupport(physicalDevice,surface);
+        SwapChainSupportDetails swapChainSupport = querySwapChainSupport(
+                m_graphicsContext.GetVkPhysicalDevice(), m_graphicsContext.GetVkSurfaceKHR());
 
         VkSurfaceFormatKHR surfaceFormat = chooseSwapSurfaceFormat(swapChainSupport.formats);
         VkPresentModeKHR presentMode = chooseSwapPresentMode(swapChainSupport.presentModes);
-        VkExtent2D extent = chooseSwapExtent(swapChainSupport.capabilities, m_windowHandle);
+        VkExtent2D extent = chooseSwapExtent(swapChainSupport.capabilities, m_graphicsContext.GetHWND());
 
         uint32_t imageCount = swapChainSupport.capabilities.minImageCount + 1;
         if (swapChainSupport.capabilities.maxImageCount > 0 && imageCount > swapChainSupport.capabilities.maxImageCount) {
             imageCount = swapChainSupport.capabilities.maxImageCount;
         }
-
         VkSwapchainCreateInfoKHR createInfo{};
         createInfo.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
-        createInfo.surface = surface;
+        createInfo.surface = m_graphicsContext.GetVkSurfaceKHR();
 
         createInfo.minImageCount = imageCount;
         createInfo.imageFormat = surfaceFormat.format;
@@ -197,7 +54,7 @@ namespace JoyEngine {
         createInfo.imageArrayLayers = 1;
         createInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
 
-        QueueFamilyIndices queueFamilies = findQueueFamilies(physicalDevice, surface);
+        QueueFamilyIndices queueFamilies = findQueueFamilies(m_graphicsContext.GetVkPhysicalDevice(), m_graphicsContext.GetVkSurfaceKHR());
         uint32_t queueFamilyIndices[] = {queueFamilies.graphicsFamily.value(), queueFamilies.presentFamily.value()};
 
         if (queueFamilies.graphicsFamily != queueFamilies.presentFamily) {
@@ -217,13 +74,13 @@ namespace JoyEngine {
 
         createInfo.oldSwapchain = VK_NULL_HANDLE;
 
-        if (vkCreateSwapchainKHR(logicalDevice, &createInfo, allocator_->GetAllocationCallbacks(), &swapChain) != VK_SUCCESS) {
+        if (vkCreateSwapchainKHR(m_graphicsContext.GetVkDevice(), &createInfo, m_graphicsContext.GetAllocator()->GetAllocationCallbacks(), &swapChain) != VK_SUCCESS) {
             throw std::runtime_error("failed to create swap chain!");
         }
 
-        vkGetSwapchainImagesKHR(logicalDevice, swapChain, &imageCount, nullptr);
+        vkGetSwapchainImagesKHR(m_graphicsContext.GetVkDevice(), swapChain, &imageCount, nullptr);
         swapChainImages.resize(imageCount);
-        vkGetSwapchainImagesKHR(logicalDevice, swapChain, &imageCount, swapChainImages.data());
+        vkGetSwapchainImagesKHR(m_graphicsContext.GetVkDevice(), swapChain, &imageCount, swapChainImages.data());
 
         swapChainImageFormat = surfaceFormat.format;
         swapChainExtent = extent;
@@ -250,7 +107,7 @@ namespace JoyEngine {
         viewInfo.subresourceRange.layerCount = 1;
 
         VkImageView imageView;
-        if (vkCreateImageView(logicalDevice, &viewInfo, allocator_->GetAllocationCallbacks(), &imageView) != VK_SUCCESS) {
+        if (vkCreateImageView(m_graphicsContext.GetVkDevice(), &viewInfo, m_graphicsContext.GetAllocator()->GetAllocationCallbacks(), &imageView) != VK_SUCCESS) {
             throw std::runtime_error("failed to create texture image view!");
         }
 
@@ -259,7 +116,7 @@ namespace JoyEngine {
 
     void RenderManager::CreateRenderPass() {
         VkAttachmentDescription depthAttachment{};
-        depthAttachment.format = findDepthFormat(physicalDevice);
+        depthAttachment.format = findDepthFormat(m_graphicsContext.GetVkPhysicalDevice());
         depthAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
         depthAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
         depthAttachment.storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
@@ -310,7 +167,7 @@ namespace JoyEngine {
         renderPassInfo.dependencyCount = 1;
         renderPassInfo.pDependencies = &dependency;
 
-        if (vkCreateRenderPass(logicalDevice, &renderPassInfo, allocator_->GetAllocationCallbacks(), &renderPass) != VK_SUCCESS) {
+        if (vkCreateRenderPass(m_graphicsContext.GetVkDevice(), &renderPassInfo, m_graphicsContext.GetAllocator()->GetAllocationCallbacks(), &renderPass) != VK_SUCCESS) {
             throw std::runtime_error("failed to create render pass!");
         }
     }

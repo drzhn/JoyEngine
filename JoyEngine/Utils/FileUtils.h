@@ -6,7 +6,7 @@
 #include <fstream>
 #include <cassert>
 
-#include "GUIDUtils.h"
+#include "GUID.h"
 
 namespace JoyEngine {
     static std::vector<char> readFile(const std::string &filename) {

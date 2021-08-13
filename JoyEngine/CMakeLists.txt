@@ -6,6 +6,8 @@ set(CMAKE_CXX_STANDARD 17)
 add_library(
         JoyEngine
 
+        JoyEngineContext.cpp
+
         RenderManager/RenderManager.cpp
         MemoryManager/MemoryManager.cpp
         ResourceManager/ResourceManager.cpp
@@ -24,7 +26,7 @@ target_include_directories(JoyEngine PUBLIC .)
 
 target_link_libraries(JoyEngine C://VulkanSDK/1.2.154.1/Lib/vulkan-1.lib)
 target_include_directories(JoyEngine PUBLIC C://VulkanSDK/1.2.154.1/Include)
-target_include_directories(JoyEngine PUBLIC ${CMAKE_SOURCE_DIR} )
+target_include_directories(JoyEngine PUBLIC ${CMAKE_SOURCE_DIR})
 add_compile_definitions(VK_USE_PLATFORM_WIN32_KHR)
 add_compile_definitions(VK_PROTOTYPES)
 add_compile_definitions(_CRT_SECURE_NO_WARNINGS)
