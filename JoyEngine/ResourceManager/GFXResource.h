@@ -26,8 +26,7 @@ namespace JoyEngine {
     };
 
     struct GFXShader : GFXResource {
-        VkShaderModule vertShaderModule;
-        VkShaderModule fragShaderModule;
+        VkShaderModule shaderModule;
     };
 }
 
