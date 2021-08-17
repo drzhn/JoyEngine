@@ -40,10 +40,10 @@ namespace JoyEngine {
                 for (auto &c : v["components"].GetArray()) {
                     if (std::string(c["type"].GetString()) == "renderer") {
                         MeshRenderer *mr = go->AddMeshRenderer();
-                        mr->SetMesh(c["model"]["path"].GetString(), GUID::StringToGuid(c["model"]["fileId"].GetString()));
-                        mr->SetTexture(c["texture"]["path"].GetString(), GUID::StringToGuid(c["model"]["fileId"].GetString()));
-                        mr->SetVertShader(c["vertexShader"]["path"].GetString(), GUID::StringToGuid(c["model"]["fileId"].GetString()));
-                        mr->SetFragShader(c["fragmentShader"]["path"].GetString(), GUID::StringToGuid(c["model"]["fileId"].GetString()));
+                        mr->SetMesh((dataPath + c["model"]["path"].GetString()).c_str(), GUID::StringToGuid(c["model"]["fileId"].GetString()));
+                        mr->SetTexture((dataPath + c["texture"]["path"].GetString()).c_str(), GUID::StringToGuid(c["model"]["fileId"].GetString()));
+                        mr->SetVertShader((dataPath + c["vertexShader"]["path"].GetString()).c_str(), GUID::StringToGuid(c["model"]["fileId"].GetString()));
+                        mr->SetFragShader((dataPath + c["fragmentShader"]["path"].GetString()).c_str(), GUID::StringToGuid(c["model"]["fileId"].GetString()));
                     }
 
                 }
@@ -59,6 +59,7 @@ namespace JoyEngine {
 
     private:
         rapidjson::Document m_document;
+        const std::string dataPath = R"(D:\CppProjects\JoyEngine\JoyData\)";
     };
 }
 

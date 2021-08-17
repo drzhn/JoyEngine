@@ -59,8 +59,6 @@ namespace JoyEngine {
         void UnloadResource<Mesh>(GUID guid) {
             if (m_loadedMeshes.find(guid) != m_loadedMeshes.end()) {
                 m_loadedMeshes[guid]->refCount--;
-            } else {
-                assert(false);
             }
             if (m_loadedMeshes[guid]->refCount == 0) {
                 DestroyBuffer(m_loadedMeshes[guid]->vertexBuffer, m_loadedMeshes[guid]->vertexBufferMemory);
@@ -74,8 +72,6 @@ namespace JoyEngine {
             if (m_loadedTextures.find(guid) != m_loadedTextures.end()) {
                 m_loadedTextures[guid]->refCount++;
                 return;
-            } else {
-                assert(false);
             }
             GFXTexture *texture = new GFXTexture();
             texture->refCount = 1;
@@ -108,8 +104,6 @@ namespace JoyEngine {
             if (m_loadedShaders.find(guid) != m_loadedShaders.end()) {
                 m_loadedShaders[guid]->refCount++;
                 return;
-            } else {
-                assert(false);
             }
             GFXShader *shader = new GFXShader();
             shader->refCount = 1;

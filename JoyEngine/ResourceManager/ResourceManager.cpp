@@ -165,7 +165,7 @@ namespace JoyEngine {
     void ResourceManager::CreateBuffer(
             VkPhysicalDevice physicalDevice,
             VkDevice logicalDevice,
-            Allocator* allocator,
+            Allocator *allocator,
             VkDeviceSize size,
             VkBufferUsageFlags usage,
             VkMemoryPropertyFlags properties,
@@ -192,6 +192,7 @@ namespace JoyEngine {
         if (vkAllocateMemory(logicalDevice, &allocInfo, allocator->GetAllocationCallbacks(), &bufferMemory) != VK_SUCCESS) {
             throw std::runtime_error("failed to allocate buffer memory!");
         }
+        vkBindBufferMemory(logicalDevice, buffer, bufferMemory, 0);
     }
 
     void ResourceManager::CreateShaderModule(const std::string &filename, VkShaderModule &shaderModule) {
