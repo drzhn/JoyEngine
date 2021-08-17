@@ -209,8 +209,6 @@ namespace JoyEngine {
 
         void DestroyImage(VkSampler sampler, VkImageView imageView, VkImage image, VkDeviceMemory imageMemory);
 
-        VkShaderModule CreateShaderModule(const std::string &filename);
-
         void CreateShaderModule(const std::string &filename, VkShaderModule &shaderModule);
 
         void DestroyShaderModule(VkShaderModule shaderModule);

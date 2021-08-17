@@ -190,17 +190,18 @@ namespace JoyEngine {
         pipelineInfo.subpass = 0;
         pipelineInfo.basePipelineHandle = VK_NULL_HANDLE;
 
-        if (vkCreateGraphicsPipelines(m_graphicsContext.GetVkDevice(),
-                                      VK_NULL_HANDLE,
-                                      1,
-                                      &pipelineInfo,
-                                      m_graphicsContext.GetAllocator()->GetAllocationCallbacks(),
-                                      &m_graphicsPipeline) != VK_SUCCESS) {
+        VkResult res = vkCreateGraphicsPipelines(m_graphicsContext.GetVkDevice(),
+                                                 VK_NULL_HANDLE,
+                                                 1,
+                                                 &pipelineInfo,
+                                                 m_graphicsContext.GetAllocator()->GetAllocationCallbacks(),
+                                                 &m_graphicsPipeline);
+        if (res != VK_SUCCESS) {
             throw std::runtime_error("failed to create graphics pipeline!");
         }
 
-        vkDestroyShaderModule(m_graphicsContext.GetVkDevice(), fragShaderModule, m_graphicsContext.GetAllocator()->GetAllocationCallbacks());
-        vkDestroyShaderModule(m_graphicsContext.GetVkDevice(), vertShaderModule, m_graphicsContext.GetAllocator()->GetAllocationCallbacks());
+        //vkDestroyShaderModule(m_graphicsContext.GetVkDevice(), fragShaderModule, m_graphicsContext.GetAllocator()->GetAllocationCallbacks());
+        //vkDestroyShaderModule(m_graphicsContext.GetVkDevice(), vertShaderModule, m_graphicsContext.GetAllocator()->GetAllocationCallbacks());
     }
 
     void RenderObject::CreateUniformBuffers() {

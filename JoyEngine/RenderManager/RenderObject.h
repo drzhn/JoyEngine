@@ -28,7 +28,7 @@ namespace JoyEngine {
         MeshRenderer *m_meshRenderer;
         VkRenderPass m_renderPass;
         VkDescriptorSetLayout m_descriptorSetLayout;
-        VkDescriptorPool m_descriptorPool;
+        VkDescriptorPool m_descriptorPool = VK_NULL_HANDLE;
         std::vector<VkDescriptorSet> m_descriptorSets;
         VkPipelineLayout m_pipelineLayout;
         VkPipeline m_graphicsPipeline;
