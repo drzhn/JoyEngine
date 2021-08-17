@@ -1,5 +1,7 @@
-//
-// Created by kleve on 10.08.2021.
-//
-
 #include "RenderObject.h"
+
+namespace JoyEngine{
+    RenderObject::RenderObject(MeshRenderer *meshRenderer):m_meshRenderer(meshRenderer) {
+
+    }
+}

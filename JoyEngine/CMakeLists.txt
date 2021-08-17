@@ -17,6 +17,7 @@ add_library(
         SceneManager/Transform.cpp
         Components/MeshRenderer.cpp
         RenderManager/RenderObject.cpp
+        Components/MeshRendererTypes.cpp
 )
 ############## make #include "<folder>/<header>.h" possible ##############
 target_include_directories(JoyEngine PUBLIC .)
@@ -31,6 +32,7 @@ add_compile_definitions(VK_USE_PLATFORM_WIN32_KHR)
 add_compile_definitions(VK_PROTOTYPES)
 add_compile_definitions(_CRT_SECURE_NO_WARNINGS)
 add_compile_definitions(_USE_MATH_DEFINES)
+#add_compile_definitions(STB_IMAGE_IMPLEMENTATION)
 
 
 add_subdirectory(Libs/glm)
@@ -39,7 +41,7 @@ target_link_libraries(JoyEngine glm)
 add_subdirectory(Libs/tinyobjloader)
 target_link_libraries(JoyEngine tinyobjloader)
 
-target_include_directories(JoyEngine PRIVATE Libs/stb) # somehow this is not a library
+target_include_directories(JoyEngine PUBLIC Libs/stb) # somehow this is not a library
 
 add_subdirectory(Libs/rapidjson)
 target_include_directories(JoyEngine PUBLIC Libs/rapidjson/include)

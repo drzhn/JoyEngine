@@ -7,29 +7,42 @@
 #include <array>
 #include <set>
 #include <chrono>
-
+#include <map>
 #include <vulkan/vulkan.h>
 
+#include "Components/MeshRenderer.h"
+#include "Components/MeshRendererTypes.h"
 #include "RenderManager/VulkanAllocator.h"
 #include "RenderManager/VulkanTypes.h"
 #include "RenderManager/VulkanUtils.h"
+#include "RenderObject.h"
 
 #include "Utils/FileUtils.h"
 
 namespace JoyEngine {
 
-    class IJoyGraphicsContext{
+    class IJoyGraphicsContext {
     public :
         [[nodiscard]] virtual HINSTANCE GetHINSTANCE() const noexcept = 0;
+
         [[nodiscard]] virtual HWND GetHWND() const noexcept = 0;
+
         [[nodiscard]] virtual Allocator *GetAllocator() const noexcept = 0;
+
         [[nodiscard]] virtual VkInstance GetVkInstance() const noexcept = 0;
+
         [[nodiscard]] virtual VkPhysicalDevice GetVkPhysicalDevice() const noexcept = 0;
+
         [[nodiscard]] virtual VkDevice GetVkDevice() const noexcept = 0;
+
         [[nodiscard]] virtual VkDebugUtilsMessengerEXT GetVkDebugUtilsMessengerEXT() const noexcept = 0;
+
         [[nodiscard]] virtual VkSurfaceKHR GetVkSurfaceKHR() const noexcept = 0;
+
         [[nodiscard]] virtual VkQueue GetGraphicsVkQueue() const noexcept = 0;
+
         [[nodiscard]] virtual VkQueue GetPresentVkQueue() const noexcept = 0;
+
         [[nodiscard]] virtual VkCommandPool GetVkCommandPool() const noexcept = 0;
     };
 
@@ -37,20 +50,19 @@ namespace JoyEngine {
     public:
         RenderManager() = default;
 
-        RenderManager(const IJoyGraphicsContext& graphicsContext);
+        RenderManager(const IJoyGraphicsContext &graphicsContext);
 
         ~RenderManager() {
 
         }
+
+        static RenderManager *GetInstance() noexcept { return m_instance; }
 
         void Init() {}
 
         void Start() {}
 
         void Stop() {}
-
-        const char *MODEL_PATH = "../models/viking_room.obj";
-        const char *TEXTURE_PATH = "../textures/viking_room.png";
 
         const int MAX_FRAMES_IN_FLIGHT = 2;
 
@@ -60,10 +72,15 @@ namespace JoyEngine {
 
         void CreateRenderPass();
 
-        VkImageView createImageView(VkImage image, VkFormat format, VkImageAspectFlags aspectFlags);
+        VkImageView CreateImageView(VkImage image, VkFormat format, VkImageAspectFlags aspectFlags);
+
+        uint32_t RegisterMeshRenderer(MeshRenderer *meshRenderer);
+
+        void UnregisterMeshRenderer(uint32_t);
 
     private:
-        const IJoyGraphicsContext& m_graphicsContext;
+        static RenderManager *m_instance;
+        const IJoyGraphicsContext &m_graphicsContext;
         VkSwapchainKHR swapChain;
         std::vector<VkImage> swapChainImages;
         VkFormat swapChainImageFormat;
@@ -71,6 +88,9 @@ namespace JoyEngine {
         std::vector<VkImageView> swapChainImageViews;
 
         VkRenderPass renderPass;
+
+        uint32_t m_renderObjectIndex = 0;
+        std::map<uint32_t, RenderObject *> m_renderObjects;
 //        VkDescriptorSetLayout descriptorSetLayout;
 //        VkPipelineLayout pipelineLayout;
 //        VkPipeline graphicsPipeline;

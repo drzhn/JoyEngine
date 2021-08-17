@@ -24,8 +24,11 @@
 
 namespace JoyEngine {
 
+    RenderManager *RenderManager::m_instance = nullptr;
+
     RenderManager::RenderManager(const IJoyGraphicsContext &graphicsContext) :
             m_graphicsContext(graphicsContext) {
+        m_instance = this;
         CreateSwapChain();
         CreateImageViews();
         CreateRenderPass();
@@ -90,11 +93,11 @@ namespace JoyEngine {
         swapChainImageViews.resize(swapChainImages.size());
 
         for (uint32_t i = 0; i < swapChainImages.size(); i++) {
-            swapChainImageViews[i] = createImageView(swapChainImages[i], swapChainImageFormat, VK_IMAGE_ASPECT_COLOR_BIT);
+            swapChainImageViews[i] = CreateImageView(swapChainImages[i], swapChainImageFormat, VK_IMAGE_ASPECT_COLOR_BIT);
         }
     }
 
-    VkImageView RenderManager::createImageView(VkImage image, VkFormat format, VkImageAspectFlags aspectFlags) {
+    VkImageView RenderManager::CreateImageView(VkImage image, VkFormat format, VkImageAspectFlags aspectFlags) {
         VkImageViewCreateInfo viewInfo{};
         viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
         viewInfo.image = image;
@@ -171,6 +174,20 @@ namespace JoyEngine {
             throw std::runtime_error("failed to create render pass!");
         }
     }
+
+    uint32_t RenderManager::RegisterMeshRenderer(MeshRenderer *meshRenderer) {
+        RenderObject *renderObject = new RenderObject(meshRenderer);
+        m_renderObjects.insert({m_renderObjectIndex, renderObject});
+        return ++m_renderObjectIndex;
+    }
+
+    void RenderManager::UnregisterMeshRenderer(uint32_t index) {
+        if (m_renderObjects.find(index) == m_renderObjects.end()) {
+            assert(false);
+        }
+        m_renderObjects.erase(index);
+    }
+
 //
 //    class HelloTriangleApplication {
 //

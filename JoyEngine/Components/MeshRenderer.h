@@ -9,46 +9,41 @@
 namespace JoyEngine {
     class MeshRenderer : public Component {
     public:
+        MeshRenderer() = default;
+
         explicit MeshRenderer(Transform t) : m_transform(t) {
 
         }
 
-        void Enable() override {
-            // Register in render list
-        }
+        void Enable() final;
 
-        void Disable() override {
-            // Unregister in render list
-        };
+        void Disable() final;
 
-        ~MeshRenderer() {
-            // if enabled - disable
-            // tell resource manager to free resources;
-        }
+        ~MeshRenderer();
 
         void SetMesh(const char *filename, GUID guid) {
-
+            m_mesh = new Mesh(guid, filename);
         }
 
         void SetTexture(const char *filename, GUID guid) {
-
+            m_texture = new Texture(guid, filename);
         }
 
         void SetVertShader(const char *filename, GUID guid) {
-
+            m_vertShader = new Shader(guid, filename);
         }
 
         void SetFragShader(const char *filename, GUID guid) {
-
+            m_fragShader = new Shader(guid, filename);
         }
 
     private:
         const Transform &m_transform;
         uint32_t m_index;
-        //Mesh m_mesh;
-        //Texture m_texture;
-        //Shader m_vertShader;
-        //Shader m_fragShader;
+        Mesh *m_mesh;
+        Texture *m_texture;
+        Shader *m_vertShader;
+        Shader *m_fragShader;
     };
 }
 

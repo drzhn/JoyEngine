@@ -10,7 +10,7 @@ namespace JoyEngine {
 
         bool IsEnabled() const noexcept { return m_enabled; }
 
-    private:
+    protected:
         bool m_enabled = false;
     };
 }

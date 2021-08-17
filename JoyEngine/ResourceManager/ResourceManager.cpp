@@ -1,101 +1,25 @@
 #include "ResourceManager.h"
 
-#include "Utils/ModelLoader.h"
-#include "Utils/FileUtils.h"
-#include "RenderManager/VulkanUtils.h"
-#include <Libs/stb/stb_image.h>
+#include <string>
+#include <iostream>
+
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
+
+//#include "Utils/ModelLoader.h"
+//#include "Components/MeshRendererTypes.h"
+//
+//#include "Utils/FileUtils.h"
+//#include "RenderManager/VulkanUtils.h"
 
 namespace JoyEngine {
-    template<>
-    void ResourceManager::LoadResource<Mesh>(GUID guid, const std::string &filename) {
-        if (m_loadedMeshes.find(guid) != m_loadedMeshes.end()) {
-            m_loadedMeshes[guid]->refCount++;
-            return;
-        }
-        GFXMesh *mesh = new GFXMesh();
-        mesh->refCount = 1;
-        ModelLoader::LoadModel(mesh->vertices, mesh->indices, filename.c_str());
-        CreateGPUBuffer<Vertex>(mesh->vertices.data(), mesh->vertices.size(), mesh->vertexBuffer, mesh->vertexBufferMemory,
-                                VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
-        CreateGPUBuffer<uint32_t>(mesh->indices.data(), mesh->indices.size(), mesh->indexBuffer, mesh->indexBufferMemory,
-                                  VK_BUFFER_USAGE_INDEX_BUFFER_BIT);
 
-        m_loadedMeshes.insert({guid, mesh});
-    }
+    ResourceManager *ResourceManager::m_instance = nullptr;
 
-    template<>
-    void ResourceManager::UnloadResource<Mesh>(GUID guid) {
-        if (m_loadedMeshes.find(guid) != m_loadedMeshes.end()) {
-            m_loadedMeshes[guid]->refCount--;
-        } else {
-            assert(false);
-        }
-        if (m_loadedMeshes[guid]->refCount == 0) {
-            DestroyBuffer(m_loadedMeshes[guid]->vertexBuffer, m_loadedMeshes[guid]->vertexBufferMemory);
-            DestroyBuffer(m_loadedMeshes[guid]->indexBuffer, m_loadedMeshes[guid]->indexBufferMemory);
-            m_loadedMeshes.erase(guid);
-        }
-    }
-
-    template<>
-    void ResourceManager::LoadResource<Texture>(GUID guid, const std::string &filename) {
-        if (m_loadedTextures.find(guid) != m_loadedTextures.end()) {
-            m_loadedTextures[guid]->refCount++;
-            return;
-        } else {
-            assert(false);
-        }
-        GFXTexture *texture = new GFXTexture();
-        texture->refCount = 1;
-
-        CreateTextureImage(filename, texture->textureImage, texture->textureImageMemory);
-        CreateImageView(texture->textureImage, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_ASPECT_COLOR_BIT, texture->textureImageView);
-        CreateTextureSampler(texture->textureSampler);
-
-        m_loadedTextures.insert({guid, texture});
-    }
-
-    template<>
-    void ResourceManager::UnloadResource<Texture>(GUID guid) {
-        if (m_loadedTextures.find(guid) != m_loadedTextures.end()) {
-            m_loadedTextures[guid]->refCount--;
-        } else {
-            assert(false);
-        }
-        if (m_loadedTextures[guid]->refCount == 0) {
-            DestroyImage(m_loadedTextures[guid]->textureSampler,
-                         m_loadedTextures[guid]->textureImageView,
-                         m_loadedTextures[guid]->textureImage,
-                         m_loadedTextures[guid]->textureImageMemory);
-            m_loadedTextures.erase(guid);
-        }
-    }
-
-    template<>
-    void ResourceManager::LoadResource<Shader>(GUID guid, const std::string &filename) {
-        if (m_loadedShaders.find(guid) != m_loadedShaders.end()) {
-            m_loadedShaders[guid]->refCount++;
-            return;
-        } else {
-            assert(false);
-        }
-        GFXShader *shader = new GFXShader();
-        shader->refCount = 1;
-        CreateShaderModule(filename, shader->shaderModule);
-        m_loadedShaders.insert({guid, shader});
-    }
-
-    template<>
-    void ResourceManager::UnloadResource<Shader>(GUID guid) {
-        if (m_loadedShaders.find(guid) != m_loadedShaders.end()) {
-            m_loadedShaders[guid]->refCount--;
-        } else {
-            assert(false);
-        }
-        if (m_loadedShaders[guid]->refCount == 0) {
-            DestroyShaderModule(m_loadedShaders[guid]->shaderModule);
-            m_loadedShaders.erase(guid);
-        }
+    ResourceManager::ResourceManager(const MemoryManager &memoryManager, const IJoyGraphicsContext &graphicsContext) :
+    m_memoryManager(memoryManager),
+    m_graphicsContext(graphicsContext) {
+        ResourceManager::m_instance = this;
     }
 
     void ResourceManager::CreateTextureImage(const std::string &filename, VkImage &textureImage, VkDeviceMemory &textureImageMemory) {
@@ -234,38 +158,6 @@ namespace JoyEngine {
         }
     }
 
-
-    template<typename T>
-    void ResourceManager::CreateGPUBuffer(T *data, size_t size,
-                                          VkBuffer &vertexBuffer,
-                                          VkDeviceMemory &vertexBufferMemory,
-                                          VkBufferUsageFlagBits usageFlag) {
-        VkDeviceSize bufferSize = sizeof(T) * size;
-
-        VkBuffer stagingBuffer;
-        VkDeviceMemory stagingBufferMemory;
-        CreateBuffer(bufferSize,
-                     VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
-                     VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
-                     stagingBuffer,
-                     stagingBufferMemory);
-
-        void *mappedData;
-        vkMapMemory(m_graphicsContext.GetVkDevice(), stagingBufferMemory, 0, bufferSize, 0, &mappedData);
-        memcpy(mappedData, data, (size_t) bufferSize);
-        vkUnmapMemory(m_graphicsContext.GetVkDevice(), stagingBufferMemory);
-
-        CreateBuffer(bufferSize,
-                     VK_BUFFER_USAGE_TRANSFER_DST_BIT | usageFlag, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
-                     vertexBuffer,
-                     vertexBufferMemory);
-
-        CopyBuffer(stagingBuffer, vertexBuffer, bufferSize);
-
-        vkDestroyBuffer(m_graphicsContext.GetVkDevice(), stagingBuffer, m_graphicsContext.GetAllocator()->GetAllocationCallbacks());
-        vkFreeMemory(m_graphicsContext.GetVkDevice(), stagingBufferMemory, m_graphicsContext.GetAllocator()->GetAllocationCallbacks());
-    }
-
     void ResourceManager::CreateBuffer(
             VkDeviceSize size,
             VkBufferUsageFlags usage,
@@ -323,7 +215,6 @@ namespace JoyEngine {
     void ResourceManager::DestroyShaderModule(VkShaderModule shaderModule) {
         vkDestroyShaderModule(m_graphicsContext.GetVkDevice(), shaderModule, m_graphicsContext.GetAllocator()->GetAllocationCallbacks());
     }
-
 
     void ResourceManager::CopyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size) {
         VkCommandBuffer commandBuffer = BeginSingleTimeCommands();
