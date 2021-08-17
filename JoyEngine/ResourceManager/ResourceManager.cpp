@@ -4,6 +4,7 @@
 #include <iostream>
 
 #define STB_IMAGE_IMPLEMENTATION
+
 #include "stb_image.h"
 
 //#include "Utils/ModelLoader.h"
@@ -17,8 +18,8 @@ namespace JoyEngine {
     ResourceManager *ResourceManager::m_instance = nullptr;
 
     ResourceManager::ResourceManager(const MemoryManager &memoryManager, const IJoyGraphicsContext &graphicsContext) :
-    m_memoryManager(memoryManager),
-    m_graphicsContext(graphicsContext) {
+            m_memoryManager(memoryManager),
+            m_graphicsContext(graphicsContext) {
         ResourceManager::m_instance = this;
     }
 
@@ -33,7 +34,10 @@ namespace JoyEngine {
 
         VkBuffer stagingBuffer;
         VkDeviceMemory stagingBufferMemory;
-        CreateBuffer(imageSize,
+        CreateBuffer(m_graphicsContext.GetVkPhysicalDevice(),
+                     m_graphicsContext.GetVkDevice(),
+                     m_graphicsContext.GetAllocator(),
+                     imageSize,
                      VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
                      VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT
                      | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
@@ -159,6 +163,9 @@ namespace JoyEngine {
     }
 
     void ResourceManager::CreateBuffer(
+            VkPhysicalDevice physicalDevice,
+            VkDevice logicalDevice,
+            Allocator* allocator,
             VkDeviceSize size,
             VkBufferUsageFlags usage,
             VkMemoryPropertyFlags properties,
@@ -170,19 +177,19 @@ namespace JoyEngine {
         bufferInfo.usage = usage;
         bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 
-        if (vkCreateBuffer(m_graphicsContext.GetVkDevice(), &bufferInfo, m_graphicsContext.GetAllocator()->GetAllocationCallbacks(), &buffer) != VK_SUCCESS) {
+        if (vkCreateBuffer(logicalDevice, &bufferInfo, allocator->GetAllocationCallbacks(), &buffer) != VK_SUCCESS) {
             throw std::runtime_error("failed to create buffer!");
         }
 
         VkMemoryRequirements memRequirements;
-        vkGetBufferMemoryRequirements(m_graphicsContext.GetVkDevice(), buffer, &memRequirements);
+        vkGetBufferMemoryRequirements(logicalDevice, buffer, &memRequirements);
 
         VkMemoryAllocateInfo allocInfo{};
         allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
         allocInfo.allocationSize = memRequirements.size;
-        allocInfo.memoryTypeIndex = findMemoryType(m_graphicsContext.GetVkPhysicalDevice(), memRequirements.memoryTypeBits, properties);
+        allocInfo.memoryTypeIndex = findMemoryType(physicalDevice, memRequirements.memoryTypeBits, properties);
 
-        if (vkAllocateMemory(m_graphicsContext.GetVkDevice(), &allocInfo, m_graphicsContext.GetAllocator()->GetAllocationCallbacks(), &bufferMemory) != VK_SUCCESS) {
+        if (vkAllocateMemory(logicalDevice, &allocInfo, allocator->GetAllocationCallbacks(), &bufferMemory) != VK_SUCCESS) {
             throw std::runtime_error("failed to allocate buffer memory!");
         }
     }

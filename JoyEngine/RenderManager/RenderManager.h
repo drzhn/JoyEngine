@@ -20,6 +20,7 @@
 #include "Utils/FileUtils.h"
 
 namespace JoyEngine {
+    class RenderObject;
 
     class IJoyGraphicsContext {
     public :
@@ -44,6 +45,18 @@ namespace JoyEngine {
         [[nodiscard]] virtual VkQueue GetPresentVkQueue() const noexcept = 0;
 
         [[nodiscard]] virtual VkCommandPool GetVkCommandPool() const noexcept = 0;
+
+        [[nodiscard]] virtual uint32_t GetSwapchainImageCount() const noexcept = 0;
+
+        [[nodiscard]] virtual VkSwapchainKHR GetSwapChain() const noexcept = 0;
+
+        [[nodiscard]] virtual std::vector<VkImage> GetSwapChainImages() const noexcept = 0;
+
+        [[nodiscard]] virtual VkFormat GetSwapChainImageFormat() const noexcept = 0;
+
+        [[nodiscard]] virtual VkExtent2D GetSwapChainExtent() const noexcept = 0;
+
+        [[nodiscard]] virtual std::vector<VkImageView> GetSwapChainImageViews() const noexcept = 0;
     };
 
     class RenderManager {
@@ -66,13 +79,8 @@ namespace JoyEngine {
 
         const int MAX_FRAMES_IN_FLIGHT = 2;
 
-        void CreateSwapChain();
-
-        void CreateImageViews();
 
         void CreateRenderPass();
-
-        VkImageView CreateImageView(VkImage image, VkFormat format, VkImageAspectFlags aspectFlags);
 
         uint32_t RegisterMeshRenderer(MeshRenderer *meshRenderer);
 
@@ -81,13 +89,8 @@ namespace JoyEngine {
     private:
         static RenderManager *m_instance;
         const IJoyGraphicsContext &m_graphicsContext;
-        VkSwapchainKHR swapChain;
-        std::vector<VkImage> swapChainImages;
-        VkFormat swapChainImageFormat;
-        VkExtent2D swapChainExtent;
-        std::vector<VkImageView> swapChainImageViews;
 
-        VkRenderPass renderPass;
+        VkRenderPass m_renderPass;
 
         uint32_t m_renderObjectIndex = 0;
         std::map<uint32_t, RenderObject *> m_renderObjects;

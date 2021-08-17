@@ -55,8 +55,8 @@ namespace JoyEngine {
             m_loadedMeshes.insert({guid, mesh});
         }
 
-//        template<>
-        void UnloadMesh(GUID guid) {
+        template<>
+        void UnloadResource<Mesh>(GUID guid) {
             if (m_loadedMeshes.find(guid) != m_loadedMeshes.end()) {
                 m_loadedMeshes[guid]->refCount--;
             } else {
@@ -130,6 +130,21 @@ namespace JoyEngine {
             }
         }
 
+        GFXMesh *GetMesh(GUID guid) { return m_loadedMeshes[guid]; };
+
+        GFXTexture *GetTexture(GUID guid) { return m_loadedTextures[guid]; };
+
+        GFXShader *GetShader(GUID guid) { return m_loadedShaders[guid]; };
+
+        static void CreateBuffer(VkPhysicalDevice physicalDevice,
+                                 VkDevice logicalDevice,
+                                 Allocator *allocator,
+                                 VkDeviceSize size,
+                                 VkBufferUsageFlags usage,
+                                 VkMemoryPropertyFlags properties,
+                                 VkBuffer &buffer,
+                                 VkDeviceMemory &bufferMemory);
+
     private:
         static ResourceManager *m_instance;
         const MemoryManager &m_memoryManager;
@@ -141,14 +156,17 @@ namespace JoyEngine {
 
         template<typename T>
         void CreateGPUBuffer(T *data, size_t size,
-                                              VkBuffer &vertexBuffer,
-                                              VkDeviceMemory &vertexBufferMemory,
-                                              VkBufferUsageFlagBits usageFlag) {
+                             VkBuffer &vertexBuffer,
+                             VkDeviceMemory &vertexBufferMemory,
+                             VkBufferUsageFlagBits usageFlag) {
             VkDeviceSize bufferSize = sizeof(T) * size;
 
             VkBuffer stagingBuffer;
             VkDeviceMemory stagingBufferMemory;
-            CreateBuffer(bufferSize,
+            CreateBuffer(m_graphicsContext.GetVkPhysicalDevice(),
+                         m_graphicsContext.GetVkDevice(),
+                         m_graphicsContext.GetAllocator(),
+                         bufferSize,
                          VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
                          VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
                          stagingBuffer,
@@ -159,7 +177,10 @@ namespace JoyEngine {
             memcpy(mappedData, data, (size_t) bufferSize);
             vkUnmapMemory(m_graphicsContext.GetVkDevice(), stagingBufferMemory);
 
-            CreateBuffer(bufferSize,
+            CreateBuffer(m_graphicsContext.GetVkPhysicalDevice(),
+                         m_graphicsContext.GetVkDevice(),
+                         m_graphicsContext.GetAllocator(),
+                         bufferSize,
                          VK_BUFFER_USAGE_TRANSFER_DST_BIT | usageFlag, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
                          vertexBuffer,
                          vertexBufferMemory);
@@ -169,8 +190,6 @@ namespace JoyEngine {
             vkDestroyBuffer(m_graphicsContext.GetVkDevice(), stagingBuffer, m_graphicsContext.GetAllocator()->GetAllocationCallbacks());
             vkFreeMemory(m_graphicsContext.GetVkDevice(), stagingBufferMemory, m_graphicsContext.GetAllocator()->GetAllocationCallbacks());
         }
-
-        void CreateBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer &buffer, VkDeviceMemory &bufferMemory);
 
         void CopyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size);
 

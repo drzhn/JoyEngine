@@ -37,6 +37,14 @@ namespace JoyEngine {
             m_fragShader = new Shader(guid, filename);
         }
 
+        [[nodiscard]]Mesh *GetMesh() const noexcept { return m_mesh; }
+
+        [[nodiscard]]Texture *GetTexture() const noexcept { return m_texture; }
+
+        [[nodiscard]]Shader *GetVertexShader() const noexcept { return m_vertShader; }
+
+        [[nodiscard]]Shader *GetFragmentShader() const noexcept { return m_fragShader; }
+
     private:
         const Transform &m_transform;
         uint32_t m_index;

@@ -8,7 +8,7 @@ namespace JoyEngine {
     class ModelLoader {
     public:
         static void LoadModel(std::vector<Vertex> &vertices,
-                       std::vector<uint32_t> &indices, const char *modelPath) {
+                              std::vector<uint32_t> &indices, const char *modelPath) {
             tinyobj::attrib_t attrib;
             std::vector<tinyobj::shape_t> shapes;
             std::vector<tinyobj::material_t> materials;
