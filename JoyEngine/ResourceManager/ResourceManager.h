@@ -32,7 +32,7 @@ namespace JoyEngine {
 
         ResourceManager() = default;
 
-        ResourceManager(const MemoryManager &memoryManager, const IJoyGraphicsContext &graphicsContext);
+        ResourceManager(MemoryManager *const , IJoyGraphicsContext *const );
 
         static ResourceManager *GetInstance() noexcept { return m_instance; }
 
@@ -44,9 +44,6 @@ namespace JoyEngine {
 
         template<class T>
         void LoadResource(GUID guid, const std::string &filename) { assert(false); }
-
-        template<class T>
-        void UnloadResource(GUID guid) { assert(false); }
 
         // implementation is here because of https://stackoverflow.com/questions/456713/why-do-i-get-unresolved-external-symbol-errors-when-using-templates
         template<>
@@ -67,18 +64,6 @@ namespace JoyEngine {
         }
 
         template<>
-        void UnloadResource<Mesh>(GUID guid) {
-            if (m_loadedMeshes.find(guid) != m_loadedMeshes.end()) {
-                m_loadedMeshes[guid]->refCount--;
-            }
-            if (m_loadedMeshes[guid]->refCount == 0) {
-                DestroyBuffer(m_loadedMeshes[guid]->vertexBuffer, m_loadedMeshes[guid]->vertexBufferMemory);
-                DestroyBuffer(m_loadedMeshes[guid]->indexBuffer, m_loadedMeshes[guid]->indexBufferMemory);
-                m_loadedMeshes.erase(guid);
-            }
-        }
-
-        template<>
         void LoadResource<Texture>(GUID guid, const std::string &filename) {
             if (m_loadedTextures.find(guid) != m_loadedTextures.end()) {
                 m_loadedTextures[guid]->refCount++;
@@ -87,12 +72,25 @@ namespace JoyEngine {
             GFXTexture *texture = new GFXTexture();
             texture->refCount = 1;
 
-            CreateTexture(texture,filename);
+            CreateTexture(texture, filename);
 
             m_loadedTextures.insert({guid, texture});
         }
 
-        void CreateTexture(GFXTexture *texture, const std::string &filename);
+        template<>
+        void LoadResource<Shader>(GUID guid, const std::string &filename) {
+            if (m_loadedShaders.find(guid) != m_loadedShaders.end()) {
+                m_loadedShaders[guid]->refCount++;
+                return;
+            }
+            GFXShader *shader = new GFXShader();
+            shader->refCount = 1;
+            CreateShaderModule(filename, shader->shaderModule);
+            m_loadedShaders.insert({guid, shader});
+        }
+
+        template<class T>
+        void UnloadResource(GUID guid) { assert(false); }
 
         template<>
         void UnloadResource<Texture>(GUID guid) {
@@ -111,15 +109,15 @@ namespace JoyEngine {
         }
 
         template<>
-        void LoadResource<Shader>(GUID guid, const std::string &filename) {
-            if (m_loadedShaders.find(guid) != m_loadedShaders.end()) {
-                m_loadedShaders[guid]->refCount++;
-                return;
+        void UnloadResource<Mesh>(GUID guid) {
+            if (m_loadedMeshes.find(guid) != m_loadedMeshes.end()) {
+                m_loadedMeshes[guid]->refCount--;
             }
-            GFXShader *shader = new GFXShader();
-            shader->refCount = 1;
-            CreateShaderModule(filename, shader->shaderModule);
-            m_loadedShaders.insert({guid, shader});
+            if (m_loadedMeshes[guid]->refCount == 0) {
+                DestroyBuffer(m_loadedMeshes[guid]->vertexBuffer, m_loadedMeshes[guid]->vertexBufferMemory);
+                DestroyBuffer(m_loadedMeshes[guid]->indexBuffer, m_loadedMeshes[guid]->indexBufferMemory);
+                m_loadedMeshes.erase(guid);
+            }
         }
 
         template<>
@@ -134,6 +132,8 @@ namespace JoyEngine {
                 m_loadedShaders.erase(guid);
             }
         }
+
+        void CreateTexture(GFXTexture *texture, const std::string &filename);
 
         GFXMesh *GetMesh(GUID guid) { return m_loadedMeshes[guid]; };
 
@@ -171,8 +171,9 @@ namespace JoyEngine {
 
     private:
         static ResourceManager *m_instance;
-        const MemoryManager &m_memoryManager;
-        const IJoyGraphicsContext &m_graphicsContext;
+
+        MemoryManager *const m_memoryManager;
+        IJoyGraphicsContext *const m_graphicsContext;
 
         std::map<GUID, GFXMesh *> m_loadedMeshes;
         std::map<GUID, GFXTexture *> m_loadedTextures;

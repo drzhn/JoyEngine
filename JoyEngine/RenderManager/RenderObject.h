@@ -14,8 +14,8 @@ namespace JoyEngine {
     public :
         RenderObject() = delete;
 
-        explicit RenderObject(MeshRenderer *meshRenderer,
-                              const IJoyGraphicsContext &m_graphicsContext,
+        explicit RenderObject(MeshRenderer *const meshRenderer,
+                              IJoyGraphicsContext *const graphicsContext,
                               VkRenderPass renderPass);
 
         ~RenderObject();
@@ -31,9 +31,10 @@ namespace JoyEngine {
         void UpdateUniformBuffer(uint32_t currentImage);
 
     private:
-        const IJoyGraphicsContext &m_graphicsContext;
-        const MeshRenderer *m_meshRenderer;
+        IJoyGraphicsContext *const m_graphicsContext;
+        MeshRenderer *const m_meshRenderer;
         VkRenderPass m_renderPass = VK_NULL_HANDLE;
+
         VkDescriptorSetLayout m_descriptorSetLayout = VK_NULL_HANDLE;
         VkDescriptorPool m_descriptorPool = VK_NULL_HANDLE;
         std::vector<VkDescriptorSet> m_descriptorSets;

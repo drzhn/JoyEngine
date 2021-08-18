@@ -13,9 +13,7 @@ namespace JoyEngine {
         PickPhysicalDevice();
         CreateLogicalDevice();
         CreateCommandPool();
-
         CreateSwapChain();
-
         CreateImageViews();
     }
 

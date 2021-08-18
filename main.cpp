@@ -16,6 +16,7 @@
 #include <fstream>
 #include <thread>
 #include <atomic>
+#include <memory>
 
 
 int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine, int nCmdShow) {
@@ -63,12 +64,14 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
             TranslateMessage(&msg);
             DispatchMessage(&msg);
         }
-        graphicsContext->Update();
-
         if (WindowHandler::GetWindowDestroyed()) {
             break;
         }
+        graphicsContext->Update();
+
     }
+
+    delete graphicsContext;
 
     return 0;
 }

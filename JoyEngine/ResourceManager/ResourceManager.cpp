@@ -4,6 +4,7 @@
 #include <iostream>
 
 #define STB_IMAGE_IMPLEMENTATION
+
 #include "stb_image.h"
 
 #include "Utils/ModelLoader.h"
@@ -16,7 +17,7 @@ namespace JoyEngine {
 
     ResourceManager *ResourceManager::m_instance = nullptr;
 
-    ResourceManager::ResourceManager(const MemoryManager &memoryManager, const IJoyGraphicsContext &graphicsContext) :
+    ResourceManager::ResourceManager(MemoryManager *const memoryManager, IJoyGraphicsContext *const graphicsContext) :
             m_memoryManager(memoryManager),
             m_graphicsContext(graphicsContext) {
         ResourceManager::m_instance = this;
@@ -33,9 +34,9 @@ namespace JoyEngine {
 
         VkBuffer stagingBuffer;
         VkDeviceMemory stagingBufferMemory;
-        CreateBuffer(m_graphicsContext.GetVkPhysicalDevice(),
-                     m_graphicsContext.GetVkDevice(),
-                     m_graphicsContext.GetAllocator(),
+        CreateBuffer(m_graphicsContext->GetVkPhysicalDevice(),
+                     m_graphicsContext->GetVkDevice(),
+                     m_graphicsContext->GetAllocator(),
                      imageSize,
                      VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
                      VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT
@@ -43,15 +44,15 @@ namespace JoyEngine {
                      stagingBuffer, stagingBufferMemory);
 
         void *data;
-        vkMapMemory(m_graphicsContext.GetVkDevice(), stagingBufferMemory, 0, imageSize, 0, &data);
+        vkMapMemory(m_graphicsContext->GetVkDevice(), stagingBufferMemory, 0, imageSize, 0, &data);
         memcpy(data, pixels, static_cast<size_t>(imageSize));
-        vkUnmapMemory(m_graphicsContext.GetVkDevice(), stagingBufferMemory);
+        vkUnmapMemory(m_graphicsContext->GetVkDevice(), stagingBufferMemory);
 
         stbi_image_free(pixels);
 
-        CreateImage(m_graphicsContext.GetVkPhysicalDevice(),
-                    m_graphicsContext.GetVkDevice(),
-                    m_graphicsContext.GetAllocator(),
+        CreateImage(m_graphicsContext->GetVkPhysicalDevice(),
+                    m_graphicsContext->GetVkDevice(),
+                    m_graphicsContext->GetAllocator(),
                     texWidth, texHeight,
                     VK_FORMAT_R8G8B8A8_SRGB,
                     VK_IMAGE_TILING_OPTIMAL,
@@ -72,8 +73,8 @@ namespace JoyEngine {
                               VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
         );
 
-        vkDestroyBuffer(m_graphicsContext.GetVkDevice(), stagingBuffer, m_graphicsContext.GetAllocator()->GetAllocationCallbacks());
-        vkFreeMemory(m_graphicsContext.GetVkDevice(), stagingBufferMemory, m_graphicsContext.GetAllocator()->GetAllocationCallbacks());
+        vkDestroyBuffer(m_graphicsContext->GetVkDevice(), stagingBuffer, m_graphicsContext->GetAllocator()->GetAllocationCallbacks());
+        vkFreeMemory(m_graphicsContext->GetVkDevice(), stagingBufferMemory, m_graphicsContext->GetAllocator()->GetAllocationCallbacks());
     }
 
     void ResourceManager::CreateImageView(VkDevice logicalDevice,
@@ -156,7 +157,7 @@ namespace JoyEngine {
         samplerInfo.anisotropyEnable = VK_TRUE;
         samplerInfo.maxAnisotropy = 1.0f;
         VkPhysicalDeviceProperties properties{};
-        vkGetPhysicalDeviceProperties(m_graphicsContext.GetVkPhysicalDevice(), &properties);
+        vkGetPhysicalDeviceProperties(m_graphicsContext->GetVkPhysicalDevice(), &properties);
         samplerInfo.maxAnisotropy = properties.limits.maxSamplerAnisotropy;
         samplerInfo.borderColor = VK_BORDER_COLOR_INT_OPAQUE_BLACK;
         samplerInfo.unnormalizedCoordinates = VK_FALSE;
@@ -167,7 +168,7 @@ namespace JoyEngine {
         samplerInfo.minLod = 0.0f;
         samplerInfo.maxLod = 0.0f;
 
-        if (vkCreateSampler(m_graphicsContext.GetVkDevice(), &samplerInfo, m_graphicsContext.GetAllocator()->GetAllocationCallbacks(), &textureSampler) != VK_SUCCESS) {
+        if (vkCreateSampler(m_graphicsContext->GetVkDevice(), &samplerInfo, m_graphicsContext->GetAllocator()->GetAllocationCallbacks(), &textureSampler) != VK_SUCCESS) {
             throw std::runtime_error("failed to create texture sampler!");
         }
     }
@@ -211,27 +212,27 @@ namespace JoyEngine {
         createInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
         createInfo.codeSize = code.size();
         createInfo.pCode = reinterpret_cast<const uint32_t *>(code.data());
-        if (vkCreateShaderModule(m_graphicsContext.GetVkDevice(),
+        if (vkCreateShaderModule(m_graphicsContext->GetVkDevice(),
                                  &createInfo,
-                                 m_graphicsContext.GetAllocator()->GetAllocationCallbacks(), &shaderModule) != VK_SUCCESS) {
+                                 m_graphicsContext->GetAllocator()->GetAllocationCallbacks(), &shaderModule) != VK_SUCCESS) {
             throw std::runtime_error("failed to create shader module!");
         }
     }
 
     void ResourceManager::DestroyBuffer(VkBuffer buffer, VkDeviceMemory memory) {
-        vkDestroyBuffer(m_graphicsContext.GetVkDevice(), buffer, m_graphicsContext.GetAllocator()->GetAllocationCallbacks());
-        vkFreeMemory(m_graphicsContext.GetVkDevice(), memory, m_graphicsContext.GetAllocator()->GetAllocationCallbacks());
+        vkDestroyBuffer(m_graphicsContext->GetVkDevice(), buffer, m_graphicsContext->GetAllocator()->GetAllocationCallbacks());
+        vkFreeMemory(m_graphicsContext->GetVkDevice(), memory, m_graphicsContext->GetAllocator()->GetAllocationCallbacks());
     }
 
     void ResourceManager::DestroyImage(VkSampler sampler, VkImageView imageView, VkImage image, VkDeviceMemory imageMemory) {
-        vkDestroySampler(m_graphicsContext.GetVkDevice(), sampler, m_graphicsContext.GetAllocator()->GetAllocationCallbacks());
-        vkDestroyImageView(m_graphicsContext.GetVkDevice(), imageView, m_graphicsContext.GetAllocator()->GetAllocationCallbacks());
-        vkDestroyImage(m_graphicsContext.GetVkDevice(), image, m_graphicsContext.GetAllocator()->GetAllocationCallbacks());
-        vkFreeMemory(m_graphicsContext.GetVkDevice(), imageMemory, m_graphicsContext.GetAllocator()->GetAllocationCallbacks());
+        vkDestroySampler(m_graphicsContext->GetVkDevice(), sampler, m_graphicsContext->GetAllocator()->GetAllocationCallbacks());
+        vkDestroyImageView(m_graphicsContext->GetVkDevice(), imageView, m_graphicsContext->GetAllocator()->GetAllocationCallbacks());
+        vkDestroyImage(m_graphicsContext->GetVkDevice(), image, m_graphicsContext->GetAllocator()->GetAllocationCallbacks());
+        vkFreeMemory(m_graphicsContext->GetVkDevice(), imageMemory, m_graphicsContext->GetAllocator()->GetAllocationCallbacks());
     }
 
     void ResourceManager::DestroyShaderModule(VkShaderModule shaderModule) {
-        vkDestroyShaderModule(m_graphicsContext.GetVkDevice(), shaderModule, m_graphicsContext.GetAllocator()->GetAllocationCallbacks());
+        vkDestroyShaderModule(m_graphicsContext->GetVkDevice(), shaderModule, m_graphicsContext->GetAllocator()->GetAllocationCallbacks());
     }
 
     void ResourceManager::CopyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size) {
@@ -318,11 +319,11 @@ namespace JoyEngine {
         VkCommandBufferAllocateInfo allocInfo{};
         allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
         allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-        allocInfo.commandPool = m_graphicsContext.GetVkCommandPool();
+        allocInfo.commandPool = m_graphicsContext->GetVkCommandPool();
         allocInfo.commandBufferCount = 1;
 
         VkCommandBuffer commandBuffer;
-        vkAllocateCommandBuffers(m_graphicsContext.GetVkDevice(), &allocInfo, &commandBuffer);
+        vkAllocateCommandBuffers(m_graphicsContext->GetVkDevice(), &allocInfo, &commandBuffer);
 
         VkCommandBufferBeginInfo beginInfo{};
         beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
@@ -341,24 +342,25 @@ namespace JoyEngine {
         submitInfo.commandBufferCount = 1;
         submitInfo.pCommandBuffers = &commandBuffer;
 
-        vkQueueSubmit(m_graphicsContext.GetGraphicsVkQueue(), 1, &submitInfo, VK_NULL_HANDLE);
-        vkQueueWaitIdle(m_graphicsContext.GetGraphicsVkQueue());
+        vkQueueSubmit(m_graphicsContext->GetGraphicsVkQueue(), 1, &submitInfo, VK_NULL_HANDLE);
+        vkQueueWaitIdle(m_graphicsContext->GetGraphicsVkQueue());
 
-        vkFreeCommandBuffers(m_graphicsContext.GetVkDevice(), m_graphicsContext.GetVkCommandPool(), 1, &commandBuffer);
+        vkFreeCommandBuffers(m_graphicsContext->GetVkDevice(), m_graphicsContext->GetVkCommandPool(), 1, &commandBuffer);
     }
+
     void ResourceManager::CreateGPUBuffer(void *data,
-                         size_t stride,
-                         size_t size,
-                         VkBuffer &vertexBuffer,
-                         VkDeviceMemory &vertexBufferMemory,
-                         VkBufferUsageFlagBits usageFlag) {
+                                          size_t stride,
+                                          size_t size,
+                                          VkBuffer &vertexBuffer,
+                                          VkDeviceMemory &vertexBufferMemory,
+                                          VkBufferUsageFlagBits usageFlag) {
         VkDeviceSize bufferSize = stride * size;
 
         VkBuffer stagingBuffer;
         VkDeviceMemory stagingBufferMemory;
-        CreateBuffer(m_graphicsContext.GetVkPhysicalDevice(),
-                     m_graphicsContext.GetVkDevice(),
-                     m_graphicsContext.GetAllocator(),
+        CreateBuffer(m_graphicsContext->GetVkPhysicalDevice(),
+                     m_graphicsContext->GetVkDevice(),
+                     m_graphicsContext->GetAllocator(),
                      bufferSize,
                      VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
                      VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
@@ -366,13 +368,13 @@ namespace JoyEngine {
                      stagingBufferMemory);
 
         void *mappedData;
-        vkMapMemory(m_graphicsContext.GetVkDevice(), stagingBufferMemory, 0, bufferSize, 0, &mappedData);
+        vkMapMemory(m_graphicsContext->GetVkDevice(), stagingBufferMemory, 0, bufferSize, 0, &mappedData);
         memcpy(mappedData, data, (size_t) bufferSize);
-        vkUnmapMemory(m_graphicsContext.GetVkDevice(), stagingBufferMemory);
+        vkUnmapMemory(m_graphicsContext->GetVkDevice(), stagingBufferMemory);
 
-        CreateBuffer(m_graphicsContext.GetVkPhysicalDevice(),
-                     m_graphicsContext.GetVkDevice(),
-                     m_graphicsContext.GetAllocator(),
+        CreateBuffer(m_graphicsContext->GetVkPhysicalDevice(),
+                     m_graphicsContext->GetVkDevice(),
+                     m_graphicsContext->GetAllocator(),
                      bufferSize,
                      VK_BUFFER_USAGE_TRANSFER_DST_BIT | usageFlag, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
                      vertexBuffer,
@@ -380,14 +382,14 @@ namespace JoyEngine {
 
         CopyBuffer(stagingBuffer, vertexBuffer, bufferSize);
 
-        vkDestroyBuffer(m_graphicsContext.GetVkDevice(), stagingBuffer, m_graphicsContext.GetAllocator()->GetAllocationCallbacks());
-        vkFreeMemory(m_graphicsContext.GetVkDevice(), stagingBufferMemory, m_graphicsContext.GetAllocator()->GetAllocationCallbacks());
+        vkDestroyBuffer(m_graphicsContext->GetVkDevice(), stagingBuffer, m_graphicsContext->GetAllocator()->GetAllocationCallbacks());
+        vkFreeMemory(m_graphicsContext->GetVkDevice(), stagingBufferMemory, m_graphicsContext->GetAllocator()->GetAllocationCallbacks());
     }
 
-    void ResourceManager::CreateTexture(GFXTexture *texture, const std::string &filename){
+    void ResourceManager::CreateTexture(GFXTexture *texture, const std::string &filename) {
         CreateTextureImage(filename, texture->textureImage, texture->textureImageMemory);
-        CreateImageView(m_graphicsContext.GetVkDevice(),
-                        m_graphicsContext.GetAllocator(),
+        CreateImageView(m_graphicsContext->GetVkDevice(),
+                        m_graphicsContext->GetAllocator(),
                         texture->textureImage,
                         VK_FORMAT_R8G8B8A8_SRGB,
                         VK_IMAGE_ASPECT_COLOR_BIT,

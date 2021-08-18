@@ -26,10 +26,11 @@ namespace JoyEngine {
 
     RenderManager *RenderManager::m_instance = nullptr;
 
-    RenderManager::RenderManager(const IJoyGraphicsContext &graphicsContext,
-                                 ResourceManager &resourceManager) :
+    RenderManager::RenderManager(IJoyGraphicsContext *const graphicsContext,
+                                 ResourceManager *const resourceManager) :
             m_graphicsContext(graphicsContext),
-            m_resourceManager(resourceManager) {
+            m_resourceManager(resourceManager),
+            m_allocator(m_graphicsContext->GetAllocator()->GetAllocationCallbacks()){
         m_instance = this;
         CreateRenderPass();
         CreateDepthResources();
@@ -39,12 +40,11 @@ namespace JoyEngine {
     void RenderManager::Init() {
         CreateCommandBuffers();
         CreateSyncObjects();
-
     }
 
     void RenderManager::CreateRenderPass() {
         VkAttachmentDescription depthAttachment{};
-        depthAttachment.format = findDepthFormat(m_graphicsContext.GetVkPhysicalDevice());
+        depthAttachment.format = findDepthFormat(m_graphicsContext->GetVkPhysicalDevice());
         depthAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
         depthAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
         depthAttachment.storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
@@ -58,7 +58,7 @@ namespace JoyEngine {
         depthAttachmentRef.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 
         VkAttachmentDescription colorAttachment{};
-        colorAttachment.format = m_graphicsContext.GetSwapChainImageFormat();
+        colorAttachment.format = m_graphicsContext->GetSwapChainImageFormat();
         colorAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
         colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
         colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
@@ -95,7 +95,7 @@ namespace JoyEngine {
         renderPassInfo.dependencyCount = 1;
         renderPassInfo.pDependencies = &dependency;
 
-        if (vkCreateRenderPass(m_graphicsContext.GetVkDevice(), &renderPassInfo, m_graphicsContext.GetAllocator()->GetAllocationCallbacks(), &m_renderPass) != VK_SUCCESS) {
+        if (vkCreateRenderPass(m_graphicsContext->GetVkDevice(), &renderPassInfo, m_allocator, &m_renderPass) != VK_SUCCESS) {
             throw std::runtime_error("failed to create render pass!");
         }
     }
@@ -114,21 +114,21 @@ namespace JoyEngine {
     }
 
     void RenderManager::CreateDepthResources() {
-        VkFormat depthFormat = findDepthFormat(m_graphicsContext.GetVkPhysicalDevice());
+        VkFormat depthFormat = findDepthFormat(m_graphicsContext->GetVkPhysicalDevice());
 
-        ResourceManager::CreateImage(m_graphicsContext.GetVkPhysicalDevice(),
-                                     m_graphicsContext.GetVkDevice(),
-                                     m_graphicsContext.GetAllocator(),
-                                     m_graphicsContext.GetSwapChainExtent().width,
-                                     m_graphicsContext.GetSwapChainExtent().height,
+        ResourceManager::CreateImage(m_graphicsContext->GetVkPhysicalDevice(),
+                                     m_graphicsContext->GetVkDevice(),
+                                     m_graphicsContext->GetAllocator(),
+                                     m_graphicsContext->GetSwapChainExtent().width,
+                                     m_graphicsContext->GetSwapChainExtent().height,
                                      depthFormat,
                                      VK_IMAGE_TILING_OPTIMAL,
                                      VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT,
                                      VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
                                      m_depthTexture.textureImage,
                                      m_depthTexture.textureImageMemory);
-        ResourceManager::CreateImageView(m_graphicsContext.GetVkDevice(),
-                                         m_graphicsContext.GetAllocator(),
+        ResourceManager::CreateImageView(m_graphicsContext->GetVkDevice(),
+                                         m_graphicsContext->GetAllocator(),
                                          m_depthTexture.textureImage,
                                          depthFormat,
                                          VK_IMAGE_ASPECT_DEPTH_BIT,
@@ -136,10 +136,10 @@ namespace JoyEngine {
     }
 
     void RenderManager::CreateFramebuffers() {
-        m_swapChainFramebuffers.resize(m_graphicsContext.GetSwapchainImageCount());
-        for (size_t i = 0; i < m_graphicsContext.GetSwapchainImageCount(); i++) {
+        m_swapChainFramebuffers.resize(m_graphicsContext->GetSwapchainImageCount());
+        for (size_t i = 0; i < m_graphicsContext->GetSwapchainImageCount(); i++) {
             std::array<VkImageView, 2> attachments = {
-                    m_graphicsContext.GetSwapChainImageViews()[i],
+                    m_graphicsContext->GetSwapChainImageViews()[i],
                     m_depthTexture.textureImageView
             };
 
@@ -148,13 +148,13 @@ namespace JoyEngine {
             framebufferInfo.renderPass = m_renderPass;
             framebufferInfo.attachmentCount = static_cast<uint32_t>(attachments.size());
             framebufferInfo.pAttachments = attachments.data();
-            framebufferInfo.width = m_graphicsContext.GetSwapChainExtent().width;
-            framebufferInfo.height = m_graphicsContext.GetSwapChainExtent().height;
+            framebufferInfo.width = m_graphicsContext->GetSwapChainExtent().width;
+            framebufferInfo.height = m_graphicsContext->GetSwapChainExtent().height;
             framebufferInfo.layers = 1;
 
-            if (vkCreateFramebuffer(m_graphicsContext.GetVkDevice(),
+            if (vkCreateFramebuffer(m_graphicsContext->GetVkDevice(),
                                     &framebufferInfo,
-                                    m_graphicsContext.GetAllocator()->GetAllocationCallbacks(),
+                                    m_allocator,
                                     &m_swapChainFramebuffers[i]) != VK_SUCCESS) {
                 throw std::runtime_error("failed to create framebuffer!");
             }
@@ -167,11 +167,11 @@ namespace JoyEngine {
 
         VkCommandBufferAllocateInfo allocInfo{};
         allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-        allocInfo.commandPool = m_graphicsContext.GetVkCommandPool();
+        allocInfo.commandPool = m_graphicsContext->GetVkCommandPool();
         allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
         allocInfo.commandBufferCount = (uint32_t) commandBuffers.size();
 
-        if (vkAllocateCommandBuffers(m_graphicsContext.GetVkDevice(), &allocInfo, commandBuffers.data()) != VK_SUCCESS) {
+        if (vkAllocateCommandBuffers(m_graphicsContext->GetVkDevice(), &allocInfo, commandBuffers.data()) != VK_SUCCESS) {
             throw std::runtime_error("failed to allocate command buffers!");
         }
 
@@ -188,7 +188,7 @@ namespace JoyEngine {
             renderPassInfo.renderPass = m_renderPass;
             renderPassInfo.framebuffer = m_swapChainFramebuffers[i];
             renderPassInfo.renderArea.offset = {0, 0};
-            renderPassInfo.renderArea.extent = m_graphicsContext.GetSwapChainExtent();
+            renderPassInfo.renderArea.extent = m_graphicsContext->GetSwapChainExtent();
 
             std::array<VkClearValue, 2> clearValues{};
             clearValues[0].color = {0.0f, 0.0f, 0.0f, 1.0f};
@@ -202,13 +202,13 @@ namespace JoyEngine {
             for (auto const &x : m_renderObjects) {
                 RenderObject *ro = x.second;
                 VkBuffer vertexBuffers[] = {
-                        m_resourceManager.GetMesh(ro->GetMeshRenderer()->GetMesh()->GetGuid())->vertexBuffer
+                        m_resourceManager->GetMesh(ro->GetMeshRenderer()->GetMesh()->GetGuid())->vertexBuffer
                 };
                 VkDeviceSize offsets[] = {0};
                 vkCmdBindVertexBuffers(commandBuffers[i], 0, 1, vertexBuffers, offsets);
 
                 vkCmdBindIndexBuffer(commandBuffers[i],
-                                     m_resourceManager.GetMesh(ro->GetMeshRenderer()->GetMesh()->GetGuid())->indexBuffer,
+                                     m_resourceManager->GetMesh(ro->GetMeshRenderer()->GetMesh()->GetGuid())->indexBuffer,
                                      0,
                                      VK_INDEX_TYPE_UINT32);
 
@@ -222,7 +222,7 @@ namespace JoyEngine {
                                         &ro->GetDescriptorSet()[i], 0, nullptr);
 
                 vkCmdDrawIndexed(commandBuffers[i],
-                                 static_cast<uint32_t>(m_resourceManager.GetMesh(ro->GetMeshRenderer()->GetMesh()->GetGuid())->indices.size()), 1, 0, 0, 0);
+                                 static_cast<uint32_t>(m_resourceManager->GetMesh(ro->GetMeshRenderer()->GetMesh()->GetGuid())->indices.size()), 1, 0, 0, 0);
             }
 
             vkCmdEndRenderPass(commandBuffers[i]);
@@ -237,7 +237,7 @@ namespace JoyEngine {
         m_imageAvailableSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
         m_renderFinishedSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
         m_inFlightFences.resize(MAX_FRAMES_IN_FLIGHT);
-        m_imagesInFlight.resize(m_graphicsContext.GetSwapchainImageCount(), VK_NULL_HANDLE);
+        m_imagesInFlight.resize(m_graphicsContext->GetSwapchainImageCount(), VK_NULL_HANDLE);
 
         VkSemaphoreCreateInfo semaphoreInfo{};
         semaphoreInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
@@ -247,9 +247,9 @@ namespace JoyEngine {
         fenceInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
 
         for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
-            if (vkCreateSemaphore(m_graphicsContext.GetVkDevice(), &semaphoreInfo, m_graphicsContext.GetAllocator()->GetAllocationCallbacks(), &m_imageAvailableSemaphores[i]) != VK_SUCCESS ||
-                vkCreateSemaphore(m_graphicsContext.GetVkDevice(), &semaphoreInfo, m_graphicsContext.GetAllocator()->GetAllocationCallbacks(), &m_renderFinishedSemaphores[i]) != VK_SUCCESS ||
-                vkCreateFence(m_graphicsContext.GetVkDevice(), &fenceInfo, m_graphicsContext.GetAllocator()->GetAllocationCallbacks(), &m_inFlightFences[i]) != VK_SUCCESS) {
+            if (vkCreateSemaphore(m_graphicsContext->GetVkDevice(), &semaphoreInfo, m_allocator, &m_imageAvailableSemaphores[i]) != VK_SUCCESS ||
+                vkCreateSemaphore(m_graphicsContext->GetVkDevice(), &semaphoreInfo, m_allocator, &m_renderFinishedSemaphores[i]) != VK_SUCCESS ||
+                vkCreateFence(m_graphicsContext->GetVkDevice(), &fenceInfo, m_allocator, &m_inFlightFences[i]) != VK_SUCCESS) {
 
                 throw std::runtime_error("failed to create synchronization objects for a frame!");
             }
@@ -258,11 +258,11 @@ namespace JoyEngine {
 
     void RenderManager::Update() {
 
-        vkWaitForFences(m_graphicsContext.GetVkDevice(), 1, &m_inFlightFences[currentFrame], VK_TRUE, UINT64_MAX);
+        vkWaitForFences(m_graphicsContext->GetVkDevice(), 1, &m_inFlightFences[currentFrame], VK_TRUE, UINT64_MAX);
 
         uint32_t imageIndex;
-        VkResult result = vkAcquireNextImageKHR(m_graphicsContext.GetVkDevice(),
-                                                m_graphicsContext.GetSwapChain(),
+        VkResult result = vkAcquireNextImageKHR(m_graphicsContext->GetVkDevice(),
+                                                m_graphicsContext->GetSwapChain(),
                                                 UINT64_MAX,
                                                 m_imageAvailableSemaphores[currentFrame],
                                                 VK_NULL_HANDLE, &imageIndex);
@@ -285,7 +285,7 @@ namespace JoyEngine {
 
         // Check if a previous frame is using this image (i.e. there is its fence to wait on)
         if (m_imagesInFlight[imageIndex] != VK_NULL_HANDLE) {
-            vkWaitForFences(m_graphicsContext.GetVkDevice(),
+            vkWaitForFences(m_graphicsContext->GetVkDevice(),
                             1,
                             &m_imagesInFlight[imageIndex],
                             VK_TRUE,
@@ -311,9 +311,9 @@ namespace JoyEngine {
         submitInfo.signalSemaphoreCount = 1;
         submitInfo.pSignalSemaphores = signalSemaphores;
 
-        vkResetFences(m_graphicsContext.GetVkDevice(), 1, &m_inFlightFences[currentFrame]);
+        vkResetFences(m_graphicsContext->GetVkDevice(), 1, &m_inFlightFences[currentFrame]);
 
-        if (vkQueueSubmit(m_graphicsContext.GetGraphicsVkQueue(), 1, &submitInfo, m_inFlightFences[currentFrame]) != VK_SUCCESS) {
+        if (vkQueueSubmit(m_graphicsContext->GetGraphicsVkQueue(), 1, &submitInfo, m_inFlightFences[currentFrame]) != VK_SUCCESS) {
             throw std::runtime_error("failed to submit draw command buffer!");
         }
 
@@ -323,13 +323,13 @@ namespace JoyEngine {
         presentInfo.waitSemaphoreCount = 1;
         presentInfo.pWaitSemaphores = signalSemaphores;
 
-        VkSwapchainKHR swapChains[] = {m_graphicsContext.GetSwapChain()};
+        VkSwapchainKHR swapChains[] = {m_graphicsContext->GetSwapChain()};
         presentInfo.swapchainCount = 1;
         presentInfo.pSwapchains = swapChains;
         presentInfo.pImageIndices = &imageIndex;
         presentInfo.pResults = nullptr; // Optional
 
-        result = vkQueuePresentKHR(m_graphicsContext.GetPresentVkQueue(), &presentInfo);
+        result = vkQueuePresentKHR(m_graphicsContext->GetPresentVkQueue(), &presentInfo);
         if (result != VK_SUCCESS) {
             throw std::runtime_error("failed to present swap chain image!");
         }
@@ -342,7 +342,7 @@ namespace JoyEngine {
 
         currentFrame = (currentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
 
-        vkQueueWaitIdle(m_graphicsContext.GetPresentVkQueue());
+        vkQueueWaitIdle(m_graphicsContext->GetPresentVkQueue());
 //        currentFrame = (currentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
 
     }

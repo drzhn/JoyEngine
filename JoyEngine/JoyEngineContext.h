@@ -13,8 +13,11 @@
 namespace JoyEngine {
 
     class MemoryManager;
+
     class ResourceManager;
+
     class SceneManager;
+
     class RenderManager;
 
     class IWindowMessageHandler {
@@ -26,31 +29,36 @@ namespace JoyEngine {
     public:
         JoyEngineContext(HINSTANCE instance, HWND windowHandle) :
                 m_windowHandle(windowHandle),
-                m_graphicsContext(instance, windowHandle),
-                m_memoryManager(),
-                m_resourceManager(m_memoryManager, m_graphicsContext),
-                m_sceneManager(),
-                m_renderManager(m_graphicsContext, m_resourceManager) {
+                m_graphicsContext(new JoyGraphicsContext(instance, windowHandle)),
+                m_memoryManager(new MemoryManager()),
+                m_resourceManager(new ResourceManager(m_memoryManager, m_graphicsContext)),
+                m_sceneManager(new SceneManager()),
+                m_renderManager(new RenderManager(m_graphicsContext, m_resourceManager)) {
+            assert(m_graphicsContext != nullptr);
+            assert(m_memoryManager != nullptr);
+            assert(m_resourceManager != nullptr);
+            assert(m_sceneManager != nullptr);
+            assert(m_renderManager != nullptr);
         }
 
         void Init() {
-            m_memoryManager.Init();
-            m_sceneManager.Init();
-            m_renderManager.Init();
+            m_memoryManager->Init();
+            m_sceneManager->Init();
+            m_renderManager->Init();
         }
 
         void Start() {
-            m_memoryManager.Start();
-            m_renderManager.Start();
+            m_memoryManager->Start();
+            m_renderManager->Start();
         }
 
         void Update() {
-            m_renderManager.Update();
+            m_renderManager->Update();
         }
 
         void Stop() {
-            m_renderManager.Stop(); // will destroy managers in reverse order
-            m_memoryManager.Stop();
+            m_renderManager->Stop(); // will destroy managers in reverse order
+            m_memoryManager->Stop();
         }
 
         ~JoyEngineContext() {
@@ -71,12 +79,13 @@ namespace JoyEngine {
         }
 
     private:
-        JoyGraphicsContext m_graphicsContext;
         HWND m_windowHandle;
-        MemoryManager m_memoryManager;
-        ResourceManager m_resourceManager;
-        SceneManager m_sceneManager;
-        RenderManager m_renderManager;
+
+        JoyGraphicsContext *const m_graphicsContext = nullptr;
+        MemoryManager *const m_memoryManager = nullptr;
+        ResourceManager *const m_resourceManager = nullptr;
+        SceneManager *const m_sceneManager = nullptr;
+        RenderManager *const m_renderManager = nullptr;
     };
 }
 

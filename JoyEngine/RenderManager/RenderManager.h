@@ -31,7 +31,7 @@ namespace JoyEngine {
     public:
         RenderManager() = default;
 
-        RenderManager(const IJoyGraphicsContext &graphicsContext, ResourceManager& resourceManager);
+        RenderManager(IJoyGraphicsContext *const graphicsContext, ResourceManager *const resourceManager);
 
         ~RenderManager() {
 
@@ -65,8 +65,10 @@ namespace JoyEngine {
 
     private:
         static RenderManager *m_instance;
-        const IJoyGraphicsContext &m_graphicsContext;
-        ResourceManager& m_resourceManager;
+
+        IJoyGraphicsContext *const m_graphicsContext;
+        ResourceManager *const m_resourceManager;
+        const VkAllocationCallbacks *m_allocator;
         VkRenderPass m_renderPass;
 
         uint32_t m_renderObjectIndex = 0;
