@@ -4,14 +4,13 @@
 #include <iostream>
 
 #define STB_IMAGE_IMPLEMENTATION
-
 #include "stb_image.h"
 
-//#include "Utils/ModelLoader.h"
+#include "Utils/ModelLoader.h"
 //#include "Components/MeshRendererTypes.h"
 //
-//#include "Utils/FileUtils.h"
-//#include "RenderManager/VulkanUtils.h"
+#include "Utils/FileUtils.h"
+#include "RenderManager/VulkanUtils.h"
 
 namespace JoyEngine {
 
@@ -50,7 +49,10 @@ namespace JoyEngine {
 
         stbi_image_free(pixels);
 
-        CreateImage(texWidth, texHeight,
+        CreateImage(m_graphicsContext.GetVkPhysicalDevice(),
+                    m_graphicsContext.GetVkDevice(),
+                    m_graphicsContext.GetAllocator(),
+                    texWidth, texHeight,
                     VK_FORMAT_R8G8B8A8_SRGB,
                     VK_IMAGE_TILING_OPTIMAL,
                     VK_IMAGE_USAGE_TRANSFER_DST_BIT
@@ -74,7 +76,12 @@ namespace JoyEngine {
         vkFreeMemory(m_graphicsContext.GetVkDevice(), stagingBufferMemory, m_graphicsContext.GetAllocator()->GetAllocationCallbacks());
     }
 
-    void ResourceManager::CreateImageView(VkImage image, VkFormat format, VkImageAspectFlags aspectFlags, VkImageView &imageView) {
+    void ResourceManager::CreateImageView(VkDevice logicalDevice,
+                                          Allocator *allocator,
+                                          VkImage image,
+                                          VkFormat format,
+                                          VkImageAspectFlags aspectFlags,
+                                          VkImageView &imageView) {
         VkImageViewCreateInfo viewInfo{};
         viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
         viewInfo.image = image;
@@ -86,12 +93,15 @@ namespace JoyEngine {
         viewInfo.subresourceRange.baseArrayLayer = 0;
         viewInfo.subresourceRange.layerCount = 1;
 
-        if (vkCreateImageView(m_graphicsContext.GetVkDevice(), &viewInfo, m_graphicsContext.GetAllocator()->GetAllocationCallbacks(), &imageView) != VK_SUCCESS) {
+        if (vkCreateImageView(logicalDevice, &viewInfo, allocator->GetAllocationCallbacks(), &imageView) != VK_SUCCESS) {
             throw std::runtime_error("failed to create texture image view!");
         }
     }
 
-    void ResourceManager::CreateImage(uint32_t width,
+    void ResourceManager::CreateImage(VkPhysicalDevice physicalDevice,
+                                      VkDevice logicalDevice,
+                                      Allocator *allocator,
+                                      uint32_t width,
                                       uint32_t height,
                                       VkFormat format,
                                       VkImageTiling tiling,
@@ -114,25 +124,25 @@ namespace JoyEngine {
         imageInfo.samples = VK_SAMPLE_COUNT_1_BIT;
         imageInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 
-        if (vkCreateImage(m_graphicsContext.GetVkDevice(), &imageInfo, m_graphicsContext.GetAllocator()->GetAllocationCallbacks(), &image) != VK_SUCCESS) {
+        if (vkCreateImage(logicalDevice, &imageInfo, allocator->GetAllocationCallbacks(), &image) != VK_SUCCESS) {
             throw std::runtime_error("failed to create image!");
         }
 
         VkMemoryRequirements memRequirements;
-        vkGetImageMemoryRequirements(m_graphicsContext.GetVkDevice(), image, &memRequirements);
+        vkGetImageMemoryRequirements(logicalDevice, image, &memRequirements);
 
         VkMemoryAllocateInfo allocInfo{};
         allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
         allocInfo.allocationSize = memRequirements.size;
-        allocInfo.memoryTypeIndex = findMemoryType(m_graphicsContext.GetVkPhysicalDevice(), memRequirements.memoryTypeBits, properties);
+        allocInfo.memoryTypeIndex = findMemoryType(physicalDevice, memRequirements.memoryTypeBits, properties);
 
         std::cout << "Allocation GPU Memory:";
-        if (vkAllocateMemory(m_graphicsContext.GetVkDevice(), &allocInfo, m_graphicsContext.GetAllocator()->GetAllocationCallbacks(), &imageMemory) != VK_SUCCESS) {
+        if (vkAllocateMemory(logicalDevice, &allocInfo, allocator->GetAllocationCallbacks(), &imageMemory) != VK_SUCCESS) {
             throw std::runtime_error("failed to allocate image memory!");
         }
         std::cout << "GPU Allocated:";
 
-        vkBindImageMemory(m_graphicsContext.GetVkDevice(), image, imageMemory, 0);
+        vkBindImageMemory(logicalDevice, image, imageMemory, 0);
     }
 
     void ResourceManager::CreateTextureSampler(VkSampler &textureSampler) {
@@ -336,5 +346,52 @@ namespace JoyEngine {
 
         vkFreeCommandBuffers(m_graphicsContext.GetVkDevice(), m_graphicsContext.GetVkCommandPool(), 1, &commandBuffer);
     }
+    void ResourceManager::CreateGPUBuffer(void *data,
+                         size_t stride,
+                         size_t size,
+                         VkBuffer &vertexBuffer,
+                         VkDeviceMemory &vertexBufferMemory,
+                         VkBufferUsageFlagBits usageFlag) {
+        VkDeviceSize bufferSize = stride * size;
 
+        VkBuffer stagingBuffer;
+        VkDeviceMemory stagingBufferMemory;
+        CreateBuffer(m_graphicsContext.GetVkPhysicalDevice(),
+                     m_graphicsContext.GetVkDevice(),
+                     m_graphicsContext.GetAllocator(),
+                     bufferSize,
+                     VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+                     VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+                     stagingBuffer,
+                     stagingBufferMemory);
+
+        void *mappedData;
+        vkMapMemory(m_graphicsContext.GetVkDevice(), stagingBufferMemory, 0, bufferSize, 0, &mappedData);
+        memcpy(mappedData, data, (size_t) bufferSize);
+        vkUnmapMemory(m_graphicsContext.GetVkDevice(), stagingBufferMemory);
+
+        CreateBuffer(m_graphicsContext.GetVkPhysicalDevice(),
+                     m_graphicsContext.GetVkDevice(),
+                     m_graphicsContext.GetAllocator(),
+                     bufferSize,
+                     VK_BUFFER_USAGE_TRANSFER_DST_BIT | usageFlag, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+                     vertexBuffer,
+                     vertexBufferMemory);
+
+        CopyBuffer(stagingBuffer, vertexBuffer, bufferSize);
+
+        vkDestroyBuffer(m_graphicsContext.GetVkDevice(), stagingBuffer, m_graphicsContext.GetAllocator()->GetAllocationCallbacks());
+        vkFreeMemory(m_graphicsContext.GetVkDevice(), stagingBufferMemory, m_graphicsContext.GetAllocator()->GetAllocationCallbacks());
+    }
+
+    void ResourceManager::CreateTexture(GFXTexture *texture, const std::string &filename){
+        CreateTextureImage(filename, texture->textureImage, texture->textureImageMemory);
+        CreateImageView(m_graphicsContext.GetVkDevice(),
+                        m_graphicsContext.GetAllocator(),
+                        texture->textureImage,
+                        VK_FORMAT_R8G8B8A8_SRGB,
+                        VK_IMAGE_ASPECT_COLOR_BIT,
+                        texture->textureImageView);
+        CreateTextureSampler(texture->textureSampler);
+    }
 }

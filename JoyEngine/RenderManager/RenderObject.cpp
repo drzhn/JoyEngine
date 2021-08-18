@@ -174,6 +174,8 @@ namespace JoyEngine {
             throw std::runtime_error("failed to create pipeline layout!");
         }
 
+        assert(m_renderPass != VK_NULL_HANDLE);
+
         VkGraphicsPipelineCreateInfo pipelineInfo{};
         pipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
         pipelineInfo.stageCount = 2;
@@ -305,5 +307,23 @@ namespace JoyEngine {
                                    0,
                                    nullptr);
         }
+    }
+
+    void RenderObject::UpdateUniformBuffer(uint32_t currentImage) {
+        static auto startTime = std::chrono::high_resolution_clock::now();
+
+        auto currentTime = std::chrono::high_resolution_clock::now();
+        float time = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - startTime).count();
+
+        UniformBufferObject ubo{};
+        ubo.model = glm::rotate(glm::mat4(1.0f), time * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+        ubo.view = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+        ubo.proj = glm::perspective(glm::radians(45.0f), (float) m_graphicsContext.GetSwapChainExtent().width / (float) m_graphicsContext.GetSwapChainExtent().height, 0.1f, 10.0f);
+        ubo.proj[1][1] *= -1;
+
+        void *data;
+        vkMapMemory(m_graphicsContext.GetVkDevice(), m_uniformBuffersMemory[currentImage], 0, sizeof(ubo), 0, &data);
+        memcpy(data, &ubo, sizeof(ubo));
+        vkUnmapMemory(m_graphicsContext.GetVkDevice(), m_uniformBuffersMemory[currentImage]);
     }
 }

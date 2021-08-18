@@ -3,9 +3,12 @@
 
 #include "windows.h"
 
+#include <set>
+
 #include <vulkan/vulkan.h>
 #include <vulkan/vk_sdk_platform.h>
 #include <vulkan/vulkan_win32.h>
+#include "RenderManager/VulkanTypes.h"
 
 namespace JoyEngine {
 

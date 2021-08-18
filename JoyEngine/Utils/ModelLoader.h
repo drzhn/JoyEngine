@@ -2,6 +2,7 @@
 #define MODEL_LOADER_H
 
 #include "Libs/tinyobjloader/tiny_obj_loader.h"
+#include <stdexcept>
 
 namespace JoyEngine {
 

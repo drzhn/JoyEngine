@@ -4,15 +4,12 @@
 #include <vulkan/vulkan.h>
 
 #include "RenderManager/RenderManager.h"
+#include "IJoyGraphicsContext.h"
 
 #include "Components/MeshRenderer.h"
 #include "Components/MeshRendererTypes.h"
 
 namespace JoyEngine {
-    class MeshRenderer;
-
-    class IJoyGraphicsContext;
-
     class RenderObject {
     public :
         RenderObject() = delete;
@@ -23,15 +20,25 @@ namespace JoyEngine {
 
         ~RenderObject();
 
+        [[nodiscard]] const MeshRenderer *GetMeshRenderer() const noexcept { return m_meshRenderer; }
+
+        [[nodiscard]] VkPipelineLayout GetPipelineLayout() const { return m_pipelineLayout; }
+
+        [[nodiscard]] VkPipeline GetPipeline() const { return m_graphicsPipeline; }
+
+        [[nodiscard]] std::vector<VkDescriptorSet> GetDescriptorSet() const { return m_descriptorSets; }
+
+        void UpdateUniformBuffer(uint32_t currentImage);
+
     private:
         const IJoyGraphicsContext &m_graphicsContext;
-        MeshRenderer *m_meshRenderer;
-        VkRenderPass m_renderPass;
-        VkDescriptorSetLayout m_descriptorSetLayout;
+        const MeshRenderer *m_meshRenderer;
+        VkRenderPass m_renderPass = VK_NULL_HANDLE;
+        VkDescriptorSetLayout m_descriptorSetLayout = VK_NULL_HANDLE;
         VkDescriptorPool m_descriptorPool = VK_NULL_HANDLE;
         std::vector<VkDescriptorSet> m_descriptorSets;
-        VkPipelineLayout m_pipelineLayout;
-        VkPipeline m_graphicsPipeline;
+        VkPipelineLayout m_pipelineLayout = VK_NULL_HANDLE;
+        VkPipeline m_graphicsPipeline = VK_NULL_HANDLE;
 
         std::vector<VkBuffer> m_uniformBuffers;
         std::vector<VkDeviceMemory> m_uniformBuffersMemory;
@@ -45,6 +52,7 @@ namespace JoyEngine {
         void CreateDescriptorPool();
 
         void CreateDescriptorSets();
+
     };
 }
 

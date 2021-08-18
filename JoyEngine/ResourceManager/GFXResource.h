@@ -2,6 +2,7 @@
 #define GFX_RESOURCE_H
 
 #include <vulkan/vulkan.h>
+#include "RenderManager/VulkanTypes.h"
 
 namespace JoyEngine {
     struct GFXResource {

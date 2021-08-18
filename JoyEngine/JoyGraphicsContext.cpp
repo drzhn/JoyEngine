@@ -1,7 +1,9 @@
-#include "JoyEngineContext.h"
+#include "JoyGraphicsContext.h"
 #include "RenderManager/VulkanUtils.h"
+#include "RenderManager/VulkanAllocator.h"
 
 namespace JoyEngine {
+
     JoyGraphicsContext::JoyGraphicsContext(HINSTANCE instance, HWND windowHandle) :
             m_windowInstance(instance),
             m_windowHandle(windowHandle) {
@@ -180,7 +182,7 @@ namespace JoyEngine {
         VkPresentModeKHR presentMode = chooseSwapPresentMode(swapChainSupport.presentModes);
         VkExtent2D extent = chooseSwapExtent(swapChainSupport.capabilities, m_windowHandle);
 
-        m_swapchainImageCount = swapChainSupport.capabilities.minImageCount + 1;
+        uint32_t imageCount = swapChainSupport.capabilities.minImageCount + 1;
         if (swapChainSupport.capabilities.maxImageCount > 0 && m_swapchainImageCount > swapChainSupport.capabilities.maxImageCount) {
             m_swapchainImageCount = swapChainSupport.capabilities.maxImageCount;
         }
@@ -188,7 +190,7 @@ namespace JoyEngine {
         createInfo.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
         createInfo.surface = m_surface;
 
-        createInfo.minImageCount = m_swapchainImageCount;
+        createInfo.minImageCount = imageCount;
         createInfo.imageFormat = surfaceFormat.format;
         createInfo.imageColorSpace = surfaceFormat.colorSpace;
         createInfo.imageExtent = extent;
@@ -219,10 +221,11 @@ namespace JoyEngine {
             throw std::runtime_error("failed to create swap chain!");
         }
 
-        vkGetSwapchainImagesKHR(m_logicalDevice, m_swapChain, &m_swapchainImageCount, nullptr);
-        m_swapChainImages.resize(m_swapchainImageCount);
-        vkGetSwapchainImagesKHR(m_logicalDevice, m_swapChain, &m_swapchainImageCount, m_swapChainImages.data());
+        vkGetSwapchainImagesKHR(m_logicalDevice, m_swapChain, &imageCount, nullptr);
+        m_swapChainImages.resize(imageCount);
+        vkGetSwapchainImagesKHR(m_logicalDevice, m_swapChain, &imageCount, m_swapChainImages.data());
 
+        m_swapchainImageCount = m_swapChainImages.size();
         m_swapChainImageFormat = surfaceFormat.format;
         m_swapChainExtent = extent;
     }

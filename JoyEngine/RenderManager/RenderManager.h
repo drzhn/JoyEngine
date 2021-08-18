@@ -10,6 +10,11 @@
 #include <map>
 #include <vulkan/vulkan.h>
 
+#include "IJoyGraphicsContext.h"
+
+#include <ResourceManager/ResourceManager.h>
+#include "ResourceManager/GFXResource.h"
+
 #include "Components/MeshRenderer.h"
 #include "Components/MeshRendererTypes.h"
 #include "RenderManager/VulkanAllocator.h"
@@ -22,48 +27,11 @@
 namespace JoyEngine {
     class RenderObject;
 
-    class IJoyGraphicsContext {
-    public :
-        [[nodiscard]] virtual HINSTANCE GetHINSTANCE() const noexcept = 0;
-
-        [[nodiscard]] virtual HWND GetHWND() const noexcept = 0;
-
-        [[nodiscard]] virtual Allocator *GetAllocator() const noexcept = 0;
-
-        [[nodiscard]] virtual VkInstance GetVkInstance() const noexcept = 0;
-
-        [[nodiscard]] virtual VkPhysicalDevice GetVkPhysicalDevice() const noexcept = 0;
-
-        [[nodiscard]] virtual VkDevice GetVkDevice() const noexcept = 0;
-
-        [[nodiscard]] virtual VkDebugUtilsMessengerEXT GetVkDebugUtilsMessengerEXT() const noexcept = 0;
-
-        [[nodiscard]] virtual VkSurfaceKHR GetVkSurfaceKHR() const noexcept = 0;
-
-        [[nodiscard]] virtual VkQueue GetGraphicsVkQueue() const noexcept = 0;
-
-        [[nodiscard]] virtual VkQueue GetPresentVkQueue() const noexcept = 0;
-
-        [[nodiscard]] virtual VkCommandPool GetVkCommandPool() const noexcept = 0;
-
-        [[nodiscard]] virtual uint32_t GetSwapchainImageCount() const noexcept = 0;
-
-        [[nodiscard]] virtual VkSwapchainKHR GetSwapChain() const noexcept = 0;
-
-        [[nodiscard]] virtual std::vector<VkImage> GetSwapChainImages() const noexcept = 0;
-
-        [[nodiscard]] virtual VkFormat GetSwapChainImageFormat() const noexcept = 0;
-
-        [[nodiscard]] virtual VkExtent2D GetSwapChainExtent() const noexcept = 0;
-
-        [[nodiscard]] virtual std::vector<VkImageView> GetSwapChainImageViews() const noexcept = 0;
-    };
-
     class RenderManager {
     public:
         RenderManager() = default;
 
-        RenderManager(const IJoyGraphicsContext &graphicsContext);
+        RenderManager(const IJoyGraphicsContext &graphicsContext, ResourceManager& resourceManager);
 
         ~RenderManager() {
 
@@ -71,14 +39,15 @@ namespace JoyEngine {
 
         static RenderManager *GetInstance() noexcept { return m_instance; }
 
-        void Init() {}
+        void Init();
 
         void Start() {}
 
         void Stop() {}
 
-        const int MAX_FRAMES_IN_FLIGHT = 2;
+        void Update();
 
+        const int MAX_FRAMES_IN_FLIGHT = 2;
 
         void CreateRenderPass();
 
@@ -86,21 +55,38 @@ namespace JoyEngine {
 
         void UnregisterMeshRenderer(uint32_t);
 
+        void CreateDepthResources();
+
+        void CreateFramebuffers();
+
+        void CreateCommandBuffers();
+
+        void CreateSyncObjects();
+
     private:
         static RenderManager *m_instance;
         const IJoyGraphicsContext &m_graphicsContext;
-
+        ResourceManager& m_resourceManager;
         VkRenderPass m_renderPass;
 
         uint32_t m_renderObjectIndex = 0;
         std::map<uint32_t, RenderObject *> m_renderObjects;
+        GFXTexture m_depthTexture;
+        std::vector<VkFramebuffer> m_swapChainFramebuffers;
+        std::vector<VkCommandBuffer> commandBuffers;
+
+        std::vector<VkSemaphore> m_imageAvailableSemaphores;
+        std::vector<VkSemaphore> m_renderFinishedSemaphores;
+        std::vector<VkFence> m_inFlightFences;
+        std::vector<VkFence> m_imagesInFlight;
+        size_t currentFrame = 0;
+
 //        VkDescriptorSetLayout descriptorSetLayout;
 //        VkPipelineLayout pipelineLayout;
 //        VkPipeline graphicsPipeline;
 //
 //        std::vector<VkFramebuffer> swapChainFramebuffers;
 //        VkCommandPool commandPool;
-//        std::vector<VkCommandBuffer> commandBuffers;
 //
 //        std::vector<VkSemaphore> imageAvailableSemaphores;
 //        std::vector<VkSemaphore> renderFinishedSemaphores;
@@ -133,6 +119,7 @@ namespace JoyEngine {
 //        VkImage depthImage;
 //        VkDeviceMemory depthImageMemory;
 //        VkImageView depthImageView;
+
 
     };
 

@@ -6,7 +6,7 @@ set(CMAKE_CXX_STANDARD 17)
 add_library(
         JoyEngine
 
-        JoyEngineContext.cpp
+        JoyGraphicsContext.cpp
 
         RenderManager/RenderManager.cpp
         MemoryManager/MemoryManager.cpp

@@ -5,7 +5,7 @@
 #include <set>
 #include <chrono>
 
-
+#include "ResourceManager/ResourceManager.h"
 //#include "RenderManager/GpuAllocator.h"
 #include "RenderManager/VulkanAllocator.h"
 #include "RenderManager/VulkanTypes.h"
@@ -26,10 +26,20 @@ namespace JoyEngine {
 
     RenderManager *RenderManager::m_instance = nullptr;
 
-    RenderManager::RenderManager(const IJoyGraphicsContext &graphicsContext) :
-            m_graphicsContext(graphicsContext) {
+    RenderManager::RenderManager(const IJoyGraphicsContext &graphicsContext,
+                                 ResourceManager &resourceManager) :
+            m_graphicsContext(graphicsContext),
+            m_resourceManager(resourceManager) {
         m_instance = this;
         CreateRenderPass();
+        CreateDepthResources();
+        CreateFramebuffers();
+    }
+
+    void RenderManager::Init() {
+        CreateCommandBuffers();
+        CreateSyncObjects();
+
     }
 
     void RenderManager::CreateRenderPass() {
@@ -101,6 +111,240 @@ namespace JoyEngine {
             assert(false);
         }
         m_renderObjects.erase(index);
+    }
+
+    void RenderManager::CreateDepthResources() {
+        VkFormat depthFormat = findDepthFormat(m_graphicsContext.GetVkPhysicalDevice());
+
+        ResourceManager::CreateImage(m_graphicsContext.GetVkPhysicalDevice(),
+                                     m_graphicsContext.GetVkDevice(),
+                                     m_graphicsContext.GetAllocator(),
+                                     m_graphicsContext.GetSwapChainExtent().width,
+                                     m_graphicsContext.GetSwapChainExtent().height,
+                                     depthFormat,
+                                     VK_IMAGE_TILING_OPTIMAL,
+                                     VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT,
+                                     VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+                                     m_depthTexture.textureImage,
+                                     m_depthTexture.textureImageMemory);
+        ResourceManager::CreateImageView(m_graphicsContext.GetVkDevice(),
+                                         m_graphicsContext.GetAllocator(),
+                                         m_depthTexture.textureImage,
+                                         depthFormat,
+                                         VK_IMAGE_ASPECT_DEPTH_BIT,
+                                         m_depthTexture.textureImageView);
+    }
+
+    void RenderManager::CreateFramebuffers() {
+        m_swapChainFramebuffers.resize(m_graphicsContext.GetSwapchainImageCount());
+        for (size_t i = 0; i < m_graphicsContext.GetSwapchainImageCount(); i++) {
+            std::array<VkImageView, 2> attachments = {
+                    m_graphicsContext.GetSwapChainImageViews()[i],
+                    m_depthTexture.textureImageView
+            };
+
+            VkFramebufferCreateInfo framebufferInfo{};
+            framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+            framebufferInfo.renderPass = m_renderPass;
+            framebufferInfo.attachmentCount = static_cast<uint32_t>(attachments.size());
+            framebufferInfo.pAttachments = attachments.data();
+            framebufferInfo.width = m_graphicsContext.GetSwapChainExtent().width;
+            framebufferInfo.height = m_graphicsContext.GetSwapChainExtent().height;
+            framebufferInfo.layers = 1;
+
+            if (vkCreateFramebuffer(m_graphicsContext.GetVkDevice(),
+                                    &framebufferInfo,
+                                    m_graphicsContext.GetAllocator()->GetAllocationCallbacks(),
+                                    &m_swapChainFramebuffers[i]) != VK_SUCCESS) {
+                throw std::runtime_error("failed to create framebuffer!");
+            }
+        }
+    }
+
+    void RenderManager::CreateCommandBuffers() {
+
+        commandBuffers.resize(m_swapChainFramebuffers.size());
+
+        VkCommandBufferAllocateInfo allocInfo{};
+        allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+        allocInfo.commandPool = m_graphicsContext.GetVkCommandPool();
+        allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+        allocInfo.commandBufferCount = (uint32_t) commandBuffers.size();
+
+        if (vkAllocateCommandBuffers(m_graphicsContext.GetVkDevice(), &allocInfo, commandBuffers.data()) != VK_SUCCESS) {
+            throw std::runtime_error("failed to allocate command buffers!");
+        }
+
+        for (size_t i = 0; i < commandBuffers.size(); i++) {
+            VkCommandBufferBeginInfo beginInfo{};
+            beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+
+            if (vkBeginCommandBuffer(commandBuffers[i], &beginInfo) != VK_SUCCESS) {
+                throw std::runtime_error("failed to begin recording command buffer!");
+            }
+
+            VkRenderPassBeginInfo renderPassInfo{};
+            renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+            renderPassInfo.renderPass = m_renderPass;
+            renderPassInfo.framebuffer = m_swapChainFramebuffers[i];
+            renderPassInfo.renderArea.offset = {0, 0};
+            renderPassInfo.renderArea.extent = m_graphicsContext.GetSwapChainExtent();
+
+            std::array<VkClearValue, 2> clearValues{};
+            clearValues[0].color = {0.0f, 0.0f, 0.0f, 1.0f};
+            clearValues[1].depthStencil = {1.0f, 0};
+
+            renderPassInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
+            renderPassInfo.pClearValues = clearValues.data();
+
+            vkCmdBeginRenderPass(commandBuffers[i], &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
+
+            for (auto const &x : m_renderObjects) {
+                RenderObject *ro = x.second;
+                VkBuffer vertexBuffers[] = {
+                        m_resourceManager.GetMesh(ro->GetMeshRenderer()->GetMesh()->GetGuid())->vertexBuffer
+                };
+                VkDeviceSize offsets[] = {0};
+                vkCmdBindVertexBuffers(commandBuffers[i], 0, 1, vertexBuffers, offsets);
+
+                vkCmdBindIndexBuffer(commandBuffers[i],
+                                     m_resourceManager.GetMesh(ro->GetMeshRenderer()->GetMesh()->GetGuid())->indexBuffer,
+                                     0,
+                                     VK_INDEX_TYPE_UINT32);
+
+                vkCmdBindPipeline(commandBuffers[i],
+                                  VK_PIPELINE_BIND_POINT_GRAPHICS,
+                                  ro->GetPipeline());
+
+                vkCmdBindDescriptorSets(commandBuffers[i],
+                                        VK_PIPELINE_BIND_POINT_GRAPHICS,
+                                        ro->GetPipelineLayout(), 0, 1,
+                                        &ro->GetDescriptorSet()[i], 0, nullptr);
+
+                vkCmdDrawIndexed(commandBuffers[i],
+                                 static_cast<uint32_t>(m_resourceManager.GetMesh(ro->GetMeshRenderer()->GetMesh()->GetGuid())->indices.size()), 1, 0, 0, 0);
+            }
+
+            vkCmdEndRenderPass(commandBuffers[i]);
+
+            if (vkEndCommandBuffer(commandBuffers[i]) != VK_SUCCESS) {
+                throw std::runtime_error("failed to record command buffer!");
+            }
+        }
+    }
+
+    void RenderManager::CreateSyncObjects() {
+        m_imageAvailableSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
+        m_renderFinishedSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
+        m_inFlightFences.resize(MAX_FRAMES_IN_FLIGHT);
+        m_imagesInFlight.resize(m_graphicsContext.GetSwapchainImageCount(), VK_NULL_HANDLE);
+
+        VkSemaphoreCreateInfo semaphoreInfo{};
+        semaphoreInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
+
+        VkFenceCreateInfo fenceInfo{};
+        fenceInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
+        fenceInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
+
+        for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
+            if (vkCreateSemaphore(m_graphicsContext.GetVkDevice(), &semaphoreInfo, m_graphicsContext.GetAllocator()->GetAllocationCallbacks(), &m_imageAvailableSemaphores[i]) != VK_SUCCESS ||
+                vkCreateSemaphore(m_graphicsContext.GetVkDevice(), &semaphoreInfo, m_graphicsContext.GetAllocator()->GetAllocationCallbacks(), &m_renderFinishedSemaphores[i]) != VK_SUCCESS ||
+                vkCreateFence(m_graphicsContext.GetVkDevice(), &fenceInfo, m_graphicsContext.GetAllocator()->GetAllocationCallbacks(), &m_inFlightFences[i]) != VK_SUCCESS) {
+
+                throw std::runtime_error("failed to create synchronization objects for a frame!");
+            }
+        }
+    }
+
+    void RenderManager::Update() {
+
+        vkWaitForFences(m_graphicsContext.GetVkDevice(), 1, &m_inFlightFences[currentFrame], VK_TRUE, UINT64_MAX);
+
+        uint32_t imageIndex;
+        VkResult result = vkAcquireNextImageKHR(m_graphicsContext.GetVkDevice(),
+                                                m_graphicsContext.GetSwapChain(),
+                                                UINT64_MAX,
+                                                m_imageAvailableSemaphores[currentFrame],
+                                                VK_NULL_HANDLE, &imageIndex);
+
+        if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR) {
+            throw std::runtime_error("failed to acquire swap chain image!");
+        }
+//        if (result == VK_ERROR_OUT_OF_DATE_KHR) {
+//            framebufferResized = false;
+//            recreateSwapChain();
+//            return;
+//        } else if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR) {
+//            throw std::runtime_error("failed to acquire swap chain image!");
+//        }
+
+
+        for (auto const &x : m_renderObjects) {
+            x.second->UpdateUniformBuffer(imageIndex);
+        }
+
+        // Check if a previous frame is using this image (i.e. there is its fence to wait on)
+        if (m_imagesInFlight[imageIndex] != VK_NULL_HANDLE) {
+            vkWaitForFences(m_graphicsContext.GetVkDevice(),
+                            1,
+                            &m_imagesInFlight[imageIndex],
+                            VK_TRUE,
+                            UINT64_MAX);
+        }
+        // Mark the image as now being in use by this frame
+        m_imagesInFlight[imageIndex] = m_inFlightFences[currentFrame];
+
+
+        VkSubmitInfo submitInfo{};
+        submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+
+        VkSemaphore waitSemaphores[] = {m_imageAvailableSemaphores[currentFrame]};
+
+        VkPipelineStageFlags waitStages[] = {VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT};
+        submitInfo.waitSemaphoreCount = 1;
+        submitInfo.pWaitSemaphores = waitSemaphores;
+        submitInfo.pWaitDstStageMask = waitStages;
+        submitInfo.commandBufferCount = 1;
+        submitInfo.pCommandBuffers = &commandBuffers[imageIndex];
+
+        VkSemaphore signalSemaphores[] = {m_renderFinishedSemaphores[currentFrame]};
+        submitInfo.signalSemaphoreCount = 1;
+        submitInfo.pSignalSemaphores = signalSemaphores;
+
+        vkResetFences(m_graphicsContext.GetVkDevice(), 1, &m_inFlightFences[currentFrame]);
+
+        if (vkQueueSubmit(m_graphicsContext.GetGraphicsVkQueue(), 1, &submitInfo, m_inFlightFences[currentFrame]) != VK_SUCCESS) {
+            throw std::runtime_error("failed to submit draw command buffer!");
+        }
+
+        VkPresentInfoKHR presentInfo{};
+        presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
+
+        presentInfo.waitSemaphoreCount = 1;
+        presentInfo.pWaitSemaphores = signalSemaphores;
+
+        VkSwapchainKHR swapChains[] = {m_graphicsContext.GetSwapChain()};
+        presentInfo.swapchainCount = 1;
+        presentInfo.pSwapchains = swapChains;
+        presentInfo.pImageIndices = &imageIndex;
+        presentInfo.pResults = nullptr; // Optional
+
+        result = vkQueuePresentKHR(m_graphicsContext.GetPresentVkQueue(), &presentInfo);
+        if (result != VK_SUCCESS) {
+            throw std::runtime_error("failed to present swap chain image!");
+        }
+//        if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR) {
+//            framebufferResized = false;
+//            recreateSwapChain();
+//        } else if (result != VK_SUCCESS) {
+//            throw std::runtime_error("failed to present swap chain image!");
+//        }
+
+        currentFrame = (currentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
+
+        vkQueueWaitIdle(m_graphicsContext.GetPresentVkQueue());
+//        currentFrame = (currentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
+
     }
 
 //
