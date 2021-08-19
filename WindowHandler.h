@@ -6,12 +6,13 @@
 
 class WindowHandler {
 public :
-    static void RegisterMessageHandler(JoyEngine::IWindowMessageHandler *messageHandler) {
+    static void RegisterMessageHandler(JoyEngine::IWindowMessageHandler *messageHandler, HWND hwnd) {
         m_messageHandler = messageHandler;
+        m_hwnd = hwnd;
     }
 
     static LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
-        if (m_messageHandler != nullptr) {
+        if (m_messageHandler != nullptr && hwnd == m_hwnd) {
             m_messageHandler->HandleMessage(hwnd, uMsg, wParam, lParam);
         }
         if (uMsg == WM_DESTROY) {
@@ -26,6 +27,7 @@ public :
 private :
     static bool m_windowDestroyed;
     static JoyEngine::IWindowMessageHandler *m_messageHandler;
+    static HWND m_hwnd;
 };
 
 #endif // WINDOW_HANDLER_H

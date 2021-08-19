@@ -13,7 +13,7 @@ namespace JoyEngine {
 
         [[nodiscard]] virtual HWND GetHWND() const noexcept = 0;
 
-        [[nodiscard]] virtual Allocator *GetAllocator() const noexcept = 0;
+        [[nodiscard]] virtual const VkAllocationCallbacks *GetAllocationCallbacks() const noexcept = 0;
 
         [[nodiscard]] virtual VkInstance GetVkInstance() const noexcept = 0;
 
@@ -30,18 +30,6 @@ namespace JoyEngine {
         [[nodiscard]] virtual VkQueue GetPresentVkQueue() const noexcept = 0;
 
         [[nodiscard]] virtual VkCommandPool GetVkCommandPool() const noexcept = 0;
-
-        [[nodiscard]] virtual uint32_t GetSwapchainImageCount() const noexcept = 0;
-
-        [[nodiscard]] virtual VkSwapchainKHR GetSwapChain() const noexcept = 0;
-
-        [[nodiscard]] virtual std::vector<VkImage> GetSwapChainImages() const noexcept = 0;
-
-        [[nodiscard]] virtual VkFormat GetSwapChainImageFormat() const noexcept = 0;
-
-        [[nodiscard]] virtual VkExtent2D GetSwapChainExtent() const noexcept = 0;
-
-        [[nodiscard]] virtual std::vector<VkImageView> GetSwapChainImageViews() const noexcept = 0;
     };
 }
 #endif //I_JOY_GRAPHICS_CONTEXT_H

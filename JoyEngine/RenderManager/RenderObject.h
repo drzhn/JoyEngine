@@ -8,15 +8,17 @@
 
 #include "Components/MeshRenderer.h"
 #include "Components/MeshRendererTypes.h"
+#include "Swapchain.h"
 
 namespace JoyEngine {
     class RenderObject {
     public :
         RenderObject() = delete;
 
-        explicit RenderObject(MeshRenderer *const meshRenderer,
-                              IJoyGraphicsContext *const graphicsContext,
-                              VkRenderPass renderPass);
+        explicit RenderObject(MeshRenderer *meshRenderer,
+                              IJoyGraphicsContext *graphicsContext,
+                              VkRenderPass renderPass,
+                              Swapchain *swapchain);
 
         ~RenderObject();
 
@@ -32,7 +34,9 @@ namespace JoyEngine {
 
     private:
         IJoyGraphicsContext *const m_graphicsContext;
+        const VkAllocationCallbacks *m_allocator;
         MeshRenderer *const m_meshRenderer;
+        Swapchain *m_swapchain;
         VkRenderPass m_renderPass = VK_NULL_HANDLE;
 
         VkDescriptorSetLayout m_descriptorSetLayout = VK_NULL_HANDLE;

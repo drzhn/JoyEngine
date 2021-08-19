@@ -45,49 +45,50 @@
 //    return 0;
 //}
 
+#include <memory>
 
-#include "rapidjson/document.h"
-#include "rapidjson/writer.h"
-#include "rapidjson/stringbuffer.h"
-#include <iostream>
-#include <guiddef.h>
-#include <windows.h>
-#include <Combaseapi.h>
-#include "Utils/FileUtils.h"
-#include"Utils/GUID.h"
-#include <map>
-#include <unordered_map>
+class Data {
+public :
+    Data(int a) :
+            m_a(a) {
+        std::cout << " data constructed " << m_a << std::endl;
+    }
 
-using namespace rapidjson;
+    ~Data() {
+        std::cout << " data destructed " << m_a << std::endl;
+    }
 
-const char *filename = "../../../JoyData/scenes/room.json";
+    int m_a;
+};
+
+class Consumer {
+public:
+    Consumer(std::unique_ptr<Data>& data) :
+            m_data(data) {
+        m_data = nullptr;
+    }
+
+    std::unique_ptr<Data> &m_data;
+};
+
+class Manager {
+public:
+    Manager() {
+        data1 = std::make_unique<Data>(1);
+        data2 = std::make_unique<Data>(2);
+        Consumer *a = new Consumer(data1);
+    }
+
+    ~Manager() {
+        data2 = nullptr;
+        data1 = nullptr;
+    }
+
+    std::unique_ptr<Data> data1;
+    std::unique_ptr<Data> data2;
+};
 
 int main() {
-//    GUID gidReference;
-//    HRESULT hCreateGuid = CoCreateGuid( &gidReference );
-//    size_t b= sizeof(unsigned int  );
-    // 1. Parse a JSON string into DOM.
-//    const char* json = "{\"project\":\"rapidjson\",\"stars\":10}";
-//    std::vector<char> json = JoyEngine::readFile(filename);
-//    Document document;
-//    document.Parse<rapidjson::kParseStopWhenDoneFlag>(json.data());
-//
-//    Value &val = document["guid"];
-//    const char* guidStr = val.GetString();
-//    JoyEngine::GUID guid = JoyEngine::GUID::StringToGuid(guidStr);
-//    std::map<JoyEngine::GUID, int> map;
-//    map.insert({guid,4});
-
-    // 2. Modify it by DOM.
-//    Value &s = document["stars"];
-//    s.SetInt(s.GetInt() + 1);
-
-    // 3. Stringify the DOM
-//    StringBuffer buffer;
-//    Writer<StringBuffer> writer(buffer);
-//    document.Accept(writer);
-
-    // Output {"project":"rapidjson","stars":11}
-//    std::cout << buffer.GetString() << std::endl;
+    Manager m;
     return 0;
 }

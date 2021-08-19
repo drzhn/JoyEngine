@@ -8,11 +8,13 @@
 #include <set>
 #include <chrono>
 #include <map>
+#include <memory>
+
 #include <vulkan/vulkan.h>
 
 #include "IJoyGraphicsContext.h"
 
-#include <ResourceManager/ResourceManager.h>
+#include "ResourceManager/ResourceManager.h"
 #include "ResourceManager/GFXResource.h"
 
 #include "Components/MeshRenderer.h"
@@ -20,7 +22,9 @@
 #include "RenderManager/VulkanAllocator.h"
 #include "RenderManager/VulkanTypes.h"
 #include "RenderManager/VulkanUtils.h"
+
 #include "RenderObject.h"
+#include "Swapchain.h"
 
 #include "Utils/FileUtils.h"
 
@@ -33,9 +37,7 @@ namespace JoyEngine {
 
         RenderManager(IJoyGraphicsContext *const graphicsContext, ResourceManager *const resourceManager);
 
-        ~RenderManager() {
-
-        }
+        ~RenderManager();
 
         static RenderManager *GetInstance() noexcept { return m_instance; }
 
@@ -69,10 +71,11 @@ namespace JoyEngine {
         IJoyGraphicsContext *const m_graphicsContext;
         ResourceManager *const m_resourceManager;
         const VkAllocationCallbacks *m_allocator;
+        std::unique_ptr<Swapchain> m_swapchain;
         VkRenderPass m_renderPass;
 
         uint32_t m_renderObjectIndex = 0;
-        std::map<uint32_t, RenderObject *> m_renderObjects;
+        std::map<uint32_t, std::unique_ptr<RenderObject>> m_renderObjects;
         GFXTexture m_depthTexture;
         std::vector<VkFramebuffer> m_swapChainFramebuffers;
         std::vector<VkCommandBuffer> commandBuffers;

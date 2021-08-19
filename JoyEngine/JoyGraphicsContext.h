@@ -16,7 +16,10 @@ namespace JoyEngine {
 
         [[nodiscard]] HWND GetHWND() const noexcept override { return m_windowHandle; }
 
-        [[nodiscard]] Allocator *GetAllocator() const noexcept override { return m_allocator; }
+        [[nodiscard]] const VkAllocationCallbacks *GetAllocationCallbacks() const noexcept override {
+//            return nullptr;
+            return m_allocator->GetAllocationCallbacks();
+        }
 
         [[nodiscard]] VkInstance GetVkInstance() const noexcept override { return m_vkInstance; }
 
@@ -34,18 +37,6 @@ namespace JoyEngine {
 
         [[nodiscard]]  VkCommandPool GetVkCommandPool() const noexcept override { return m_commandPool; }
 
-        [[nodiscard]]  uint32_t GetSwapchainImageCount() const noexcept override { return m_swapchainImageCount; }
-
-        [[nodiscard]] VkSwapchainKHR GetSwapChain() const noexcept override { return m_swapChain; };
-
-        [[nodiscard]] std::vector <VkImage> GetSwapChainImages() const noexcept override { return m_swapChainImages; };
-
-        [[nodiscard]] VkFormat GetSwapChainImageFormat() const noexcept override { return m_swapChainImageFormat; };
-
-        [[nodiscard]] VkExtent2D GetSwapChainExtent() const noexcept override { return m_swapChainExtent; };
-
-        [[nodiscard]] std::vector <VkImageView> GetSwapChainImageViews() const noexcept override { return m_swapChainImageViews; };
-
     private:
         void CreateInstance();
 
@@ -58,12 +49,6 @@ namespace JoyEngine {
         void CreateLogicalDevice();
 
         void CreateCommandPool();
-
-        void CreateSwapChain();
-
-        void CreateImageViews();
-
-        VkImageView CreateImageView(VkImage image, VkFormat format, VkImageAspectFlags aspectFlags);
 
     private:
         const std::vector<const char *> deviceExtensions = {
@@ -87,13 +72,6 @@ namespace JoyEngine {
         VkQueue m_graphicsQueue;
         VkQueue m_presentQueue;
         VkCommandPool m_commandPool;
-
-        uint32_t m_swapchainImageCount = 0;
-        VkSwapchainKHR m_swapChain;
-        std::vector <VkImage> m_swapChainImages;
-        VkFormat m_swapChainImageFormat;
-        VkExtent2D m_swapChainExtent;
-        std::vector <VkImageView> m_swapChainImageViews;
     };
 }
 

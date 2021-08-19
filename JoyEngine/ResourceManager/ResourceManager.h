@@ -4,6 +4,7 @@
 #include <map>
 #include <set>
 #include <cassert>
+#include <memory>
 #include <vulkan/vulkan.h>
 
 #include "IJoyGraphicsContext.h"
@@ -32,7 +33,7 @@ namespace JoyEngine {
 
         ResourceManager() = default;
 
-        ResourceManager(MemoryManager *const , IJoyGraphicsContext *const );
+        ResourceManager(MemoryManager *const, IJoyGraphicsContext *const);
 
         static ResourceManager *GetInstance() noexcept { return m_instance; }
 
@@ -52,7 +53,8 @@ namespace JoyEngine {
                 m_loadedMeshes[guid]->refCount++;
                 return;
             }
-            GFXMesh *mesh = new GFXMesh();
+            m_loadedMeshes.insert({guid,std::make_unique<GFXMesh>()});
+            auto& mesh = m_loadedMeshes[guid];
             mesh->refCount = 1;
             ModelLoader::LoadModel(mesh->vertices, mesh->indices, filename.c_str());
             CreateGPUBuffer(mesh->vertices.data(), sizeof(Vertex), mesh->vertices.size(), mesh->vertexBuffer, mesh->vertexBufferMemory,
@@ -60,7 +62,6 @@ namespace JoyEngine {
             CreateGPUBuffer(mesh->indices.data(), sizeof(uint32_t), mesh->indices.size(), mesh->indexBuffer, mesh->indexBufferMemory,
                             VK_BUFFER_USAGE_INDEX_BUFFER_BIT);
 
-            m_loadedMeshes.insert({guid, mesh});
         }
 
         template<>
@@ -69,12 +70,10 @@ namespace JoyEngine {
                 m_loadedTextures[guid]->refCount++;
                 return;
             }
-            GFXTexture *texture = new GFXTexture();
+            m_loadedTextures.insert({guid,std::make_unique<GFXTexture>()});
+            auto& texture = m_loadedTextures[guid];
             texture->refCount = 1;
-
-            CreateTexture(texture, filename);
-
-            m_loadedTextures.insert({guid, texture});
+            CreateTexture(texture.get(), filename);
         }
 
         template<>
@@ -83,10 +82,10 @@ namespace JoyEngine {
                 m_loadedShaders[guid]->refCount++;
                 return;
             }
-            GFXShader *shader = new GFXShader();
+            m_loadedShaders.insert({guid,std::make_unique<GFXShader>()});
+            auto& shader = m_loadedShaders[guid];
             shader->refCount = 1;
             CreateShaderModule(filename, shader->shaderModule);
-            m_loadedShaders.insert({guid, shader});
         }
 
         template<class T>
@@ -135,15 +134,15 @@ namespace JoyEngine {
 
         void CreateTexture(GFXTexture *texture, const std::string &filename);
 
-        GFXMesh *GetMesh(GUID guid) { return m_loadedMeshes[guid]; };
+        GFXMesh *GetMesh(GUID guid) { return m_loadedMeshes[guid].get(); };
 
-        GFXTexture *GetTexture(GUID guid) { return m_loadedTextures[guid]; };
+        GFXTexture *GetTexture(GUID guid) { return m_loadedTextures[guid].get(); };
 
-        GFXShader *GetShader(GUID guid) { return m_loadedShaders[guid]; };
+        GFXShader *GetShader(GUID guid) { return m_loadedShaders[guid].get(); };
 
         static void CreateBuffer(VkPhysicalDevice physicalDevice,
                                  VkDevice logicalDevice,
-                                 Allocator *allocator,
+                                 const VkAllocationCallbacks *allocator,
                                  VkDeviceSize size,
                                  VkBufferUsageFlags usage,
                                  VkMemoryPropertyFlags properties,
@@ -152,7 +151,7 @@ namespace JoyEngine {
 
         static void CreateImage(VkPhysicalDevice physicalDevice,
                                 VkDevice logicalDevice,
-                                Allocator *allocator,
+                                const VkAllocationCallbacks *allocator,
                                 uint32_t width,
                                 uint32_t height,
                                 VkFormat format,
@@ -163,7 +162,7 @@ namespace JoyEngine {
                                 VkDeviceMemory &imageMemory);
 
         static void CreateImageView(VkDevice logicalDevice,
-                                    Allocator *allocator,
+                                    const VkAllocationCallbacks *allocator,
                                     VkImage image,
                                     VkFormat format,
                                     VkImageAspectFlags aspectFlags,
@@ -174,10 +173,11 @@ namespace JoyEngine {
 
         MemoryManager *const m_memoryManager;
         IJoyGraphicsContext *const m_graphicsContext;
+        const VkAllocationCallbacks *m_allocator;
 
-        std::map<GUID, GFXMesh *> m_loadedMeshes;
-        std::map<GUID, GFXTexture *> m_loadedTextures;
-        std::map<GUID, GFXShader *> m_loadedShaders;
+        std::map<GUID, std::unique_ptr<GFXMesh>> m_loadedMeshes;
+        std::map<GUID, std::unique_ptr<GFXTexture>> m_loadedTextures;
+        std::map<GUID, std::unique_ptr<GFXShader>> m_loadedShaders;
 
         void CreateGPUBuffer(void *data,
                              size_t stride,

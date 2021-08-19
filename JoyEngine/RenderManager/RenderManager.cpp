@@ -30,11 +30,39 @@ namespace JoyEngine {
                                  ResourceManager *const resourceManager) :
             m_graphicsContext(graphicsContext),
             m_resourceManager(resourceManager),
-            m_allocator(m_graphicsContext->GetAllocator()->GetAllocationCallbacks()){
+            m_allocator(m_graphicsContext->GetAllocationCallbacks()),
+            m_swapchain(new Swapchain(graphicsContext)) {
         m_instance = this;
         CreateRenderPass();
         CreateDepthResources();
         CreateFramebuffers();
+    }
+
+    RenderManager::~RenderManager() {
+        for (auto &item : m_renderObjects) {
+            item.second = nullptr;
+        }
+
+        vkDestroyImageView(m_graphicsContext->GetVkDevice(), m_depthTexture.textureImageView, m_allocator);
+        vkDestroyImage(m_graphicsContext->GetVkDevice(), m_depthTexture.textureImage, m_allocator);
+        vkFreeMemory(m_graphicsContext->GetVkDevice(), m_depthTexture.textureImageMemory, m_allocator);
+
+        for (size_t i = 0; i < m_swapChainFramebuffers.size(); i++) {
+            vkDestroyFramebuffer(m_graphicsContext->GetVkDevice(), m_swapChainFramebuffers[i], m_allocator);
+        }
+
+        vkFreeCommandBuffers(m_graphicsContext->GetVkDevice(),
+                             m_graphicsContext->GetVkCommandPool(),
+                             static_cast<uint32_t>(commandBuffers.size()),
+                             commandBuffers.data());
+
+        m_swapchain = nullptr;
+
+        for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
+            vkDestroySemaphore(m_graphicsContext->GetVkDevice(), m_renderFinishedSemaphores[i], m_allocator);
+            vkDestroySemaphore(m_graphicsContext->GetVkDevice(), m_imageAvailableSemaphores[i], m_allocator);
+            vkDestroyFence(m_graphicsContext->GetVkDevice(), m_inFlightFences[i], m_allocator);
+        }
     }
 
     void RenderManager::Init() {
@@ -58,7 +86,7 @@ namespace JoyEngine {
         depthAttachmentRef.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 
         VkAttachmentDescription colorAttachment{};
-        colorAttachment.format = m_graphicsContext->GetSwapChainImageFormat();
+        colorAttachment.format = m_swapchain->GetSwapChainImageFormat();
         colorAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
         colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
         colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
@@ -101,8 +129,10 @@ namespace JoyEngine {
     }
 
     uint32_t RenderManager::RegisterMeshRenderer(MeshRenderer *meshRenderer) {
-        RenderObject *renderObject = new RenderObject(meshRenderer, m_graphicsContext, m_renderPass);
-        m_renderObjects.insert({m_renderObjectIndex, renderObject});
+        m_renderObjects.insert({
+                                       m_renderObjectIndex,
+                                       std::make_unique<RenderObject>(meshRenderer, m_graphicsContext, m_renderPass, m_swapchain.get())
+                               });
         return ++m_renderObjectIndex;
     }
 
@@ -118,9 +148,9 @@ namespace JoyEngine {
 
         ResourceManager::CreateImage(m_graphicsContext->GetVkPhysicalDevice(),
                                      m_graphicsContext->GetVkDevice(),
-                                     m_graphicsContext->GetAllocator(),
-                                     m_graphicsContext->GetSwapChainExtent().width,
-                                     m_graphicsContext->GetSwapChainExtent().height,
+                                     m_allocator,
+                                     m_swapchain->GetSwapChainExtent().width,
+                                     m_swapchain->GetSwapChainExtent().height,
                                      depthFormat,
                                      VK_IMAGE_TILING_OPTIMAL,
                                      VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT,
@@ -128,7 +158,7 @@ namespace JoyEngine {
                                      m_depthTexture.textureImage,
                                      m_depthTexture.textureImageMemory);
         ResourceManager::CreateImageView(m_graphicsContext->GetVkDevice(),
-                                         m_graphicsContext->GetAllocator(),
+                                         m_allocator,
                                          m_depthTexture.textureImage,
                                          depthFormat,
                                          VK_IMAGE_ASPECT_DEPTH_BIT,
@@ -136,10 +166,10 @@ namespace JoyEngine {
     }
 
     void RenderManager::CreateFramebuffers() {
-        m_swapChainFramebuffers.resize(m_graphicsContext->GetSwapchainImageCount());
-        for (size_t i = 0; i < m_graphicsContext->GetSwapchainImageCount(); i++) {
+        m_swapChainFramebuffers.resize(m_swapchain->GetSwapchainImageCount());
+        for (size_t i = 0; i < m_swapchain->GetSwapchainImageCount(); i++) {
             std::array<VkImageView, 2> attachments = {
-                    m_graphicsContext->GetSwapChainImageViews()[i],
+                    m_swapchain->GetSwapChainImageViews()[i],
                     m_depthTexture.textureImageView
             };
 
@@ -148,8 +178,8 @@ namespace JoyEngine {
             framebufferInfo.renderPass = m_renderPass;
             framebufferInfo.attachmentCount = static_cast<uint32_t>(attachments.size());
             framebufferInfo.pAttachments = attachments.data();
-            framebufferInfo.width = m_graphicsContext->GetSwapChainExtent().width;
-            framebufferInfo.height = m_graphicsContext->GetSwapChainExtent().height;
+            framebufferInfo.width = m_swapchain->GetSwapChainExtent().width;
+            framebufferInfo.height = m_swapchain->GetSwapChainExtent().height;
             framebufferInfo.layers = 1;
 
             if (vkCreateFramebuffer(m_graphicsContext->GetVkDevice(),
@@ -188,7 +218,7 @@ namespace JoyEngine {
             renderPassInfo.renderPass = m_renderPass;
             renderPassInfo.framebuffer = m_swapChainFramebuffers[i];
             renderPassInfo.renderArea.offset = {0, 0};
-            renderPassInfo.renderArea.extent = m_graphicsContext->GetSwapChainExtent();
+            renderPassInfo.renderArea.extent = m_swapchain->GetSwapChainExtent();
 
             std::array<VkClearValue, 2> clearValues{};
             clearValues[0].color = {0.0f, 0.0f, 0.0f, 1.0f};
@@ -200,7 +230,7 @@ namespace JoyEngine {
             vkCmdBeginRenderPass(commandBuffers[i], &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
 
             for (auto const &x : m_renderObjects) {
-                RenderObject *ro = x.second;
+                RenderObject *ro = x.second.get();
                 VkBuffer vertexBuffers[] = {
                         m_resourceManager->GetMesh(ro->GetMeshRenderer()->GetMesh()->GetGuid())->vertexBuffer
                 };
@@ -237,7 +267,7 @@ namespace JoyEngine {
         m_imageAvailableSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
         m_renderFinishedSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
         m_inFlightFences.resize(MAX_FRAMES_IN_FLIGHT);
-        m_imagesInFlight.resize(m_graphicsContext->GetSwapchainImageCount(), VK_NULL_HANDLE);
+        m_imagesInFlight.resize(m_swapchain->GetSwapchainImageCount(), VK_NULL_HANDLE);
 
         VkSemaphoreCreateInfo semaphoreInfo{};
         semaphoreInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
@@ -262,7 +292,7 @@ namespace JoyEngine {
 
         uint32_t imageIndex;
         VkResult result = vkAcquireNextImageKHR(m_graphicsContext->GetVkDevice(),
-                                                m_graphicsContext->GetSwapChain(),
+                                                m_swapchain->GetSwapChain(),
                                                 UINT64_MAX,
                                                 m_imageAvailableSemaphores[currentFrame],
                                                 VK_NULL_HANDLE, &imageIndex);
@@ -323,7 +353,7 @@ namespace JoyEngine {
         presentInfo.waitSemaphoreCount = 1;
         presentInfo.pWaitSemaphores = signalSemaphores;
 
-        VkSwapchainKHR swapChains[] = {m_graphicsContext->GetSwapChain()};
+        VkSwapchainKHR swapChains[] = {m_swapchain->GetSwapChain()};
         presentInfo.swapchainCount = 1;
         presentInfo.pSwapchains = swapChains;
         presentInfo.pImageIndices = &imageIndex;

@@ -8,10 +8,13 @@
 namespace JoyEngine {
     RenderObject::RenderObject(MeshRenderer *const meshRenderer,
                                IJoyGraphicsContext *const graphicsContext,
-                               VkRenderPass renderPass) :
+                               VkRenderPass renderPass,
+                               Swapchain *swapchain) :
             m_meshRenderer(meshRenderer),
             m_graphicsContext(graphicsContext),
-            m_renderPass(renderPass) {
+            m_renderPass(renderPass),
+            m_allocator(graphicsContext->GetAllocationCallbacks()),
+            m_swapchain(swapchain){
         CreateDescriptorSetLayout();
         CreateGraphicsPipeline();
         CreateUniformBuffers();
@@ -20,14 +23,14 @@ namespace JoyEngine {
     }
 
     RenderObject::~RenderObject() {
-        vkDestroyPipeline(m_graphicsContext->GetVkDevice(), m_graphicsPipeline, m_graphicsContext->GetAllocator()->GetAllocationCallbacks());
-        vkDestroyPipelineLayout(m_graphicsContext->GetVkDevice(), m_pipelineLayout, m_graphicsContext->GetAllocator()->GetAllocationCallbacks());
-        for (size_t i = 0; i < m_graphicsContext->GetSwapchainImageCount(); i++) {
-            vkDestroyBuffer(m_graphicsContext->GetVkDevice(), m_uniformBuffers[i], m_graphicsContext->GetAllocator()->GetAllocationCallbacks());
-            vkFreeMemory(m_graphicsContext->GetVkDevice(), m_uniformBuffersMemory[i], m_graphicsContext->GetAllocator()->GetAllocationCallbacks());
+        vkDestroyPipeline(m_graphicsContext->GetVkDevice(), m_graphicsPipeline, m_allocator);
+        vkDestroyPipelineLayout(m_graphicsContext->GetVkDevice(), m_pipelineLayout, m_allocator);
+        for (size_t i = 0; i < m_swapchain->GetSwapchainImageCount(); i++) {
+            vkDestroyBuffer(m_graphicsContext->GetVkDevice(), m_uniformBuffers[i], m_allocator);
+            vkFreeMemory(m_graphicsContext->GetVkDevice(), m_uniformBuffersMemory[i], m_allocator);
         }
 
-        vkDestroyDescriptorPool(m_graphicsContext->GetVkDevice(), m_descriptorPool, m_graphicsContext->GetAllocator()->GetAllocationCallbacks());
+        vkDestroyDescriptorPool(m_graphicsContext->GetVkDevice(), m_descriptorPool, m_allocator);
     }
 
     void RenderObject::CreateDescriptorSetLayout() {
@@ -53,7 +56,7 @@ namespace JoyEngine {
 
         if (vkCreateDescriptorSetLayout(m_graphicsContext->GetVkDevice(),
                                         &layoutInfo,
-                                        m_graphicsContext->GetAllocator()->GetAllocationCallbacks(),
+                                        m_allocator,
                                         &m_descriptorSetLayout) != VK_SUCCESS) {
             throw std::runtime_error("failed to create descriptor set layout!");
         }
@@ -95,14 +98,14 @@ namespace JoyEngine {
         VkViewport viewport{};
         viewport.x = 0.0f;
         viewport.y = 0.0f;
-        viewport.width = (float) m_graphicsContext->GetSwapChainExtent().width;
-        viewport.height = (float) m_graphicsContext->GetSwapChainExtent().height;
+        viewport.width = (float) m_swapchain->GetSwapChainExtent().width;
+        viewport.height = (float) m_swapchain->GetSwapChainExtent().height;
         viewport.minDepth = 0.0f;
         viewport.maxDepth = 1.0f;
 
         VkRect2D scissor{};
         scissor.offset = {0, 0};
-        scissor.extent = m_graphicsContext->GetSwapChainExtent();
+        scissor.extent = m_swapchain->GetSwapChainExtent();
 
         VkPipelineViewportStateCreateInfo viewportState{};
         viewportState.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
@@ -169,7 +172,7 @@ namespace JoyEngine {
 
         if (vkCreatePipelineLayout(m_graphicsContext->GetVkDevice(),
                                    &pipelineLayoutInfo,
-                                   m_graphicsContext->GetAllocator()->GetAllocationCallbacks(),
+                                   m_allocator,
                                    &m_pipelineLayout) != VK_SUCCESS) {
             throw std::runtime_error("failed to create pipeline layout!");
         }
@@ -196,14 +199,14 @@ namespace JoyEngine {
                                                  VK_NULL_HANDLE,
                                                  1,
                                                  &pipelineInfo,
-                                                 m_graphicsContext->GetAllocator()->GetAllocationCallbacks(),
+                                                 m_allocator,
                                                  &m_graphicsPipeline);
         if (res != VK_SUCCESS) {
             throw std::runtime_error("failed to create graphics pipeline!");
         }
 
-        //vkDestroyShaderModule(m_graphicsContext->GetVkDevice(), fragShaderModule, m_graphicsContext->GetAllocator()->GetAllocationCallbacks());
-        //vkDestroyShaderModule(m_graphicsContext->GetVkDevice(), vertShaderModule, m_graphicsContext->GetAllocator()->GetAllocationCallbacks());
+        //vkDestroyShaderModule(m_graphicsContext->GetVkDevice(), fragShaderModule, m_allocator);
+        //vkDestroyShaderModule(m_graphicsContext->GetVkDevice(), vertShaderModule, m_allocator);
     }
 
     void RenderObject::CreateUniformBuffers() {
@@ -212,19 +215,19 @@ namespace JoyEngine {
         for (size_t i = 0; i < m_uniformBuffers.size(); i++) {
             vkDestroyBuffer(m_graphicsContext->GetVkDevice(),
                             m_uniformBuffers[i],
-                            m_graphicsContext->GetAllocator()->GetAllocationCallbacks());
+                            m_allocator);
             vkFreeMemory(m_graphicsContext->GetVkDevice(),
                          m_uniformBuffersMemory[i],
-                         m_graphicsContext->GetAllocator()->GetAllocationCallbacks());
+                         m_allocator);
         }
 
-        m_uniformBuffers.resize(m_graphicsContext->GetSwapchainImageCount());
-        m_uniformBuffersMemory.resize(m_graphicsContext->GetSwapchainImageCount());
+        m_uniformBuffers.resize(m_swapchain->GetSwapchainImageCount());
+        m_uniformBuffersMemory.resize(m_swapchain->GetSwapchainImageCount());
 
-        for (size_t i = 0; i < m_graphicsContext->GetSwapchainImageCount(); i++) {
+        for (size_t i = 0; i < m_swapchain->GetSwapchainImageCount(); i++) {
             ResourceManager::CreateBuffer(m_graphicsContext->GetVkPhysicalDevice(),
                                           m_graphicsContext->GetVkDevice(),
-                                          m_graphicsContext->GetAllocator(),
+                                          m_allocator,
                                           bufferSize,
                                           VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
                                           VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
@@ -235,24 +238,24 @@ namespace JoyEngine {
     void RenderObject::CreateDescriptorPool() {
 
         if (m_descriptorPool != VK_NULL_HANDLE) {
-            vkDestroyDescriptorPool(m_graphicsContext->GetVkDevice(), m_descriptorPool, m_graphicsContext->GetAllocator()->GetAllocationCallbacks());
+            vkDestroyDescriptorPool(m_graphicsContext->GetVkDevice(), m_descriptorPool, m_allocator);
         }
 
         std::array<VkDescriptorPoolSize, 2> poolSizes{};
         poolSizes[0].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-        poolSizes[0].descriptorCount = static_cast<uint32_t>(m_graphicsContext->GetSwapchainImageCount());
+        poolSizes[0].descriptorCount = static_cast<uint32_t>(m_swapchain->GetSwapchainImageCount());
         poolSizes[1].type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-        poolSizes[1].descriptorCount = static_cast<uint32_t>(m_graphicsContext->GetSwapchainImageCount());
+        poolSizes[1].descriptorCount = static_cast<uint32_t>(m_swapchain->GetSwapchainImageCount());
 
         VkDescriptorPoolCreateInfo poolInfo{};
         poolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
         poolInfo.poolSizeCount = static_cast<uint32_t>(poolSizes.size());
         poolInfo.pPoolSizes = poolSizes.data();
-        poolInfo.maxSets = static_cast<uint32_t>(m_graphicsContext->GetSwapchainImageCount());
+        poolInfo.maxSets = static_cast<uint32_t>(m_swapchain->GetSwapchainImageCount());
 
         if (vkCreateDescriptorPool(m_graphicsContext->GetVkDevice(),
                                    &poolInfo,
-                                   m_graphicsContext->GetAllocator()->GetAllocationCallbacks(),
+                                   m_allocator,
                                    &m_descriptorPool) != VK_SUCCESS) {
             throw std::runtime_error("failed to create descriptor pool!");
         }
@@ -260,19 +263,19 @@ namespace JoyEngine {
     }
 
     void RenderObject::CreateDescriptorSets() {
-        std::vector<VkDescriptorSetLayout> layouts(m_graphicsContext->GetSwapchainImageCount(), m_descriptorSetLayout);
+        std::vector<VkDescriptorSetLayout> layouts(m_swapchain->GetSwapchainImageCount(), m_descriptorSetLayout);
         VkDescriptorSetAllocateInfo allocInfo{};
         allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
         allocInfo.descriptorPool = m_descriptorPool;
-        allocInfo.descriptorSetCount = static_cast<uint32_t>(m_graphicsContext->GetSwapchainImageCount());
+        allocInfo.descriptorSetCount = static_cast<uint32_t>(m_swapchain->GetSwapchainImageCount());
         allocInfo.pSetLayouts = layouts.data();
 
-        m_descriptorSets.resize(m_graphicsContext->GetSwapchainImageCount());
+        m_descriptorSets.resize(m_swapchain->GetSwapchainImageCount());
         if (vkAllocateDescriptorSets(m_graphicsContext->GetVkDevice(), &allocInfo, m_descriptorSets.data()) != VK_SUCCESS) {
             throw std::runtime_error("failed to allocate descriptor sets!");
         }
 
-        for (size_t i = 0; i < m_graphicsContext->GetSwapchainImageCount(); i++) {
+        for (size_t i = 0; i < m_swapchain->GetSwapchainImageCount(); i++) {
             VkDescriptorBufferInfo bufferInfo{};
             bufferInfo.buffer = m_uniformBuffers[i];
             bufferInfo.offset = 0;
@@ -318,7 +321,7 @@ namespace JoyEngine {
         UniformBufferObject ubo{};
         ubo.model = glm::rotate(glm::mat4(1.0f), time * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
         ubo.view = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-        ubo.proj = glm::perspective(glm::radians(45.0f), (float) m_graphicsContext->GetSwapChainExtent().width / (float) m_graphicsContext->GetSwapChainExtent().height, 0.1f, 10.0f);
+        ubo.proj = glm::perspective(glm::radians(45.0f), (float) m_swapchain->GetSwapChainExtent().width / (float) m_swapchain->GetSwapChainExtent().height, 0.1f, 10.0f);
         ubo.proj[1][1] *= -1;
 
         void *data;

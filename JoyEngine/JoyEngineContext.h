@@ -62,20 +62,21 @@ namespace JoyEngine {
         }
 
         ~JoyEngineContext() {
+            delete m_sceneManager; // unregister mesh renderers, remove descriptor set, pipelines, pipeline layouts
+            delete m_resourceManager; //delete all scene render data (buffers, textures)
+            delete m_renderManager; //delete swapchain, synchronisation, framebuffers
+            delete m_memoryManager; //free gpu memory
+            delete m_graphicsContext; //delete surface, device, instance
             std::cout << "Context destroyed" << std::endl;
         }
 
         void HandleMessage(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) override {
-            if (hwnd == m_windowHandle) {
-                InternalHandleMessage(uMsg, wParam, lParam);
-            }
+            InternalHandleMessage(uMsg, wParam, lParam);
         };
 
     private:
         void InternalHandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam) {
-            if (uMsg == WM_DESTROY) {
-                Stop();
-            }
+
         }
 
     private:
