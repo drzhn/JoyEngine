@@ -16,7 +16,7 @@ namespace JoyEngine {
 
     class SceneParser {
     public:
-        SceneParser(const char *filename) {
+        SceneParser(const std::string &filename) {
             std::vector<char> json = JoyEngine::readFile(filename);
             m_document.Parse<rapidjson::kParseStopWhenDoneFlag>(json.data());
         }

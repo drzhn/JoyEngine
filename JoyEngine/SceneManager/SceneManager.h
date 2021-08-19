@@ -2,6 +2,7 @@
 #define SCENE_MANAGER_H
 
 #include <map>
+#include <memory>
 
 //#include "ResourceManager/ResourceManager.h"
 
@@ -20,27 +21,25 @@ namespace JoyEngine {
 //                m_scene(nullptr) {}
 
         void Init() {
-            LoadScene(R"(D:\CppProjects\JoyEngine\JoyData\scenes\room.json)");
+            m_scene = std::make_unique<Scene>(R"(D:\CppProjects\JoyEngine\JoyData\scenes\room.json)");
         }
 
-        void Start() {}
+        void Start() {
 
-        void Stop() {}
+        }
 
-        void LoadScene(const char *filename);
-
-        void UnloadScene();
+        void Stop() {
+            m_scene = nullptr;
+        }
 
         ~SceneManager() {
             if (m_scene != nullptr) {
-                UnloadScene();
+                m_scene = nullptr;
             }
-            delete m_scene;
         }
 
     private:
-//        const ResourceManager *m_resourceManager;
-        Scene *m_scene;
+        std::unique_ptr<Scene> m_scene = nullptr;
     };
 }
 

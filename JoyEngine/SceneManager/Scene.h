@@ -10,18 +10,14 @@
 namespace JoyEngine {
     class Scene {
     public :
-        Scene(std::string name) : m_name(std::move(name)) {};
+        Scene(const std::string &name);
 
-        void AddGameObject(GameObject *go) {
-            m_objects.push_back(go);
-        }
+//        void AddGameObject(GameObject *go) {
+//            m_objects.push_back(go);
+//        }
 
         void Update() {
             // Update GameObjects throw logic in components;
-        }
-
-        void SetGameObjects(std::vector<GameObject *> objects) {
-            m_objects = objects;
         }
 
     private:

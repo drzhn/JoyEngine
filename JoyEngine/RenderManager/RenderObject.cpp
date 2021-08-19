@@ -15,7 +15,7 @@ namespace JoyEngine {
             m_graphicsContext(graphicsContext),
             m_renderPass(renderPass),
             m_allocator(graphicsContext->GetAllocationCallbacks()),
-            m_swapchain(swapchain){
+            m_swapchain(swapchain) {
         CreateDescriptorSetLayout();
         CreateGraphicsPipeline();
         CreateUniformBuffers();
@@ -26,6 +26,8 @@ namespace JoyEngine {
     RenderObject::~RenderObject() {
         vkDestroyPipeline(m_graphicsContext->GetVkDevice(), m_graphicsPipeline, m_allocator);
         vkDestroyPipelineLayout(m_graphicsContext->GetVkDevice(), m_pipelineLayout, m_allocator);
+
+        vkDestroyDescriptorSetLayout(m_graphicsContext->GetVkDevice(), m_descriptorSetLayout, m_allocator);
         for (size_t i = 0; i < m_swapchain->GetSwapchainImageCount(); i++) {
             vkDestroyBuffer(m_graphicsContext->GetVkDevice(), m_uniformBuffers[i], m_allocator);
             vkFreeMemory(m_graphicsContext->GetVkDevice(), m_uniformBuffersMemory[i], m_allocator);
@@ -226,13 +228,14 @@ namespace JoyEngine {
         m_uniformBuffersMemory.resize(m_swapchain->GetSwapchainImageCount());
 
         for (size_t i = 0; i < m_swapchain->GetSwapchainImageCount(); i++) {
+            // TODO make it push constants!
             MemoryManager::CreateBuffer(m_graphicsContext->GetVkPhysicalDevice(),
-                                          m_graphicsContext->GetVkDevice(),
-                                          m_allocator,
-                                          bufferSize,
-                                          VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
-                                          VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
-                                          m_uniformBuffers[i], m_uniformBuffersMemory[i]);
+                                        m_graphicsContext->GetVkDevice(),
+                                        m_allocator,
+                                        bufferSize,
+                                        VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
+                                        VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+                                        m_uniformBuffers[i], m_uniformBuffersMemory[i]);
         }
     }
 

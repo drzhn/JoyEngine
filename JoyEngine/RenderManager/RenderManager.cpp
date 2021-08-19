@@ -55,6 +55,8 @@ namespace JoyEngine {
                              static_cast<uint32_t>(commandBuffers.size()),
                              commandBuffers.data());
 
+        vkDestroyRenderPass(m_graphicsContext->GetVkDevice(), m_renderPass, m_allocator);
+
         m_swapchain = nullptr;
 
         for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
