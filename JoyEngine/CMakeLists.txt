@@ -19,7 +19,7 @@ add_library(
         RenderManager/RenderObject.cpp
         Components/MeshRendererTypes.cpp
         RenderManager/Swapchain.cpp
-)
+        ResourceManager/GFXResource.cpp)
 ############## make #include "<folder>/<header>.h" possible ##############
 target_include_directories(JoyEngine PUBLIC .)
 

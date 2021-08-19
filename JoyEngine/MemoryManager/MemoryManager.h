@@ -1,16 +1,103 @@
 #ifndef MEMORY_MANAGER_H
 #define MEMORY_MANAGER_H
 
+#include "IJoyGraphicsContext.h"
 #include "GPUMemoryManager.h"
+#include "ResourceManager/GFXResource.h"
 
-namespace JoyEngine{
+namespace JoyEngine {
 
-    class MemoryManager{
+    class MemoryManager {
     public:
-        MemoryManager(){}
-        void Init(){}
-        void Start(){}
-        void Stop(){}
+        MemoryManager() = delete;
+
+        MemoryManager(IJoyGraphicsContext *const graphicsContext) :
+                m_graphicsContext(graphicsContext),
+                m_allocator(graphicsContext->GetAllocationCallbacks()) {
+            m_instance = this;
+        }
+
+        static MemoryManager *GetInstance() {
+            assert(m_instance != nullptr);
+            return m_instance;
+        }
+
+        void Init() {}
+
+        void Start() {}
+
+        void Stop() {}
+
+        static void CreateBuffer(VkPhysicalDevice physicalDevice,
+                                 VkDevice logicalDevice,
+                                 const VkAllocationCallbacks *allocator,
+                                 VkDeviceSize size,
+                                 VkBufferUsageFlags usage,
+                                 VkMemoryPropertyFlags properties,
+                                 VkBuffer &buffer,
+                                 VkDeviceMemory &bufferMemory);
+
+        static void CreateImage(VkPhysicalDevice physicalDevice,
+                                VkDevice logicalDevice,
+                                const VkAllocationCallbacks *allocator,
+                                uint32_t width,
+                                uint32_t height,
+                                VkFormat format,
+                                VkImageTiling tiling,
+                                VkImageUsageFlags usage,
+                                VkMemoryPropertyFlags properties,
+                                VkImage &image,
+                                VkDeviceMemory &imageMemory);
+
+        static void CreateImageView(VkDevice logicalDevice,
+                                    const VkAllocationCallbacks *allocator,
+                                    VkImage image,
+                                    VkFormat format,
+                                    VkImageAspectFlags aspectFlags,
+                                    VkImageView &imageView);
+
+        void CreateGPUBuffer(void *data,
+                             size_t stride,
+                             size_t size,
+                             VkBuffer &vertexBuffer,
+                             VkDeviceMemory &vertexBufferMemory,
+                             VkBufferUsageFlagBits usageFlag);
+
+        void DestroyBuffer(VkBuffer vertexBuffer,
+                           VkDeviceMemory vertexBufferMemory);
+
+        void CreateTexture(VkImage &image,
+                           VkImageView &imageView,
+                           VkDeviceMemory &memory,
+                           const std::string &filename);
+
+        void CreateTextureSampler(VkSampler &textureSampler);
+
+        void DestroyImage(VkImageView imageView, VkImage image, VkDeviceMemory imageMemory);
+
+        void DestroySampler(VkSampler sampler);
+
+        void CreateShaderModule(const std::string &filename, VkShaderModule &shaderModule);
+
+        void DestroyShaderModule(VkShaderModule shaderModule);
+    private:
+        IJoyGraphicsContext *const m_graphicsContext;
+        const VkAllocationCallbacks *m_allocator;
+        static MemoryManager *m_instance;
+
+
+        void CopyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size);
+
+        VkCommandBuffer BeginSingleTimeCommands();
+
+        void EndSingleTimeCommands(VkCommandBuffer commandBuffer);
+
+        void CreateTextureImage(const std::string &filename, VkImage &textureImage, VkDeviceMemory &textureImageMemory);
+
+
+        void TransitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout);
+
+        void CopyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height);
     };
 }
 

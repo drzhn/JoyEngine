@@ -30,8 +30,8 @@ namespace JoyEngine {
         JoyEngineContext(HINSTANCE instance, HWND windowHandle) :
                 m_windowHandle(windowHandle),
                 m_graphicsContext(new JoyGraphicsContext(instance, windowHandle)),
-                m_memoryManager(new MemoryManager()),
-                m_resourceManager(new ResourceManager(m_memoryManager, m_graphicsContext)),
+                m_memoryManager(new MemoryManager(m_graphicsContext)),
+                m_resourceManager(new ResourceManager(m_graphicsContext)),
                 m_sceneManager(new SceneManager()),
                 m_renderManager(new RenderManager(m_graphicsContext, m_resourceManager)) {
             assert(m_graphicsContext != nullptr);

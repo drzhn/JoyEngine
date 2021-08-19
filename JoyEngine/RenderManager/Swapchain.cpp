@@ -1,5 +1,7 @@
 #include "Swapchain.h"
 
+#include "MemoryManager/MemoryManager.h"
+
 #include "RenderManager/VulkanTypes.h"
 #include "RenderManager/VulkanUtils.h"
 
@@ -70,7 +72,7 @@ namespace JoyEngine {
         m_swapChainImageViews.resize(m_swapchainImageCount);
 
         for (uint32_t i = 0; i < m_swapchainImageCount; i++) {
-            ResourceManager::CreateImageView(
+            MemoryManager::CreateImageView(
                     m_graphicsContext->GetVkDevice(),
                     m_allocator,
                     m_swapChainImages[i],

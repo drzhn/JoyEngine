@@ -76,7 +76,7 @@ namespace JoyEngine {
 
         uint32_t m_renderObjectIndex = 0;
         std::map<uint32_t, std::unique_ptr<RenderObject>> m_renderObjects;
-        GFXTexture m_depthTexture;
+        std::unique_ptr<GFXTexture> m_depthTexture;
         std::vector<VkFramebuffer> m_swapChainFramebuffers;
         std::vector<VkCommandBuffer> commandBuffers;
 

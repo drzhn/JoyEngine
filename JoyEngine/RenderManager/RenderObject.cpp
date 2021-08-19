@@ -3,6 +3,7 @@
 #include <array>
 #include <stdexcept>
 #include <vector>
+#include "MemoryManager/MemoryManager.h"
 #include "ResourceManager/ResourceManager.h"
 
 namespace JoyEngine {
@@ -63,8 +64,8 @@ namespace JoyEngine {
     }
 
     void RenderObject::CreateGraphicsPipeline() {
-        VkShaderModule vertShaderModule = ResourceManager::GetInstance()->GetShader(m_meshRenderer->GetVertexShader()->GetGuid())->shaderModule;
-        VkShaderModule fragShaderModule = ResourceManager::GetInstance()->GetShader(m_meshRenderer->GetFragmentShader()->GetGuid())->shaderModule;
+        VkShaderModule vertShaderModule = ResourceManager::GetInstance()->GetShader(m_meshRenderer->GetVertexShader()->GetGuid())->GetShadeModule();
+        VkShaderModule fragShaderModule = ResourceManager::GetInstance()->GetShader(m_meshRenderer->GetFragmentShader()->GetGuid())->GetShadeModule();
 
         VkPipelineShaderStageCreateInfo vertShaderStageInfo{};
         vertShaderStageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
@@ -225,7 +226,7 @@ namespace JoyEngine {
         m_uniformBuffersMemory.resize(m_swapchain->GetSwapchainImageCount());
 
         for (size_t i = 0; i < m_swapchain->GetSwapchainImageCount(); i++) {
-            ResourceManager::CreateBuffer(m_graphicsContext->GetVkPhysicalDevice(),
+            MemoryManager::CreateBuffer(m_graphicsContext->GetVkPhysicalDevice(),
                                           m_graphicsContext->GetVkDevice(),
                                           m_allocator,
                                           bufferSize,
@@ -283,8 +284,8 @@ namespace JoyEngine {
 
             VkDescriptorImageInfo imageInfo{};
             imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-            imageInfo.imageView = ResourceManager::GetInstance()->GetTexture(m_meshRenderer->GetTexture()->GetGuid())->textureImageView;
-            imageInfo.sampler = ResourceManager::GetInstance()->GetTexture(m_meshRenderer->GetTexture()->GetGuid())->textureSampler;
+            imageInfo.imageView = ResourceManager::GetInstance()->GetTexture(m_meshRenderer->GetTexture()->GetGuid())->GetImageView();
+            imageInfo.sampler = ResourceManager::GetInstance()->GetTexture(m_meshRenderer->GetTexture()->GetGuid())->GetSampler();
 
             std::array<VkWriteDescriptorSet, 2> descriptorWrites{};
 

@@ -6,6 +6,7 @@
 #include <chrono>
 
 #include "ResourceManager/ResourceManager.h"
+#include "MemoryManager/MemoryManager.h"
 //#include "RenderManager/GpuAllocator.h"
 #include "RenderManager/VulkanAllocator.h"
 #include "RenderManager/VulkanTypes.h"
@@ -43,9 +44,7 @@ namespace JoyEngine {
             item.second = nullptr;
         }
 
-        vkDestroyImageView(m_graphicsContext->GetVkDevice(), m_depthTexture.textureImageView, m_allocator);
-        vkDestroyImage(m_graphicsContext->GetVkDevice(), m_depthTexture.textureImage, m_allocator);
-        vkFreeMemory(m_graphicsContext->GetVkDevice(), m_depthTexture.textureImageMemory, m_allocator);
+        m_depthTexture = nullptr;
 
         for (size_t i = 0; i < m_swapChainFramebuffers.size(); i++) {
             vkDestroyFramebuffer(m_graphicsContext->GetVkDevice(), m_swapChainFramebuffers[i], m_allocator);
@@ -144,9 +143,10 @@ namespace JoyEngine {
     }
 
     void RenderManager::CreateDepthResources() {
+        m_depthTexture = std::make_unique<GFXTexture>();
         VkFormat depthFormat = findDepthFormat(m_graphicsContext->GetVkPhysicalDevice());
 
-        ResourceManager::CreateImage(m_graphicsContext->GetVkPhysicalDevice(),
+        MemoryManager::CreateImage(m_graphicsContext->GetVkPhysicalDevice(),
                                      m_graphicsContext->GetVkDevice(),
                                      m_allocator,
                                      m_swapchain->GetSwapChainExtent().width,
@@ -155,14 +155,14 @@ namespace JoyEngine {
                                      VK_IMAGE_TILING_OPTIMAL,
                                      VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT,
                                      VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
-                                     m_depthTexture.textureImage,
-                                     m_depthTexture.textureImageMemory);
-        ResourceManager::CreateImageView(m_graphicsContext->GetVkDevice(),
+                                     m_depthTexture->GetImage(),
+                                     m_depthTexture->GetDeviceMemory());
+        MemoryManager::CreateImageView(m_graphicsContext->GetVkDevice(),
                                          m_allocator,
-                                         m_depthTexture.textureImage,
+                                         m_depthTexture->GetImage(),
                                          depthFormat,
                                          VK_IMAGE_ASPECT_DEPTH_BIT,
-                                         m_depthTexture.textureImageView);
+                                         m_depthTexture->GetImageView());
     }
 
     void RenderManager::CreateFramebuffers() {
@@ -170,7 +170,7 @@ namespace JoyEngine {
         for (size_t i = 0; i < m_swapchain->GetSwapchainImageCount(); i++) {
             std::array<VkImageView, 2> attachments = {
                     m_swapchain->GetSwapChainImageViews()[i],
-                    m_depthTexture.textureImageView
+                    m_depthTexture->GetImageView()
             };
 
             VkFramebufferCreateInfo framebufferInfo{};
@@ -232,13 +232,13 @@ namespace JoyEngine {
             for (auto const &x : m_renderObjects) {
                 RenderObject *ro = x.second.get();
                 VkBuffer vertexBuffers[] = {
-                        m_resourceManager->GetMesh(ro->GetMeshRenderer()->GetMesh()->GetGuid())->vertexBuffer
+                        m_resourceManager->GetMesh(ro->GetMeshRenderer()->GetMesh()->GetGuid())->GetVertexBuffer()
                 };
                 VkDeviceSize offsets[] = {0};
                 vkCmdBindVertexBuffers(commandBuffers[i], 0, 1, vertexBuffers, offsets);
 
                 vkCmdBindIndexBuffer(commandBuffers[i],
-                                     m_resourceManager->GetMesh(ro->GetMeshRenderer()->GetMesh()->GetGuid())->indexBuffer,
+                                     m_resourceManager->GetMesh(ro->GetMeshRenderer()->GetMesh()->GetGuid())->GetIndexBuffer(),
                                      0,
                                      VK_INDEX_TYPE_UINT32);
 
@@ -252,7 +252,7 @@ namespace JoyEngine {
                                         &ro->GetDescriptorSet()[i], 0, nullptr);
 
                 vkCmdDrawIndexed(commandBuffers[i],
-                                 static_cast<uint32_t>(m_resourceManager->GetMesh(ro->GetMeshRenderer()->GetMesh()->GetGuid())->indices.size()), 1, 0, 0, 0);
+                                 static_cast<uint32_t>(m_resourceManager->GetMesh(ro->GetMeshRenderer()->GetMesh()->GetGuid())->GetIndexSize()), 1, 0, 0, 0);
             }
 
             vkCmdEndRenderPass(commandBuffers[i]);
