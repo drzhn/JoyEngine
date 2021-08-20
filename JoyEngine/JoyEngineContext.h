@@ -39,6 +39,7 @@ namespace JoyEngine {
             assert(m_resourceManager != nullptr);
             assert(m_sceneManager != nullptr);
             assert(m_renderManager != nullptr);
+            std::cout << "Context created" << std::endl;
         }
 
         void Init() {

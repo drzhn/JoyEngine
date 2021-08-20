@@ -129,11 +129,9 @@ namespace JoyEngine {
         allocInfo.allocationSize = memRequirements.size;
         allocInfo.memoryTypeIndex = findMemoryType(physicalDevice, memRequirements.memoryTypeBits, properties);
 
-        std::cout << "Allocation GPU Memory:";
         if (vkAllocateMemory(logicalDevice, &allocInfo, allocator, &imageMemory) != VK_SUCCESS) {
             throw std::runtime_error("failed to allocate image memory!");
         }
-        std::cout << "GPU Allocated:";
 
         vkBindImageMemory(logicalDevice, image, imageMemory, 0);
     }

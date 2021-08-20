@@ -26,8 +26,8 @@ target_include_directories(JoyEngine PUBLIC .)
 
 ############################ LIBRARIES ############################
 
-target_link_libraries(JoyEngine C://VulkanSDK/1.2.154.1/Lib/vulkan-1.lib)
-target_include_directories(JoyEngine PUBLIC C://VulkanSDK/1.2.154.1/Include)
+target_link_libraries(JoyEngine C://VulkanSDK/1.2.182.0/Lib/vulkan-1.lib)
+target_include_directories(JoyEngine PUBLIC C://VulkanSDK/1.2.182.0/Include)
 target_include_directories(JoyEngine PUBLIC ${CMAKE_SOURCE_DIR})
 add_compile_definitions(VK_USE_PLATFORM_WIN32_KHR)
 add_compile_definitions(VK_PROTOTYPES)
