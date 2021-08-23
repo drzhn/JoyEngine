@@ -49,6 +49,8 @@ namespace JoyEngine {
 
         void Update();
 
+        void DrawFrame();
+
         const int MAX_FRAMES_IN_FLIGHT = 2;
 
         void CreateRenderPass();
@@ -62,6 +64,10 @@ namespace JoyEngine {
         void CreateFramebuffers();
 
         void CreateCommandBuffers();
+
+        void WriteCommandBuffers();
+
+        void ResetCommandBuffers();
 
         void CreateSyncObjects();
 
@@ -85,47 +91,6 @@ namespace JoyEngine {
         std::vector<VkFence> m_inFlightFences;
         std::vector<VkFence> m_imagesInFlight;
         size_t currentFrame = 0;
-
-//        VkDescriptorSetLayout descriptorSetLayout;
-//        VkPipelineLayout pipelineLayout;
-//        VkPipeline graphicsPipeline;
-//
-//        std::vector<VkFramebuffer> swapChainFramebuffers;
-//        VkCommandPool commandPool;
-//
-//        std::vector<VkSemaphore> imageAvailableSemaphores;
-//        std::vector<VkSemaphore> renderFinishedSemaphores;
-//        std::vector<VkFence> inFlightFences;
-//        std::vector<VkFence> imagesInFlight;
-//        size_t currentFrame = 0;
-//
-//        bool framebufferResized = false;
-//
-//        std::vector<Vertex> vertices;
-//        std::vector<uint32_t> indices;
-//
-//        VkBuffer vertexBuffer;
-//        VkDeviceMemory vertexBufferMemory;
-//
-//        VkBuffer indexBuffer;
-//        VkDeviceMemory indexBufferMemory;
-//
-//        std::vector<VkBuffer> uniformBuffers;
-//        std::vector<VkDeviceMemory> uniformBuffersMemory;
-//
-//        VkDescriptorPool descriptorPool;
-//        std::vector<VkDescriptorSet> descriptorSets;
-//
-//        VkImage textureImage;
-//        VkDeviceMemory textureImageMemory;
-//        VkImageView textureImageView;
-//        VkSampler textureSampler;
-//
-//        VkImage depthImage;
-//        VkDeviceMemory depthImageMemory;
-//        VkImageView depthImageView;
-
-
     };
 
 

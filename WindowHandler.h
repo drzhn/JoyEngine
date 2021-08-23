@@ -12,12 +12,18 @@ public :
     }
 
     static LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
-        if (m_messageHandler != nullptr && hwnd == m_hwnd) {
-            m_messageHandler->HandleMessage(hwnd, uMsg, wParam, lParam);
-        }
-        if (uMsg == WM_DESTROY) {
-            m_windowDestroyed = true;
-            PostQuitMessage(0);
+        switch (uMsg) {
+            case WM_DESTROY: {
+                m_windowDestroyed = true;
+                PostQuitMessage(0);
+                break;
+            }
+            default: {
+                if (m_messageHandler != nullptr && hwnd == m_hwnd) {
+                    m_messageHandler->HandleMessage(hwnd, uMsg, wParam, lParam);
+                }
+                break;
+            }
         }
         return DefWindowProc(hwnd, uMsg, wParam, lParam);
     }

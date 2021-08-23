@@ -149,22 +149,22 @@ namespace JoyEngine {
         VkFormat depthFormat = findDepthFormat(m_graphicsContext->GetVkPhysicalDevice());
 
         MemoryManager::CreateImage(m_graphicsContext->GetVkPhysicalDevice(),
-                                     m_graphicsContext->GetVkDevice(),
-                                     m_allocator,
-                                     m_swapchain->GetSwapChainExtent().width,
-                                     m_swapchain->GetSwapChainExtent().height,
-                                     depthFormat,
-                                     VK_IMAGE_TILING_OPTIMAL,
-                                     VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT,
-                                     VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
-                                     m_depthTexture->GetImage(),
-                                     m_depthTexture->GetDeviceMemory());
+                                   m_graphicsContext->GetVkDevice(),
+                                   m_allocator,
+                                   m_swapchain->GetSwapChainExtent().width,
+                                   m_swapchain->GetSwapChainExtent().height,
+                                   depthFormat,
+                                   VK_IMAGE_TILING_OPTIMAL,
+                                   VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT,
+                                   VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+                                   m_depthTexture->GetImage(),
+                                   m_depthTexture->GetDeviceMemory());
         MemoryManager::CreateImageView(m_graphicsContext->GetVkDevice(),
-                                         m_allocator,
-                                         m_depthTexture->GetImage(),
-                                         depthFormat,
-                                         VK_IMAGE_ASPECT_DEPTH_BIT,
-                                         m_depthTexture->GetImageView());
+                                       m_allocator,
+                                       m_depthTexture->GetImage(),
+                                       depthFormat,
+                                       VK_IMAGE_ASPECT_DEPTH_BIT,
+                                       m_depthTexture->GetImageView());
     }
 
     void RenderManager::CreateFramebuffers() {
@@ -206,7 +206,9 @@ namespace JoyEngine {
         if (vkAllocateCommandBuffers(m_graphicsContext->GetVkDevice(), &allocInfo, commandBuffers.data()) != VK_SUCCESS) {
             throw std::runtime_error("failed to allocate command buffers!");
         }
+    }
 
+    void RenderManager::WriteCommandBuffers() {
         for (size_t i = 0; i < commandBuffers.size(); i++) {
             VkCommandBufferBeginInfo beginInfo{};
             beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
@@ -265,6 +267,12 @@ namespace JoyEngine {
         }
     }
 
+    void RenderManager::ResetCommandBuffers() {
+        for (size_t i = 0; i < commandBuffers.size(); i++) {
+            vkResetCommandBuffer(commandBuffers[i], 0);
+        }
+    }
+
     void RenderManager::CreateSyncObjects() {
         m_imageAvailableSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
         m_renderFinishedSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
@@ -289,6 +297,12 @@ namespace JoyEngine {
     }
 
     void RenderManager::Update() {
+        WriteCommandBuffers();
+        DrawFrame();
+        ResetCommandBuffers();
+    }
+
+    void RenderManager::DrawFrame() {
 
         vkWaitForFences(m_graphicsContext->GetVkDevice(), 1, &m_inFlightFences[currentFrame], VK_TRUE, UINT64_MAX);
 
@@ -297,7 +311,8 @@ namespace JoyEngine {
                                                 m_swapchain->GetSwapChain(),
                                                 UINT64_MAX,
                                                 m_imageAvailableSemaphores[currentFrame],
-                                                VK_NULL_HANDLE, &imageIndex);
+                                                VK_NULL_HANDLE,
+                                                &imageIndex);
 
         if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR) {
             throw std::runtime_error("failed to acquire swap chain image!");
