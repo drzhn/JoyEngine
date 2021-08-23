@@ -11,7 +11,6 @@
 
 #include "Components/MeshRendererTypes.h"
 #include "GFXResource.h"
-#include "Utils/ModelLoader.h"
 #include "RenderManager/VulkanAllocator.h"
 
 namespace JoyEngine {

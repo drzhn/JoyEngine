@@ -18,7 +18,6 @@ namespace JoyEngine {
             if (!tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, &err, modelPath)) {
                 throw std::runtime_error(warn + err);
             }
-
             for (const auto &shape : shapes) {
                 for (const auto &index : shape.mesh.indices) {
                     Vertex vertex{};
@@ -28,7 +27,11 @@ namespace JoyEngine {
                             attrib.vertices[3 * index.vertex_index + 1],
                             attrib.vertices[3 * index.vertex_index + 2]
                     };
-
+                    vertex.normal = {
+                            attrib.normals[3 * index.normal_index + 0],
+                            attrib.normals[3 * index.normal_index + 1],
+                            attrib.normals[3 * index.normal_index + 2]
+                    };
                     vertex.texCoord = {
                             attrib.texcoords[2 * index.texcoord_index + 0],
                             1.0f - attrib.texcoords[2 * index.texcoord_index + 1]
