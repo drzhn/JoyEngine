@@ -63,6 +63,7 @@ namespace JoyEngine {
         }
 
         ~JoyEngineContext() {
+            Stop();
             delete m_sceneManager; // unregister mesh renderers, remove descriptor set, pipelines, pipeline layouts
             delete m_resourceManager; //delete all scene render data (buffers, textures)
             delete m_renderManager; //delete swapchain, synchronisation, framebuffers

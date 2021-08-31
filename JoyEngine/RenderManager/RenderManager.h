@@ -45,7 +45,7 @@ namespace JoyEngine {
 
         void Start() {}
 
-        void Stop() {}
+        void Stop();
 
         void Update();
 
@@ -65,9 +65,9 @@ namespace JoyEngine {
 
         void CreateCommandBuffers();
 
-        void WriteCommandBuffers();
+        void WriteCommandBuffers(uint32_t imageIndex);
 
-        void ResetCommandBuffers();
+        void ResetCommandBuffers(uint32_t imageIndex);
 
         void CreateSyncObjects();
 
