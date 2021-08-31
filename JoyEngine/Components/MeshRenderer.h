@@ -9,7 +9,7 @@
 namespace JoyEngine {
     class MeshRenderer : public Component {
     public:
-        MeshRenderer() = default;
+        MeshRenderer() = delete;
 
         explicit MeshRenderer(Transform t) : m_transform(t) {
 

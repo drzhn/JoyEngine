@@ -59,7 +59,7 @@ namespace JoyEngine {
 
         void UnregisterMeshRenderer(uint32_t);
 
-        void CreateDepthResources();
+        void CreateGBufferResources();
 
         void CreateFramebuffers();
 
@@ -83,6 +83,8 @@ namespace JoyEngine {
         uint32_t m_renderObjectIndex = 0;
         std::map<uint32_t, std::unique_ptr<RenderObject>> m_renderObjects;
         std::unique_ptr<GFXTexture> m_depthTexture;
+        std::unique_ptr<GFXTexture> m_normalTexture;
+        std::unique_ptr<GFXTexture> m_positionTexture;
         std::vector<VkFramebuffer> m_swapChainFramebuffers;
         std::vector<VkCommandBuffer> commandBuffers;
 

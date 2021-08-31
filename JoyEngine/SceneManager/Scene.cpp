@@ -6,6 +6,6 @@ namespace JoyEngine {
     Scene::Scene(const std::string &filename) {
         SceneParser parser(filename);
         m_name = parser.GetName();
-        m_objects = parser.GetObjects();
+        parser.GetObjects(m_objects);
     };
 }

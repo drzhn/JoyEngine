@@ -3,6 +3,7 @@
 
 #include <string>
 #include <iostream>
+#include <memory>
 #include <Libs/glm/glm/glm.hpp>
 
 #include "FileUtils.h"
@@ -26,20 +27,19 @@ namespace JoyEngine {
             return val.GetString();
         }
 
-        std::vector<GameObject *> GetObjects() {
+        void GetObjects(std::vector<std::unique_ptr<GameObject>> &objects) {
             rapidjson::Value &val = m_document["objects"];
-            std::vector<GameObject *> objects;
-            for (auto &v : val.GetArray()) {
-                GameObject *go = new GameObject(v["name"].GetString());
+            for (auto &v: val.GetArray()) {
+                std::unique_ptr<GameObject> go = std::make_unique<GameObject>(v["name"].GetString());
 
                 rapidjson::Value &transformValue = v["transform"];
                 go->GetTransform()->SetPosition(GetVectorValueFromField(transformValue, "localPosition"));
                 go->GetTransform()->SetRotation(GetVectorValueFromField(transformValue, "localRotation"));
                 go->GetTransform()->SetScale(GetVectorValueFromField(transformValue, "localScale"));
 
-                for (auto &c : v["components"].GetArray()) {
+                for (auto &c: v["components"].GetArray()) {
                     if (std::string(c["type"].GetString()) == "renderer") {
-                        MeshRenderer *mr = go->AddMeshRenderer();
+                        std::shared_ptr<MeshRenderer> mr = go->AddMeshRenderer();
                         mr->SetMesh((dataPath + c["model"]["path"].GetString()).c_str(), GUID::StringToGuid(c["model"]["fileId"].GetString()));
                         mr->SetTexture((dataPath + c["texture"]["path"].GetString()).c_str(), GUID::StringToGuid(c["texture"]["fileId"].GetString()));
                         mr->SetVertShader((dataPath + c["vertexShader"]["path"].GetString()).c_str(), GUID::StringToGuid(c["vertexShader"]["fileId"].GetString()));
@@ -48,10 +48,8 @@ namespace JoyEngine {
                     }
 
                 }
-
-                objects.push_back(go);
+                objects.push_back(std::move(go));
             }
-            return objects;
         }
 
         static glm::vec3 GetVectorValueFromField(rapidjson::Value &val, const char *name) {

@@ -35,7 +35,7 @@ namespace JoyEngine {
             m_swapchain(new Swapchain(graphicsContext)) {
         m_instance = this;
         CreateRenderPass();
-        CreateDepthResources();
+        CreateGBufferResources();
         CreateFramebuffers();
     }
 
@@ -45,11 +45,13 @@ namespace JoyEngine {
     }
 
     RenderManager::~RenderManager() {
-        for (auto &item: m_renderObjects) {
-            item.second = nullptr;
-        }
+//        for (auto &item: m_renderObjects) {
+//            item.second = nullptr;
+//        }
 
         m_depthTexture = nullptr;
+        m_positionTexture = nullptr;
+        m_normalTexture = nullptr;
 
         for (size_t i = 0; i < m_swapChainFramebuffers.size(); i++) {
             vkDestroyFramebuffer(m_graphicsContext->GetVkDevice(), m_swapChainFramebuffers[i], m_allocator);
@@ -135,11 +137,11 @@ namespace JoyEngine {
     }
 
     uint32_t RenderManager::RegisterMeshRenderer(MeshRenderer *meshRenderer) {
-        m_renderObjects.insert({
-                                       m_renderObjectIndex,
-                                       std::make_unique<RenderObject>(meshRenderer, m_graphicsContext, m_renderPass, m_swapchain.get())
-                               });
-        return ++m_renderObjectIndex;
+        m_renderObjects.insert(std::make_pair(
+                m_renderObjectIndex,
+                std::make_unique<RenderObject>(meshRenderer, m_graphicsContext, m_renderPass, m_swapchain.get())
+        ));
+        return m_renderObjectIndex++;
     }
 
     void RenderManager::UnregisterMeshRenderer(uint32_t index) {
@@ -149,7 +151,7 @@ namespace JoyEngine {
         m_renderObjects.erase(index);
     }
 
-    void RenderManager::CreateDepthResources() {
+    void RenderManager::CreateGBufferResources() {
         m_depthTexture = std::make_unique<GFXTexture>();
         VkFormat depthFormat = findDepthFormat(m_graphicsContext->GetVkPhysicalDevice());
 
@@ -170,6 +172,46 @@ namespace JoyEngine {
                                        depthFormat,
                                        VK_IMAGE_ASPECT_DEPTH_BIT,
                                        m_depthTexture->GetImageView());
+
+        m_normalTexture = std::make_unique<GFXTexture>();
+
+        MemoryManager::CreateImage(m_graphicsContext->GetVkPhysicalDevice(),
+                                   m_graphicsContext->GetVkDevice(),
+                                   m_allocator,
+                                   m_swapchain->GetSwapChainExtent().width,
+                                   m_swapchain->GetSwapChainExtent().height,
+                                   VK_FORMAT_R8G8B8A8_UNORM,
+                                   VK_IMAGE_TILING_OPTIMAL,
+                                   VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT,
+                                   VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+                                   m_normalTexture->GetImage(),
+                                   m_normalTexture->GetDeviceMemory());
+        MemoryManager::CreateImageView(m_graphicsContext->GetVkDevice(),
+                                       m_allocator,
+                                       m_normalTexture->GetImage(),
+                                       VK_FORMAT_R8G8B8A8_UNORM,
+                                       VK_IMAGE_ASPECT_COLOR_BIT,
+                                       m_normalTexture->GetImageView());
+
+        m_positionTexture = std::make_unique<GFXTexture>();
+
+        MemoryManager::CreateImage(m_graphicsContext->GetVkPhysicalDevice(),
+                                   m_graphicsContext->GetVkDevice(),
+                                   m_allocator,
+                                   m_swapchain->GetSwapChainExtent().width,
+                                   m_swapchain->GetSwapChainExtent().height,
+                                   VK_FORMAT_R8G8B8A8_UNORM,
+                                   VK_IMAGE_TILING_OPTIMAL,
+                                   VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT,
+                                   VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+                                   m_positionTexture->GetImage(),
+                                   m_positionTexture->GetDeviceMemory());
+        MemoryManager::CreateImageView(m_graphicsContext->GetVkDevice(),
+                                       m_allocator,
+                                       m_positionTexture->GetImage(),
+                                       VK_FORMAT_R8G8B8A8_UNORM,
+                                       VK_IMAGE_ASPECT_COLOR_BIT,
+                                       m_positionTexture->GetImageView());
     }
 
     void RenderManager::CreateFramebuffers() {

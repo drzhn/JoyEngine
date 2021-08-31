@@ -3,7 +3,7 @@
 
 #include <string>
 #include <vector>
-#include <type_traits>
+#include <memory>
 
 #include "Transform.h"
 #include "Components/Component.h"
@@ -19,10 +19,16 @@ namespace JoyEngine {
             m_transform = Transform();
         }
 
+        ~GameObject(){
+            for (auto& component: m_components){
+                component->Disable();
+            }
+        }
+
         Transform *GetTransform() { return &m_transform; }
 
-        MeshRenderer *AddMeshRenderer() {
-            MeshRenderer *mr = new MeshRenderer(m_transform);
+        std::shared_ptr<MeshRenderer> AddMeshRenderer() {
+            std::shared_ptr<MeshRenderer> mr =std::make_shared<MeshRenderer>(m_transform);
             m_components.push_back(mr);
             return mr;
         }
@@ -30,7 +36,7 @@ namespace JoyEngine {
     private:
         Transform m_transform;
         std::string m_name;
-        std::vector<Component *> m_components;
+        std::vector<std::shared_ptr<Component>> m_components;
     };
 }
 
