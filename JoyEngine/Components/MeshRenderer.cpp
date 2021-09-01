@@ -17,9 +17,5 @@ namespace JoyEngine {
         if (m_enabled) {
             Disable();
         }
-        delete m_mesh;
-        delete m_texture;
-        delete m_vertShader;
-        delete m_fragShader;
     }
 }

@@ -1,6 +1,8 @@
 #ifndef MESHRENDERER_H
 #define MESHRENDERER_H
 
+#include <memory>
+
 #include "Component.h"
 #include "MeshRendererTypes.h"
 #include "SceneManager/Transform.h"
@@ -22,36 +24,36 @@ namespace JoyEngine {
         ~MeshRenderer();
 
         void SetMesh(const char *filename, GUID guid) {
-            m_mesh = new Mesh(guid, filename);
+            m_mesh = std::make_unique<Mesh>(guid, filename);
         }
 
         void SetTexture(const char *filename, GUID guid) {
-            m_texture = new Texture(guid, filename);
+            m_texture = std::make_unique<Texture>(guid, filename);
         }
 
         void SetVertShader(const char *filename, GUID guid) {
-            m_vertShader = new Shader(guid, filename);
+            m_vertShader = std::make_unique<Shader>(guid, filename);
         }
 
         void SetFragShader(const char *filename, GUID guid) {
-            m_fragShader = new Shader(guid, filename);
+            m_fragShader = std::make_unique<Shader>(guid, filename);
         }
 
-        [[nodiscard]]Mesh *GetMesh() const noexcept { return m_mesh; }
+        [[nodiscard]]Mesh *GetMesh() const noexcept { return m_mesh.get(); }
 
-        [[nodiscard]]Texture *GetTexture() const noexcept { return m_texture; }
+        [[nodiscard]]Texture *GetTexture() const noexcept { return m_texture.get(); }
 
-        [[nodiscard]]Shader *GetVertexShader() const noexcept { return m_vertShader; }
+        [[nodiscard]]Shader *GetVertexShader() const noexcept { return m_vertShader.get(); }
 
-        [[nodiscard]]Shader *GetFragmentShader() const noexcept { return m_fragShader; }
+        [[nodiscard]]Shader *GetFragmentShader() const noexcept { return m_fragShader.get(); }
 
     private:
         const Transform &m_transform;
         uint32_t m_index;
-        Mesh *m_mesh;
-        Texture *m_texture;
-        Shader *m_vertShader;
-        Shader *m_fragShader;
+        std::unique_ptr<Mesh> m_mesh;
+        std::unique_ptr<Texture> m_texture;
+        std::unique_ptr<Shader> m_vertShader;
+        std::unique_ptr<Shader> m_fragShader;
     };
 }
 
