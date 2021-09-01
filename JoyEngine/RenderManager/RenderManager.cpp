@@ -302,7 +302,11 @@ namespace JoyEngine {
                                     &ro->GetDescriptorSet()[imageIndex], 0, nullptr);
 
             vkCmdDrawIndexed(commandBuffers[imageIndex],
-                             static_cast<uint32_t>(m_resourceManager->GetMesh(ro->GetMeshRenderer()->GetMesh()->GetGuid())->GetIndexSize()), 1, 0, 0, 0);
+                             static_cast<uint32_t>(m_resourceManager->GetMesh(ro->GetMeshRenderer()->GetMesh()->GetGuid())->GetIndexSize()),
+                             1,
+                             0,
+                             0,
+                             0);
         }
 
         vkCmdEndRenderPass(commandBuffers[imageIndex]);

@@ -22,7 +22,7 @@ namespace JoyEngine {
     class ResourceManager {
     public:
 
-        ResourceManager() = default;
+        ResourceManager() = delete;
 
         ResourceManager(IJoyGraphicsContext *const);
 

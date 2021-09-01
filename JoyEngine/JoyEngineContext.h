@@ -8,6 +8,7 @@
 #include "RenderManager/RenderManager.h"
 #include "MemoryManager/MemoryManager.h"
 #include "ResourceManager/ResourceManager.h"
+#include "DataManager/DataManager.h"
 #include "JoyGraphicsContext.h"
 
 namespace JoyEngine {
@@ -31,11 +32,13 @@ namespace JoyEngine {
                 m_windowHandle(windowHandle),
                 m_graphicsContext(new JoyGraphicsContext(instance, windowHandle)),
                 m_memoryManager(new MemoryManager(m_graphicsContext)),
+                m_dataManager(new DataManager()),
                 m_resourceManager(new ResourceManager(m_graphicsContext)),
                 m_sceneManager(new SceneManager()),
                 m_renderManager(new RenderManager(m_graphicsContext, m_resourceManager)) {
             assert(m_graphicsContext != nullptr);
             assert(m_memoryManager != nullptr);
+            assert(m_dataManager != nullptr);
             assert(m_resourceManager != nullptr);
             assert(m_sceneManager != nullptr);
             assert(m_renderManager != nullptr);
@@ -86,6 +89,7 @@ namespace JoyEngine {
 
         JoyGraphicsContext *const m_graphicsContext = nullptr;
         MemoryManager *const m_memoryManager = nullptr;
+        DataManager *const m_dataManager = nullptr;
         ResourceManager *const m_resourceManager = nullptr;
         SceneManager *const m_sceneManager = nullptr;
         RenderManager *const m_renderManager = nullptr;
