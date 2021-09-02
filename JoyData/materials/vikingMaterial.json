@@ -5,5 +5,14 @@
   "hasVertexInput": true,
   "hasMVP": true,
   "depthTest": true,
-  "depthWrite": true
+  "depthWrite": true,
+  "bindingSets": [
+    {
+      "bindings": [
+        {
+          "type": "sampler"
+        }
+      ]
+    }
+  ]
 }

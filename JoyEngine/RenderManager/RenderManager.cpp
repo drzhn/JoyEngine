@@ -146,7 +146,7 @@ namespace JoyEngine {
 
     void RenderManager::UnregisterMeshRenderer(uint32_t index) {
         if (m_renderObjects.find(index) == m_renderObjects.end()) {
-            assert(false);
+            ASSERT(false);
         }
         m_renderObjects.erase(index);
     }

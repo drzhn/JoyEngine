@@ -180,7 +180,7 @@ namespace JoyEngine {
             throw std::runtime_error("failed to create pipeline layout!");
         }
 
-        assert(m_renderPass != VK_NULL_HANDLE);
+        ASSERT(m_renderPass != VK_NULL_HANDLE);
 
         VkGraphicsPipelineCreateInfo pipelineInfo{};
         pipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;

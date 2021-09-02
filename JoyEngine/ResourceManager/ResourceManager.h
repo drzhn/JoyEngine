@@ -3,7 +3,7 @@
 
 #include <map>
 #include <set>
-#include <cassert>
+#include <Utils/Assert.h>
 #include <memory>
 #include <vulkan/vulkan.h>
 
@@ -27,7 +27,7 @@ namespace JoyEngine {
         ResourceManager(IJoyGraphicsContext *const);
 
         static ResourceManager *GetInstance() noexcept {
-            assert(m_instance != nullptr);
+            ASSERT(m_instance != nullptr);
             return m_instance;
         }
 
@@ -38,7 +38,7 @@ namespace JoyEngine {
         void Stop() {}
 
         template<class T>
-        void LoadResource(GUID guid, const std::string &filename) { assert(false); }
+        void LoadResource(GUID guid, const std::string &filename) { ASSERT(false); }
 
         // implementation is here because of https://stackoverflow.com/questions/456713/why-do-i-get-unresolved-external-symbol-errors-when-using-templates
         template<>
@@ -72,14 +72,14 @@ namespace JoyEngine {
         }
 
         template<class T>
-        void UnloadResource(GUID guid) { assert(false); }
+        void UnloadResource(GUID guid) { ASSERT(false); }
 
         template<>
         void UnloadResource<Texture>(GUID guid) {
             if (m_loadedTextures.find(guid) != m_loadedTextures.end()) {
                 m_loadedTextures[guid]->DecreaseRefCount();
             } else {
-                assert(false);
+                ASSERT(false);
             }
             if (m_loadedTextures[guid]->GetRefCount() == 0) {
                 m_loadedTextures.erase(guid);
@@ -101,7 +101,7 @@ namespace JoyEngine {
             if (m_loadedShaders.find(guid) != m_loadedShaders.end()) {
                 m_loadedShaders[guid]->DecreaseRefCount();
             } else {
-                assert(false);
+                ASSERT(false);
             }
             if (m_loadedShaders[guid]->GetRefCount() == 0) {
                 m_loadedShaders.erase(guid);

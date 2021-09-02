@@ -36,12 +36,12 @@ namespace JoyEngine {
                 m_resourceManager(new ResourceManager(m_graphicsContext)),
                 m_sceneManager(new SceneManager()),
                 m_renderManager(new RenderManager(m_graphicsContext, m_resourceManager)) {
-            assert(m_graphicsContext != nullptr);
-            assert(m_memoryManager != nullptr);
-            assert(m_dataManager != nullptr);
-            assert(m_resourceManager != nullptr);
-            assert(m_sceneManager != nullptr);
-            assert(m_renderManager != nullptr);
+            ASSERT(m_graphicsContext != nullptr);
+            ASSERT(m_memoryManager != nullptr);
+            ASSERT(m_dataManager != nullptr);
+            ASSERT(m_resourceManager != nullptr);
+            ASSERT(m_sceneManager != nullptr);
+            ASSERT(m_renderManager != nullptr);
             std::cout << "Context created" << std::endl;
         }
 

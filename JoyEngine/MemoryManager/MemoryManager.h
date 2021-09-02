@@ -4,6 +4,7 @@
 #include "IJoyGraphicsContext.h"
 #include "GPUMemoryManager.h"
 #include "ResourceManager/GFXResource.h"
+#include "Utils/Assert.h"
 
 namespace JoyEngine {
 
@@ -18,7 +19,7 @@ namespace JoyEngine {
         }
 
         static MemoryManager *GetInstance() {
-            assert(m_instance != nullptr);
+            ASSERT(m_instance != nullptr);
             return m_instance;
         }
 

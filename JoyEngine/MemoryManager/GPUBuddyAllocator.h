@@ -2,7 +2,7 @@
 #define GPUALLOCATOR_H
 
 #include <cstdint>
-#include <cassert>
+#include <Utils/Assert.h>
 #include <vector>
 
 
@@ -35,7 +35,7 @@ namespace JoyEngine {
         }
 
         bool Allocate(uint64_t size, uint32_t &offset) {
-            assert(size != 0);
+            ASSERT(size != 0);
             uint32_t numChunks = ((size - 1) / m_chunkSize + 1);
             uint32_t pow = nearPow(numChunks);
             if (FindFreeBlock(m_maxPower, 0, pow, offset)) {
@@ -47,7 +47,7 @@ namespace JoyEngine {
 
 
         void Free(uint64_t size, uint32_t realOffset) {
-            assert(size != 0);
+            ASSERT(size != 0);
             uint32_t numChunks = ((size - 1) / m_chunkSize + 1);
             uint32_t pow = nearPow(numChunks);
             FreeBlock(realOffset, pow);

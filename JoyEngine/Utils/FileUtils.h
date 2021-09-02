@@ -4,7 +4,7 @@
 #include <vector>
 #include <string>
 #include <fstream>
-#include <cassert>
+#include <Utils/Assert.h>
 
 #include "GUID.h"
 
@@ -12,7 +12,7 @@ namespace JoyEngine {
     static std::vector<char> readFile(const std::string &filename) {
         std::ifstream file(filename, std::ios::ate | std::ios::binary);
 
-//        assert(file.is_open());
+//        ASSERT(file.is_open());
         if (!file.is_open()) {
             throw std::runtime_error("failed to open file!");
         }

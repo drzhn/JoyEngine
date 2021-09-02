@@ -8,3 +8,6 @@ add_executable(JoyMain WIN32 main.cpp WindowHandler.cpp)
 add_subdirectory(JoyEngine)
 target_link_libraries(JoyMain JoyEngine)
 
+if (CMAKE_BUILD_TYPE MATCHES Debug)
+    add_definitions(-DDEBUG=1)
+endif()
