@@ -24,7 +24,8 @@ add_library(
         Components/MeshRendererTypes.cpp
         RenderManager/Swapchain.cpp
         ResourceManager/GFXResource.cpp
-        DataManager/DataManager.cpp)
+        DataManager/DataManager.cpp
+        Utils/ObjectParser.cpp)
 ############## make #include "<folder>/<header>.h" possible ##############
 target_include_directories(JoyEngine PUBLIC .)
 
@@ -54,7 +55,7 @@ target_include_directories(JoyEngine PUBLIC Libs/rapidjson/include)
 
 ############################ TEST ############################
 
-add_executable(RenderTest Tests/Test.cpp)
+add_executable(RenderTest Tests/Test.cpp Utils/ObjectParser.cpp)
 target_include_directories(RenderTest PUBLIC .)
 target_include_directories(RenderTest PUBLIC Libs/rapidjson/include)
 

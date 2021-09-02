@@ -13,12 +13,10 @@
 #include "rapidjson/document.h"
 
 namespace JoyEngine {
-
-
     class SceneParser {
     public:
         SceneParser(const std::string &filename) {
-            std::vector<char> json = JoyEngine::readFile(filename);
+            std::vector<char> json = readFile(filename);
             m_document.Parse<rapidjson::kParseStopWhenDoneFlag>(json.data());
         }
 

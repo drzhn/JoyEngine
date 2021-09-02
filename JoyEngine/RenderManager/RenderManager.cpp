@@ -348,7 +348,6 @@ namespace JoyEngine {
     }
 
     void RenderManager::DrawFrame() {
-        auto count = m_swapchain->GetSwapchainImageCount();
         vkWaitForFences(m_graphicsContext->GetVkDevice(), 1, &m_inFlightFences[currentFrame], VK_TRUE, UINT64_MAX);
 
         uint32_t imageIndex;

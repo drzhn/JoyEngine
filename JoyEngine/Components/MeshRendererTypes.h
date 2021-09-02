@@ -13,6 +13,14 @@ namespace JoyEngine {
         GUID m_guid;
     };
 
+    class Material : public Resource {
+    public :
+        Material(GUID guid, const std::string &filename);
+
+        ~Material();
+
+    };
+
     class Mesh : public Resource {
     public :
         Mesh(GUID guid, const std::string &filename);

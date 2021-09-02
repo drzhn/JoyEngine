@@ -17,6 +17,7 @@ namespace JoyEngine {
 
     private:
         const std::string m_dataPath = R"(D:\CppProjects\JoyEngine\JoyData\)";
+        const std::string m_databaseFilename = R"(data.db)";
         std::map<GUID, std::filesystem::path> m_pathDatabase;
     };
 }

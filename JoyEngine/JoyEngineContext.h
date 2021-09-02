@@ -10,6 +10,8 @@
 #include "ResourceManager/ResourceManager.h"
 #include "DataManager/DataManager.h"
 #include "JoyGraphicsContext.h"
+#include "Utils/Assert.h"
+
 
 namespace JoyEngine {
 

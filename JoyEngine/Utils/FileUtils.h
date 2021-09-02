@@ -1,21 +1,16 @@
-#ifndef FILEUTILS_H
-#define FILEUTILS_H
+#ifndef FILE_UTILS_H
+#define FILE_UTILS_H
 
 #include <vector>
 #include <string>
 #include <fstream>
 #include <Utils/Assert.h>
 
-#include "GUID.h"
-
 namespace JoyEngine {
     static std::vector<char> readFile(const std::string &filename) {
         std::ifstream file(filename, std::ios::ate | std::ios::binary);
 
-//        ASSERT(file.is_open());
-        if (!file.is_open()) {
-            throw std::runtime_error("failed to open file!");
-        }
+        ASSERT(file.is_open());
 
         std::streamsize fileSize = file.tellg();
         std::vector<char> buffer(fileSize);
@@ -27,4 +22,4 @@ namespace JoyEngine {
     }
 }
 
-#endif //FILEUTILS_H
+#endif //FILE_UTILS_H

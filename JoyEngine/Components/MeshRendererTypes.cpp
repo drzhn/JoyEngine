@@ -5,6 +5,15 @@
 
 namespace JoyEngine {
 
+    Material::Material(GUID guid, const std::string &filename) {
+        m_guid = guid;
+        ResourceManager::GetInstance()->LoadResource<Material>(guid, filename);
+    }
+
+    Material::~Material() {
+        ResourceManager::GetInstance()->UnloadResource<Material>(m_guid);
+    }
+
     Mesh::Mesh(GUID guid, const std::string &filename) {
         m_guid = guid;
         ResourceManager::GetInstance()->LoadResource<Mesh>(guid, filename);
