@@ -35,14 +35,10 @@ namespace JoyEngine {
                 go->GetTransform()->SetRotation(GetVectorValueFromField(transformValue, "localRotation"));
                 go->GetTransform()->SetScale(GetVectorValueFromField(transformValue, "localScale"));
 
-                for (auto &c: v["components"].GetArray()) {
-                    if (std::string(c["type"].GetString()) == "renderer") {
-                        std::shared_ptr<MeshRenderer> mr = go->AddMeshRenderer();
-                        mr->SetMesh((dataPath + c["model"]["path"].GetString()).c_str(), GUID::StringToGuid(c["model"]["fileId"].GetString()));
-                        mr->SetTexture((dataPath + c["texture"]["path"].GetString()).c_str(), GUID::StringToGuid(c["texture"]["fileId"].GetString()));
-                        mr->SetVertShader((dataPath + c["vertexShader"]["path"].GetString()).c_str(), GUID::StringToGuid(c["vertexShader"]["fileId"].GetString()));
-                        mr->SetFragShader((dataPath + c["fragmentShader"]["path"].GetString()).c_str(), GUID::StringToGuid(c["fragmentShader"]["fileId"].GetString()));
-                        mr->Enable();
+                for (auto &component: v["components"].GetArray()) {
+                    if (std::string(component["type"].GetString()) == "renderer") {
+                        go->AddMeshRenderer(GUID::StringToGuid(component["model"].GetString()),
+                                            GUID::StringToGuid(component["material"].GetString()));
                     }
 
                 }

@@ -23,7 +23,7 @@ add_library(
         RenderManager/RenderObject.cpp
         Components/MeshRendererTypes.cpp
         RenderManager/Swapchain.cpp
-        ResourceManager/GFXResource.cpp
+        ResourceManager/Resource.cpp
         DataManager/DataManager.cpp
         Utils/ObjectParser.cpp)
 ############## make #include "<folder>/<header>.h" possible ##############

@@ -8,6 +8,7 @@
 #include "Transform.h"
 #include "Components/Component.h"
 #include "Components/MeshRenderer.h"
+#include "Utils/GUID.h"
 
 namespace JoyEngine {
     class GameObject {
@@ -19,24 +20,20 @@ namespace JoyEngine {
             m_transform = Transform();
         }
 
-        ~GameObject(){
-            for (auto& component: m_components){
+        ~GameObject() {
+            for (auto &component: m_components) {
                 component->Disable();
             }
         }
 
         Transform *GetTransform() { return &m_transform; }
 
-        std::shared_ptr<MeshRenderer> AddMeshRenderer() {
-            std::shared_ptr<MeshRenderer> mr =std::make_shared<MeshRenderer>(m_transform);
-            m_components.push_back(mr);
-            return mr;
-        }
+        void AddMeshRenderer(GUID meshGuid, GUID materialGuid);
 
     private:
         Transform m_transform;
         std::string m_name;
-        std::vector<std::shared_ptr<Component>> m_components;
+        std::vector<std::unique_ptr<Component>> m_components;
     };
 }
 

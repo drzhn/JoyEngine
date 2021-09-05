@@ -6,8 +6,13 @@
 #include "RenderManager/VulkanTypes.h"
 
 namespace JoyEngine {
-    class GFXResource {
+
+    class Resource {
     public:
+        Resource() = default;
+
+        ~Resource() = default;
+
         [[nodiscard]] uint32_t GetRefCount() const { return m_refCount; }
 
         void IncreaseRefCount() { m_refCount++; }
@@ -18,13 +23,13 @@ namespace JoyEngine {
         uint32_t m_refCount = 0;
     };
 
-    class GFXMesh : public GFXResource {
+    class Mesh : public Resource {
     public :
-        GFXMesh() = delete;
+        Mesh() = delete;
 
-        explicit GFXMesh(const std::string &);
+        explicit Mesh(const std::string &);
 
-        ~GFXMesh();
+        ~Mesh();
 
         [[nodiscard]] size_t GetIndexSize() const noexcept { return m_indexSize; }
 
@@ -42,20 +47,20 @@ namespace JoyEngine {
         size_t m_indexSize;
         size_t m_vertexSize;
 
-        VkBuffer m_vertexBuffer;
-        VkBuffer m_indexBuffer;
+        VkBuffer m_vertexBuffer = VK_NULL_HANDLE;
+        VkBuffer m_indexBuffer = VK_NULL_HANDLE;
 
-        VkDeviceMemory m_vertexBufferMemory;
-        VkDeviceMemory m_indexBufferMemory;
+        VkDeviceMemory m_vertexBufferMemory = VK_NULL_HANDLE;
+        VkDeviceMemory m_indexBufferMemory = VK_NULL_HANDLE;
     };
 
-    class GFXTexture : public GFXResource {
+    class Texture : public Resource {
     public :
-        GFXTexture() = default; // just to make creation of empty texture possible (for render manager depth texture)
+        Texture() = default; // just to make creation of empty texture possible (for render manager depth texture)
 
-        explicit GFXTexture(const std::string &);
+        explicit Texture(const std::string &);
 
-        ~GFXTexture();
+        ~Texture();
 
         [[nodiscard]] VkImage &GetImage() noexcept { return m_textureImage; }
 
@@ -72,17 +77,19 @@ namespace JoyEngine {
         VkSampler m_textureSampler = VK_NULL_HANDLE;
     };
 
-    class GFXShader : public GFXResource {
+    class Shader : public Resource {
     public :
 
-        GFXShader() = delete;
+        Shader() = delete;
 
-        explicit GFXShader(const std::string &);
+        explicit Shader(const std::string &);
 
-        ~GFXShader();
+        ~Shader();
+
         [[nodiscard]] VkShaderModule &GetShadeModule() noexcept { return m_shaderModule; }
+
     private :
-        VkShaderModule m_shaderModule;
+        VkShaderModule m_shaderModule = VK_NULL_HANDLE;
     };
 }
 

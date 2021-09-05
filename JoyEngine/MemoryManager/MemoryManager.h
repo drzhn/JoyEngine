@@ -3,7 +3,7 @@
 
 #include "IJoyGraphicsContext.h"
 #include "GPUMemoryManager.h"
-#include "ResourceManager/GFXResource.h"
+#include "ResourceManager/Resource.h"
 #include "Utils/Assert.h"
 
 namespace JoyEngine {

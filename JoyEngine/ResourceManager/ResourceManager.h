@@ -9,22 +9,21 @@
 
 #include "IJoyGraphicsContext.h"
 
-#include "Components/MeshRendererTypes.h"
-#include "GFXResource.h"
+#include "Resource.h"
 #include "RenderManager/VulkanAllocator.h"
 
 namespace JoyEngine {
 
-    class IJoyGraphicsContext;
+//    class IJoyGraphicsContext;
 
-    class JoyGraphicsContext;
+//    class JoyGraphicsContext;
 
     class ResourceManager {
     public:
 
         ResourceManager() = delete;
 
-        ResourceManager(IJoyGraphicsContext *const);
+        explicit ResourceManager(IJoyGraphicsContext *);
 
         static ResourceManager *GetInstance() noexcept {
             ASSERT(m_instance != nullptr);
@@ -37,83 +36,37 @@ namespace JoyEngine {
 
         void Stop() {}
 
-        template<class T>
-        void LoadResource(GUID guid, const std::string &filename) { ASSERT(false); }
-
-        // implementation is here because of https://stackoverflow.com/questions/456713/why-do-i-get-unresolved-external-symbol-errors-when-using-templates
-        template<>
-        void LoadResource<Mesh>(GUID guid, const std::string &filename) {
-            if (m_loadedMeshes.find(guid) != m_loadedMeshes.end()) {
-                m_loadedMeshes[guid]->IncreaseRefCount();
-                return;
-            }
-            m_loadedMeshes.insert({guid, std::make_unique<GFXMesh>(filename)});
-            m_loadedMeshes[guid]->IncreaseRefCount();
+        bool IsResourceLoaded(GUID guid) {
+            return m_loadedResources.find(guid) != m_loadedResources.end();
         }
 
-        template<>
-        void LoadResource<Texture>(GUID guid, const std::string &filename) {
-            if (m_loadedTextures.find(guid) != m_loadedTextures.end()) {
-                m_loadedTextures[guid]->IncreaseRefCount();
-                return;
-            }
-            m_loadedTextures.insert({guid, std::make_unique<GFXTexture>(filename)});
-            m_loadedTextures[guid]->IncreaseRefCount();
-        }
+//        void RegisterResource(GUID guid) {
+//            if (IsResourceLoaded(guid)) {
+//                m_loadedResources[guid]->IncreaseRefCount();
+//                return;
+//            }
+//            m_loadedResources.insert({guid, std::make_unique<GFXMesh>(filename)});
+//            m_loadedResources[guid]->IncreaseRefCount();
+//        }
 
-        template<>
-        void LoadResource<Shader>(GUID guid, const std::string &filename) {
-            if (m_loadedShaders.find(guid) != m_loadedShaders.end()) {
-                m_loadedShaders[guid]->IncreaseRefCount();
-                return;
-            }
-            m_loadedShaders.insert({guid, std::make_unique<GFXShader>(filename)});
-            m_loadedShaders[guid]->IncreaseRefCount();
-        }
-
-        template<class T>
-        void UnloadResource(GUID guid) { ASSERT(false); }
-
-        template<>
-        void UnloadResource<Texture>(GUID guid) {
-            if (m_loadedTextures.find(guid) != m_loadedTextures.end()) {
-                m_loadedTextures[guid]->DecreaseRefCount();
+        void UnloadResource(GUID guid) {
+            if (IsResourceLoaded(guid)) {
+                m_loadedResources[guid]->DecreaseRefCount();
             } else {
                 ASSERT(false);
             }
-            if (m_loadedTextures[guid]->GetRefCount() == 0) {
-                m_loadedTextures.erase(guid);
+            if (m_loadedResources[guid]->GetRefCount() == 0) {
+                m_loadedResources.erase(guid);
             }
         }
 
-        template<>
-        void UnloadResource<Mesh>(GUID guid) {
-            if (m_loadedMeshes.find(guid) != m_loadedMeshes.end()) {
-                m_loadedMeshes[guid]->DecreaseRefCount();
-            }
-            if (m_loadedMeshes[guid]->GetRefCount() == 0) {
-                m_loadedMeshes.erase(guid);
-            }
+        template<class T>
+        T *GetResource(GUID guid) {
+            ASSERT(IsResourceLoaded(guid));
+            T* ptr = dynamic_cast<T *>(m_loadedResources[guid].get());
+            ASSERT(ptr != nullptr);
+            return ptr;
         }
-
-        template<>
-        void UnloadResource<Shader>(GUID guid) {
-            if (m_loadedShaders.find(guid) != m_loadedShaders.end()) {
-                m_loadedShaders[guid]->DecreaseRefCount();
-            } else {
-                ASSERT(false);
-            }
-            if (m_loadedShaders[guid]->GetRefCount() == 0) {
-                m_loadedShaders.erase(guid);
-            }
-        }
-
-
-        GFXMesh *GetMesh(GUID guid) { return m_loadedMeshes[guid].get(); };
-
-        GFXTexture *GetTexture(GUID guid) { return m_loadedTextures[guid].get(); };
-
-        GFXShader *GetShader(GUID guid) { return m_loadedShaders[guid].get(); };
 
     private:
         static ResourceManager *m_instance;
@@ -121,9 +74,7 @@ namespace JoyEngine {
         IJoyGraphicsContext *const m_graphicsContext;
         const VkAllocationCallbacks *m_allocator;
 
-        std::map<GUID, std::unique_ptr<GFXMesh>> m_loadedMeshes;
-        std::map<GUID, std::unique_ptr<GFXTexture>> m_loadedTextures;
-        std::map<GUID, std::unique_ptr<GFXShader>> m_loadedShaders;
+        std::map<GUID, std::unique_ptr<Resource>> m_loadedResources;
 
 
     };

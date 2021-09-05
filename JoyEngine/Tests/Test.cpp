@@ -10,10 +10,31 @@
 //    int a = 0;
 //};
 
+#include <iostream>
 
-#include "Utils/Assert.h"
+class A {
+public:
+    A() {
+        std::cout << "A created" << std::endl;
+    }
 
-int main()
-{
-    ASSERT(false);
+    ~A() {
+        std::cout << "A destroyed" << std::endl;
+
+    }
+};
+
+class B : public A {
+public:
+    B() {
+        std::cout << "B created" << std::endl;
+    }
+
+    ~B() {
+        std::cout << "B destroyed" << std::endl;
+    }
+};
+
+int main() {
+    A a = B();
 }

@@ -152,7 +152,7 @@ namespace JoyEngine {
     }
 
     void RenderManager::CreateGBufferResources() {
-        m_depthTexture = std::make_unique<GFXTexture>();
+        m_depthTexture = std::make_unique<Texture>();
         VkFormat depthFormat = findDepthFormat(m_graphicsContext->GetVkPhysicalDevice());
 
         MemoryManager::CreateImage(m_graphicsContext->GetVkPhysicalDevice(),
@@ -173,7 +173,7 @@ namespace JoyEngine {
                                        VK_IMAGE_ASPECT_DEPTH_BIT,
                                        m_depthTexture->GetImageView());
 
-        m_normalTexture = std::make_unique<GFXTexture>();
+        m_normalTexture = std::make_unique<Texture>();
 
         MemoryManager::CreateImage(m_graphicsContext->GetVkPhysicalDevice(),
                                    m_graphicsContext->GetVkDevice(),
@@ -193,7 +193,7 @@ namespace JoyEngine {
                                        VK_IMAGE_ASPECT_COLOR_BIT,
                                        m_normalTexture->GetImageView());
 
-        m_positionTexture = std::make_unique<GFXTexture>();
+        m_positionTexture = std::make_unique<Texture>();
 
         MemoryManager::CreateImage(m_graphicsContext->GetVkPhysicalDevice(),
                                    m_graphicsContext->GetVkDevice(),

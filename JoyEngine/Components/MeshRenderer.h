@@ -1,10 +1,9 @@
 #ifndef MESHRENDERER_H
 #define MESHRENDERER_H
 
-#include <memory>
+#include <optional>
 
 #include "Component.h"
-#include "MeshRendererTypes.h"
 #include "SceneManager/Transform.h"
 #include "Utils/GUID.h"
 
@@ -13,9 +12,7 @@ namespace JoyEngine {
     public:
         MeshRenderer() = delete;
 
-        explicit MeshRenderer(Transform t) : m_transform(t) {
-
-        }
+        explicit MeshRenderer(Transform t);
 
         void Enable() final;
 
@@ -23,37 +20,17 @@ namespace JoyEngine {
 
         ~MeshRenderer();
 
-        void SetMesh(const char *filename, GUID guid) {
-            m_mesh = std::make_unique<Mesh>(guid, filename);
-        }
+        void SetMesh(GUID meshGuid);
 
-        void SetTexture(const char *filename, GUID guid) {
-            m_texture = std::make_unique<Texture>(guid, filename);
-        }
+        void SetMaterial(GUID materialGuid);
 
-        void SetVertShader(const char *filename, GUID guid) {
-            m_vertShader = std::make_unique<Shader>(guid, filename);
-        }
-
-        void SetFragShader(const char *filename, GUID guid) {
-            m_fragShader = std::make_unique<Shader>(guid, filename);
-        }
-
-        [[nodiscard]]Mesh *GetMesh() const noexcept { return m_mesh.get(); }
-
-        [[nodiscard]]Texture *GetTexture() const noexcept { return m_texture.get(); }
-
-        [[nodiscard]]Shader *GetVertexShader() const noexcept { return m_vertShader.get(); }
-
-        [[nodiscard]]Shader *GetFragmentShader() const noexcept { return m_fragShader.get(); }
+//        [[nodiscard]]Mesh *GetMesh() const noexcept { return m_mesh.get(); }
 
     private:
         const Transform &m_transform;
         uint32_t m_index;
-        std::unique_ptr<Mesh> m_mesh;
-        std::unique_ptr<Texture> m_texture;
-        std::unique_ptr<Shader> m_vertShader;
-        std::unique_ptr<Shader> m_fragShader;
+        std::optional<GUID> m_meshGuid;
+        std::optional<GUID> m_materialGuid;
     };
 }
 

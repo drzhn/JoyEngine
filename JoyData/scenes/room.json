@@ -25,7 +25,7 @@
         {
           "type": "renderer",
           "model": "fc972e06-70d9-4271-8615-825003b43f74",
-          "materialInstance": "70cfb3fd-9105-4987-b37a-ad1f74529f9d"
+          "material": "70cfb3fd-9105-4987-b37a-ad1f74529f9d"
         }
       ]
     }
