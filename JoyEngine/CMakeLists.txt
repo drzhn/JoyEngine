@@ -21,7 +21,6 @@ add_library(
         SceneManager/Transform.cpp
         Components/MeshRenderer.cpp
         RenderManager/RenderObject.cpp
-        Components/MeshRendererTypes.cpp
         RenderManager/Swapchain.cpp
         ResourceManager/Resource.cpp
         DataManager/DataManager.cpp

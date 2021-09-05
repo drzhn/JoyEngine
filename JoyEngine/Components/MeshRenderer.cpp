@@ -1,11 +1,12 @@
 #include "MeshRenderer.h"
 
 #include "RenderManager/RenderManager.h"
+#include "ResourceManager/Resource.h"
 #include "ResourceManager/ResourceManager.h"
 
 namespace JoyEngine {
-    MeshRenderer::MeshRenderer(Transform t) : m_transform(t),
-                                              m_index(UINT32_MAX) {
+    MeshRenderer::MeshRenderer(Transform *t) : Component(t),
+                                               m_index(UINT32_MAX) {
 
     }
 
@@ -28,15 +29,26 @@ namespace JoyEngine {
 
     void MeshRenderer::SetMesh(GUID meshGuid) {
         if (m_meshGuid.has_value()) {
-
+            ResourceManager::GetInstance()->UnloadResource(meshGuid);
         }
         m_meshGuid = meshGuid;
+        ResourceManager::GetInstance()->LoadResource<Mesh>(meshGuid);
     }
 
     void MeshRenderer::SetMaterial(GUID materialGuid) {
         if (m_materialGuid.has_value()) {
-
+            ResourceManager::GetInstance()->UnloadResource(materialGuid);
         }
         m_materialGuid = materialGuid;
+    }
+
+    GUID MeshRenderer::GetMeshGuid() const noexcept {
+        ASSERT(m_meshGuid.has_value());
+        return m_meshGuid.value();
+    }
+
+    GUID MeshRenderer::GetMaterialGuid() const noexcept {
+        ASSERT(m_materialGuid.has_value());
+        return m_materialGuid.value();
     }
 }

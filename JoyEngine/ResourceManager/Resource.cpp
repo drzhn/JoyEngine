@@ -1,16 +1,36 @@
 #include "Resource.h"
 
 #include <string>
+#include <fstream>
 #include <Utils/ModelLoader.h>
 
+#include "DataManager/DataManager.h"
 #include "MemoryManager/MemoryManager.h"
 
 namespace JoyEngine {
 
-    Mesh::Mesh(const std::string &filename) {
+    SharedMaterial::SharedMaterial(GUID) {
+
+    }
+
+    SharedMaterial::~SharedMaterial() {
+
+    }
+
+    Material::Material(GUID) {
+
+    }
+
+    Material::~Material() {
+
+    }
+
+    Mesh::Mesh(GUID guid) {
         std::vector<Vertex> vertices;
         std::vector<uint32_t> indices;
-        ModelLoader::LoadModel(vertices, indices, filename.c_str());
+        std::ifstream modelStream;
+        DataManager::GetInstance()->GetDataStream(modelStream, guid);
+        ModelLoader::LoadModel(vertices, indices, modelStream);
         m_vertexSize = vertices.size();
         m_indexSize = indices.size();
         MemoryManager::GetInstance()->CreateGPUBuffer(vertices.data(),
@@ -25,6 +45,10 @@ namespace JoyEngine {
                                                       m_indexBuffer,
                                                       m_indexBufferMemory,
                                                       VK_BUFFER_USAGE_INDEX_BUFFER_BIT);
+        if (modelStream.is_open())
+        {
+            modelStream.close();
+        }
     }
 
     Mesh::~Mesh() {
@@ -32,14 +56,13 @@ namespace JoyEngine {
         MemoryManager::GetInstance()->DestroyBuffer(m_indexBuffer, m_indexBufferMemory);
     }
 
-    Texture::Texture(const std::string &filename) {
+    Texture::Texture(GUID guid) {
         MemoryManager::GetInstance()->CreateTexture(m_textureImage, m_textureImageView, m_textureImageMemory, filename);
         MemoryManager::GetInstance()->CreateTextureSampler(m_textureSampler);
     }
 
     Texture::~Texture() {
-        if (m_textureSampler != VK_NULL_HANDLE)
-        {
+        if (m_textureSampler != VK_NULL_HANDLE) {
             MemoryManager::GetInstance()->DestroySampler(m_textureSampler);
         }
         MemoryManager::GetInstance()->DestroyImage(m_textureImageView,
@@ -47,11 +70,13 @@ namespace JoyEngine {
                                                    m_textureImageMemory);
     }
 
-    Shader::Shader(const std::string &filename) {
+    Shader::Shader(GUID guid) {
         MemoryManager::GetInstance()->CreateShaderModule(filename, m_shaderModule);
     }
 
     Shader::~Shader() {
         MemoryManager::GetInstance()->DestroyShaderModule(m_shaderModule);
     }
+
+
 }

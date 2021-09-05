@@ -20,8 +20,11 @@ namespace JoyEngine {
             return m_instance;
         }
 
-        const std::filesystem::path& GetPath(GUID);
+        const std::filesystem::path &GetPath(GUID);
+
         std::vector<char> GetData(GUID);
+
+        void GetDataStream(std::ifstream &, GUID);
 
     private:
         static DataManager *m_instance;

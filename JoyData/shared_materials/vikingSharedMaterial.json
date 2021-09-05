@@ -9,7 +9,7 @@
   "bindingSets": [
     [
       {
-        "type": "sampler",
+        "type": "texture",
         "name": "mainTexture"
       }
     ]

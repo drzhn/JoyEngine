@@ -28,7 +28,7 @@
 #include "Utils/FileUtils.h"
 
 namespace JoyEngine {
-//    class RenderObject;
+    class RenderObject;
 
     class RenderManager {
     public:

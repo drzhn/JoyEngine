@@ -7,7 +7,6 @@
 #include "IJoyGraphicsContext.h"
 
 #include "Components/MeshRenderer.h"
-#include "Components/MeshRendererTypes.h"
 #include "Swapchain.h"
 
 namespace JoyEngine {

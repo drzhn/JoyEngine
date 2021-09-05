@@ -3,23 +3,24 @@
 
 #include "Libs/tinyobjloader/tiny_obj_loader.h"
 #include <stdexcept>
+#include <fstream>
 
 namespace JoyEngine {
 
     class ModelLoader {
     public:
         static void LoadModel(std::vector<Vertex> &vertices,
-                              std::vector<uint32_t> &indices, const char *modelPath) {
+                              std::vector<uint32_t> &indices, std::ifstream &stream) {
             tinyobj::attrib_t attrib;
             std::vector<tinyobj::shape_t> shapes;
             std::vector<tinyobj::material_t> materials;
             std::string warn, err;
 
-            if (!tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, &err, modelPath)) {
+            if (!tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, &err, &stream)) {
                 throw std::runtime_error(warn + err);
             }
-            for (const auto &shape : shapes) {
-                for (const auto &index : shape.mesh.indices) {
+            for (const auto &shape: shapes) {
+                for (const auto &index: shape.mesh.indices) {
                     Vertex vertex{};
 
                     vertex.pos = {

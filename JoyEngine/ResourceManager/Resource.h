@@ -11,7 +11,7 @@ namespace JoyEngine {
     public:
         Resource() = default;
 
-        ~Resource() = default;
+        virtual ~Resource() = default;
 
         [[nodiscard]] uint32_t GetRefCount() const { return m_refCount; }
 
@@ -23,11 +23,43 @@ namespace JoyEngine {
         uint32_t m_refCount = 0;
     };
 
+    class SharedMaterial : public Resource {
+    public :
+        SharedMaterial() = delete;
+
+        explicit SharedMaterial(GUID);
+
+        ~SharedMaterial();
+
+    private :
+        GUID m_vertexShader;
+        GUID m_fragmentShader;
+        bool m_hasVertexInput;
+        bool m_hasMVP;
+        bool m_depthTest;
+        bool m_depthWrite;
+        std::vector<std::vector<std::tuple<std::string, std::string>>> m_bindingSets;
+
+    };
+
+    class Material : public Resource {
+    public :
+        Material() = delete;
+
+        explicit Material(GUID);
+
+        ~Material();
+
+    private :
+        GUID m_sharedMaterialGuid;
+        std::map<std::string, GUID> m_bindings;
+    };
+
     class Mesh : public Resource {
     public :
         Mesh() = delete;
 
-        explicit Mesh(const std::string &);
+        explicit Mesh(GUID);
 
         ~Mesh();
 
@@ -58,7 +90,7 @@ namespace JoyEngine {
     public :
         Texture() = default; // just to make creation of empty texture possible (for render manager depth texture)
 
-        explicit Texture(const std::string &);
+        explicit Texture(GUID);
 
         ~Texture();
 
@@ -82,7 +114,7 @@ namespace JoyEngine {
 
         Shader() = delete;
 
-        explicit Shader(const std::string &);
+        explicit Shader(GUID);
 
         ~Shader();
 

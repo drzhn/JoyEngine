@@ -20,6 +20,11 @@ namespace JoyEngine {
 
         return buffer;
     }
+
+    static void getFileStream(std::ifstream & stream, const std::string &filename) {
+        stream.open(filename);
+        ASSERT(stream.is_open());
+    }
 }
 
 #endif //FILE_UTILS_H

@@ -40,14 +40,15 @@ namespace JoyEngine {
             return m_loadedResources.find(guid) != m_loadedResources.end();
         }
 
-//        void RegisterResource(GUID guid) {
-//            if (IsResourceLoaded(guid)) {
-//                m_loadedResources[guid]->IncreaseRefCount();
-//                return;
-//            }
-//            m_loadedResources.insert({guid, std::make_unique<GFXMesh>(filename)});
-//            m_loadedResources[guid]->IncreaseRefCount();
-//        }
+        template<class T>
+        void LoadResource(GUID guid) {
+            if (IsResourceLoaded(guid)) {
+                m_loadedResources[guid]->IncreaseRefCount();
+                return;
+            }
+            m_loadedResources.insert({guid, std::make_unique<T>(guid)});
+            m_loadedResources[guid]->IncreaseRefCount();
+        }
 
         void UnloadResource(GUID guid) {
             if (IsResourceLoaded(guid)) {
@@ -63,8 +64,12 @@ namespace JoyEngine {
         template<class T>
         T *GetResource(GUID guid) {
             ASSERT(IsResourceLoaded(guid));
-            T* ptr = dynamic_cast<T *>(m_loadedResources[guid].get());
+#ifdef DEBUG
+            T *ptr = dynamic_cast<T *>(m_loadedResources[guid].get());
             ASSERT(ptr != nullptr);
+#else
+            T *ptr = reinterpret_cast<T *>(m_loadedResources[guid].get());
+#endif //DEBUG
             return ptr;
         }
 

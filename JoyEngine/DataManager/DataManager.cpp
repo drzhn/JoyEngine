@@ -30,4 +30,8 @@ namespace JoyEngine {
         }
         return readFile(m_dataPath + m_pathDatabase[guid].string());
     }
+
+    void DataManager::GetDataStream(std::ifstream &stream, GUID guid) {
+        getFileStream(stream, GetPath(guid).string());
+    }
 }

@@ -18,7 +18,7 @@ public:
         std::cout << "A created" << std::endl;
     }
 
-    ~A() {
+    virtual ~A() {
         std::cout << "A destroyed" << std::endl;
 
     }
