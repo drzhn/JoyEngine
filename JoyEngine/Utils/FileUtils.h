@@ -7,13 +7,14 @@
 #include <Utils/Assert.h>
 
 namespace JoyEngine {
-    static std::vector<char> readFile(const std::string &filename) {
+    template<typename T>
+    static std::vector<T> readFile(const std::string &filename) {
         std::ifstream file(filename, std::ios::ate | std::ios::binary);
 
         ASSERT(file.is_open());
 
-        std::streamsize fileSize = file.tellg();
-        std::vector<char> buffer(fileSize);
+        std::streamsize fileSize = file.tellg() / sizeof(T);
+        std::vector<T> buffer(fileSize);
         file.seekg(0);
         file.read(buffer.data(), fileSize);
         file.close();
@@ -21,7 +22,7 @@ namespace JoyEngine {
         return buffer;
     }
 
-    static void getFileStream(std::ifstream & stream, const std::string &filename) {
+    static void getFileStream(std::ifstream &stream, const std::string &filename) {
         stream.open(filename);
         ASSERT(stream.is_open());
     }

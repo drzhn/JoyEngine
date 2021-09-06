@@ -66,8 +66,8 @@ namespace JoyEngine {
     }
 
     void RenderObject::CreateGraphicsPipeline() {
-        VkShaderModule vertShaderModule = ResourceManager::GetInstance()->GetShader(m_meshRenderer->GetVertexShader()->GetGuid())->GetShadeModule();
-        VkShaderModule fragShaderModule = ResourceManager::GetInstance()->GetShader(m_meshRenderer->GetFragmentShader()->GetGuid())->GetShadeModule();
+        VkShaderModule vertShaderModule = m_meshRenderer->GetMaterial()->GetSharedMaterial()->GetVertexShader()->GetShadeModule();
+        VkShaderModule fragShaderModule = m_meshRenderer->GetMaterial()->GetSharedMaterial()->GetFragmentShader()->GetShadeModule();
 
         VkPipelineShaderStageCreateInfo vertShaderStageInfo{};
         vertShaderStageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;

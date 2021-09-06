@@ -2,7 +2,6 @@
 
 #include "RenderManager/RenderManager.h"
 #include "ResourceManager/Resource.h"
-#include "ResourceManager/ResourceManager.h"
 
 namespace JoyEngine {
     MeshRenderer::MeshRenderer(Transform *t) : Component(t),
@@ -40,6 +39,7 @@ namespace JoyEngine {
             ResourceManager::GetInstance()->UnloadResource(materialGuid);
         }
         m_materialGuid = materialGuid;
+        ResourceManager::GetInstance()->LoadResource<Material>(materialGuid);
     }
 
     GUID MeshRenderer::GetMeshGuid() const noexcept {
@@ -50,5 +50,13 @@ namespace JoyEngine {
     GUID MeshRenderer::GetMaterialGuid() const noexcept {
         ASSERT(m_materialGuid.has_value());
         return m_materialGuid.value();
+    }
+
+    Mesh *MeshRenderer::GetMesh() const noexcept {
+        return ResourceManager::GetInstance()->GetResource<Mesh>(m_meshGuid.value());
+    }
+
+    Material *MeshRenderer::GetMaterial() const noexcept {
+        return ResourceManager::GetInstance()->GetResource<Material>(m_materialGuid.value());
     }
 }

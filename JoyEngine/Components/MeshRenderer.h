@@ -6,6 +6,7 @@
 #include "Component.h"
 #include "Utils/GUID.h"
 #include "Utils/Assert.h"
+#include "ResourceManager/Resource.h"
 
 namespace JoyEngine {
     class MeshRenderer : public Component {
@@ -27,6 +28,10 @@ namespace JoyEngine {
         [[nodiscard]]GUID GetMeshGuid() const noexcept;
 
         [[nodiscard]]GUID GetMaterialGuid() const noexcept;
+
+        [[nodiscard]]Mesh *GetMesh() const noexcept;
+
+        [[nodiscard]]Material *GetMaterial() const noexcept;
 
     private:
         uint32_t m_index;

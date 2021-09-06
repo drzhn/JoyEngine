@@ -1,11 +1,14 @@
 #ifndef GFX_RESOURCE_H
 #define GFX_RESOURCE_H
 
+#include <map>
+
 #include <vulkan/vulkan.h>
 #include "Utils/GUID.h"
 #include "RenderManager/VulkanTypes.h"
 
 namespace JoyEngine {
+    class Shader;
 
     class Resource {
     public:
@@ -29,7 +32,11 @@ namespace JoyEngine {
 
         explicit SharedMaterial(GUID);
 
-        ~SharedMaterial();
+        ~SharedMaterial() final;
+
+        [[nodiscard]] Shader *GetVertexShader() const noexcept;
+
+        [[nodiscard]] Shader *GetFragmentShader() const noexcept;
 
     private :
         GUID m_vertexShader;
@@ -48,7 +55,9 @@ namespace JoyEngine {
 
         explicit Material(GUID);
 
-        ~Material();
+        ~Material() final;
+
+        [[nodiscard]] SharedMaterial *GetSharedMaterial() const noexcept;
 
     private :
         GUID m_sharedMaterialGuid;
@@ -61,7 +70,7 @@ namespace JoyEngine {
 
         explicit Mesh(GUID);
 
-        ~Mesh();
+        ~Mesh() final;
 
         [[nodiscard]] size_t GetIndexSize() const noexcept { return m_indexSize; }
 
@@ -92,7 +101,7 @@ namespace JoyEngine {
 
         explicit Texture(GUID);
 
-        ~Texture();
+        ~Texture() final;
 
         [[nodiscard]] VkImage &GetImage() noexcept { return m_textureImage; }
 
@@ -116,7 +125,7 @@ namespace JoyEngine {
 
         explicit Shader(GUID);
 
-        ~Shader();
+        ~Shader() final;
 
         [[nodiscard]] VkShaderModule &GetShadeModule() noexcept { return m_shaderModule; }
 

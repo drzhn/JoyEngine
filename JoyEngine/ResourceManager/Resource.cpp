@@ -6,23 +6,49 @@
 
 #include "DataManager/DataManager.h"
 #include "MemoryManager/MemoryManager.h"
+#include "ResourceManager/ResourceManager.h"
 
 namespace JoyEngine {
 
-    SharedMaterial::SharedMaterial(GUID) {
-
+    SharedMaterial::SharedMaterial(GUID guid) {
+        DataManager::GetInstance()->ParseSharedMaterial(guid,
+                                                        m_vertexShader,
+                                                        m_fragmentShader,
+                                                        m_hasVertexInput,
+                                                        m_hasMVP,
+                                                        m_depthTest,
+                                                        m_depthWrite,
+                                                        m_bindingSets
+        );
     }
 
     SharedMaterial::~SharedMaterial() {
 
     }
 
-    Material::Material(GUID) {
+    Shader *SharedMaterial::GetVertexShader() const noexcept {
+        return ResourceManager::GetInstance()->GetResource<Shader>(m_vertexShader);
+    }
 
+    Shader *SharedMaterial::GetFragmentShader() const noexcept {
+        return ResourceManager::GetInstance()->GetResource<Shader>(m_fragmentShader);
+    }
+
+    Material::Material(GUID guid) {
+        DataManager::GetInstance()->ParseMaterial(guid, m_sharedMaterialGuid, m_bindings);
+        ResourceManager::GetInstance()->LoadResource<SharedMaterial>(m_sharedMaterialGuid);
     }
 
     Material::~Material() {
+        ResourceManager::GetInstance()->UnloadResource(m_sharedMaterialGuid);
+        for (const auto &item : m_bindings)
+        {
+            ResourceManager::GetInstance()->UnloadResource(item.second);
+        }
+    }
 
+    SharedMaterial *Material::GetSharedMaterial() const noexcept {
+        return ResourceManager::GetInstance()->GetResource<SharedMaterial>(m_sharedMaterialGuid);
     }
 
     Mesh::Mesh(GUID guid) {
@@ -45,8 +71,7 @@ namespace JoyEngine {
                                                       m_indexBuffer,
                                                       m_indexBufferMemory,
                                                       VK_BUFFER_USAGE_INDEX_BUFFER_BIT);
-        if (modelStream.is_open())
-        {
+        if (modelStream.is_open()) {
             modelStream.close();
         }
     }
@@ -57,7 +82,12 @@ namespace JoyEngine {
     }
 
     Texture::Texture(GUID guid) {
-        MemoryManager::GetInstance()->CreateTexture(m_textureImage, m_textureImageView, m_textureImageMemory, filename);
+        std::vector<unsigned char> imageData = DataManager::GetInstance()->GetData<unsigned char>(guid);
+        MemoryManager::GetInstance()->CreateTexture(m_textureImage,
+                                                    m_textureImageView,
+                                                    m_textureImageMemory,
+                                                    imageData.data(),
+                                                    static_cast<int>(imageData.size()));
         MemoryManager::GetInstance()->CreateTextureSampler(m_textureSampler);
     }
 
@@ -71,7 +101,10 @@ namespace JoyEngine {
     }
 
     Shader::Shader(GUID guid) {
-        MemoryManager::GetInstance()->CreateShaderModule(filename, m_shaderModule);
+        std::vector<char> shaderData = DataManager::GetInstance()->GetData<char>(guid);
+        MemoryManager::GetInstance()->CreateShaderModule(reinterpret_cast<const uint32_t *>(shaderData.data()),
+                                                         shaderData.size(),
+                                                         m_shaderModule);
     }
 
     Shader::~Shader() {

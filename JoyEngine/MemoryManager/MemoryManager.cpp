@@ -15,9 +15,9 @@ namespace JoyEngine {
 
     MemoryManager *MemoryManager::m_instance;
 
-    void MemoryManager::CreateTextureImage(const std::string &filename, VkImage &textureImage, VkDeviceMemory &textureImageMemory) {
+    void MemoryManager::CreateTextureImage(const unsigned char* filedata, int len, VkImage &textureImage, VkDeviceMemory &textureImageMemory) {
         int texWidth, texHeight, texChannels;
-        stbi_uc *pixels = stbi_load(filename.c_str(), &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
+        stbi_uc *pixels = stbi_load_from_memory(filedata, len, &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
         VkDeviceSize imageSize = texWidth * texHeight * 4;
 
         if (!pixels) {
@@ -196,12 +196,11 @@ namespace JoyEngine {
         vkBindBufferMemory(logicalDevice, buffer, bufferMemory, 0);
     }
 
-    void MemoryManager::CreateShaderModule(const std::string &filename, VkShaderModule &shaderModule) {
-        const std::vector<char> code = readFile(filename);
+    void MemoryManager::CreateShaderModule(const uint32_t* code, size_t codeSize, VkShaderModule &shaderModule) {
         VkShaderModuleCreateInfo createInfo{};
         createInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
-        createInfo.codeSize = code.size();
-        createInfo.pCode = reinterpret_cast<const uint32_t *>(code.data());
+        createInfo.codeSize = codeSize;
+        createInfo.pCode = code;
         if (vkCreateShaderModule(m_graphicsContext->GetVkDevice(),
                                  &createInfo,
                                  m_allocator, &shaderModule) != VK_SUCCESS) {
@@ -379,8 +378,8 @@ namespace JoyEngine {
         vkFreeMemory(m_graphicsContext->GetVkDevice(), stagingBufferMemory, m_allocator);
     }
 
-    void MemoryManager::CreateTexture(VkImage &image, VkImageView &imageView, VkDeviceMemory &memory, const std::string &filename) {
-        CreateTextureImage(filename, image, memory);
+    void MemoryManager::CreateTexture(VkImage &image, VkImageView &imageView, VkDeviceMemory &memory, const unsigned char* data, int length) {
+        CreateTextureImage(data, length, image, memory);
         CreateImageView(m_graphicsContext->GetVkDevice(),
                         m_allocator,
                         image,

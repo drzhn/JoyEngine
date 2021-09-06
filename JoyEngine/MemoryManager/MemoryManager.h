@@ -70,7 +70,8 @@ namespace JoyEngine {
         void CreateTexture(VkImage &image,
                            VkImageView &imageView,
                            VkDeviceMemory &memory,
-                           const std::string &filename);
+                           const unsigned char *data,
+                           int length);
 
         void CreateTextureSampler(VkSampler &textureSampler);
 
@@ -78,9 +79,10 @@ namespace JoyEngine {
 
         void DestroySampler(VkSampler sampler);
 
-        void CreateShaderModule(const std::string &filename, VkShaderModule &shaderModule);
+        void CreateShaderModule(const uint32_t* code, size_t codeSize, VkShaderModule &shaderModule);
 
         void DestroyShaderModule(VkShaderModule shaderModule);
+
     private:
         IJoyGraphicsContext *const m_graphicsContext;
         const VkAllocationCallbacks *m_allocator;
@@ -93,8 +95,7 @@ namespace JoyEngine {
 
         void EndSingleTimeCommands(VkCommandBuffer commandBuffer);
 
-        void CreateTextureImage(const std::string &filename, VkImage &textureImage, VkDeviceMemory &textureImageMemory);
-
+        void CreateTextureImage(const unsigned char *, int len, VkImage &textureImage, VkDeviceMemory &textureImageMemory);
 
         void TransitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout);
 
