@@ -6,7 +6,8 @@
 #include "Component.h"
 #include "Utils/GUID.h"
 #include "Utils/Assert.h"
-#include "ResourceManager/Resource.h"
+#include "ResourceManager/Mesh.h"
+#include "ResourceManager/Material.h"
 
 namespace JoyEngine {
     class MeshRenderer : public Component {

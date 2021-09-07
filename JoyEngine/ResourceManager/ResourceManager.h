@@ -10,6 +10,11 @@
 #include "IJoyGraphicsContext.h"
 
 #include "Resource.h"
+#include "Mesh.h"
+#include "Material.h"
+#include "SharedMaterial.h"
+#include "Texture.h"
+#include "Shader.h"
 #include "RenderManager/VulkanAllocator.h"
 
 namespace JoyEngine {
@@ -64,12 +69,12 @@ namespace JoyEngine {
         template<class T>
         T *GetResource(GUID guid) {
             ASSERT(IsResourceLoaded(guid));
-#ifdef DEBUG
+//#ifdef DEBUG
             T *ptr = dynamic_cast<T *>(m_loadedResources[guid].get());
             ASSERT(ptr != nullptr);
-#else
-            T *ptr = reinterpret_cast<T *>(m_loadedResources[guid].get());
-#endif //DEBUG
+//#else
+//            T *ptr = reinterpret_cast<T *>(m_loadedResources[guid].get());
+//#endif //DEBUG
             return ptr;
         }
 

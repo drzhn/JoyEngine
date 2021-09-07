@@ -15,7 +15,7 @@
 #include "IJoyGraphicsContext.h"
 
 #include "ResourceManager/ResourceManager.h"
-#include "ResourceManager/Resource.h"
+#include "ResourceManager/Texture.h"
 
 #include "Components/MeshRenderer.h"
 #include "RenderManager/VulkanAllocator.h"

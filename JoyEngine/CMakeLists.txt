@@ -14,7 +14,6 @@ add_library(
 
         RenderManager/RenderManager.cpp
         MemoryManager/MemoryManager.cpp
-        ResourceManager/ResourceManager.cpp
         SceneManager/SceneManager.cpp
         SceneManager/Scene.cpp
         SceneManager/GameObject.cpp
@@ -22,9 +21,15 @@ add_library(
         Components/MeshRenderer.cpp
         RenderManager/RenderObject.cpp
         RenderManager/Swapchain.cpp
-        ResourceManager/Resource.cpp
         DataManager/DataManager.cpp
-        Utils/ObjectParser.cpp)
+        ResourceManager/Resource.cpp
+        ResourceManager/Mesh.cpp
+        ResourceManager/Texture.cpp
+        ResourceManager/Material.cpp
+        ResourceManager/SharedMaterial.cpp
+        ResourceManager/Shader.cpp
+        ResourceManager/ResourceManager.cpp
+        ResourceManager/DescriptorSetManager.cpp )
 ############## make #include "<folder>/<header>.h" possible ##############
 target_include_directories(JoyEngine PUBLIC .)
 
@@ -54,7 +59,7 @@ target_include_directories(JoyEngine PUBLIC Libs/rapidjson/include)
 
 ############################ TEST ############################
 
-add_executable(RenderTest Tests/Test.cpp Utils/ObjectParser.cpp)
+add_executable(RenderTest Tests/Test.cpp)
 target_include_directories(RenderTest PUBLIC .)
 target_include_directories(RenderTest PUBLIC Libs/rapidjson/include)
 
