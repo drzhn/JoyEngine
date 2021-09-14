@@ -7,11 +7,14 @@
   "depthTest": true,
   "depthWrite": true,
   "bindingSets": [
-    [
-      {
-        "type": "texture",
-        "name": "mainTexture"
-      }
-    ]
+    {
+      "isStatic": true,
+      "bindings": [
+        {
+          "type": "texture",
+          "name": "mainTexture"
+        }
+      ]
+    }
   ]
 }

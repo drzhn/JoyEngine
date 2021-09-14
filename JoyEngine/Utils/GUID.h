@@ -5,12 +5,12 @@
 
 namespace JoyEngine {
     struct GUID {
-        uint32_t Data1;
-        uint16_t Data2;
-        uint16_t Data3;
-        uint8_t Data4[8];
+        uint32_t Data1 = 0;
+        uint16_t Data2 = 0;
+        uint16_t Data3 = 0;
+        uint8_t Data4[8] = {0, 0, 0, 0, 0, 0, 0, 0};
 
-        bool operator<(const JoyEngine::GUID& guid) const{
+        bool operator<(const JoyEngine::GUID &guid) const {
             if (Data1 != guid.Data1) {
                 return Data1 < guid.Data1;
             }
@@ -28,20 +28,18 @@ namespace JoyEngine {
             return false;
         }
 
-        static GUID StringToGuid(const std::string& str)
-        {
+        static GUID StringToGuid(const std::string &str) {
             GUID guid;
             sscanf_s(str.c_str(),
                      "%8x-%4hx-%4hx-%2hhx%2hhx-%2hhx%2hhx%2hhx%2hhx%2hhx%2hhx",
                      &guid.Data1, &guid.Data2, &guid.Data3,
                      &guid.Data4[0], &guid.Data4[1], &guid.Data4[2], &guid.Data4[3],
-                     &guid.Data4[4], &guid.Data4[5], &guid.Data4[6], &guid.Data4[7] );
+                     &guid.Data4[4], &guid.Data4[5], &guid.Data4[6], &guid.Data4[7]);
 
             return guid;
         }
 
-        static std::string GuidToString(GUID guid)
-        {
+        static std::string GuidToString(GUID guid) {
             char guid_cstr[37];
             snprintf(guid_cstr, sizeof(guid_cstr),
                      "%08x-%04x-%04x-%02x%02x-%02x%02x%02x%02x%02x%02x",

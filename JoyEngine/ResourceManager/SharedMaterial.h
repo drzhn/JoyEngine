@@ -1,18 +1,30 @@
 #ifndef SHARED_MATERIAL_H
 #define SHARED_MATERIAL_H
 
+#include <map>
 #include <vector>
 #include <string>
 
 #include <vulkan/vulkan.h>
 
-#include "Resource.h"
+#include "Common/Resource.h"
 #include "Shader.h"
 #include "Utils/GUID.h"
 
 namespace JoyEngine {
 
-    class SharedMaterial final: public Resource {
+    struct BindingInfo {
+        uint32_t setIndex;
+        uint32_t bindingIndex;
+        VkDescriptorType type;
+    };
+    struct SetLayoutInfo {
+        VkDescriptorSetLayout setLayout;
+        bool isStatic;
+        uint64_t hash;
+    };
+
+    class SharedMaterial final : public Resource {
     public :
         SharedMaterial() = delete;
 
@@ -27,17 +39,23 @@ namespace JoyEngine {
     private :
         GUID m_vertexShader;
         GUID m_fragmentShader;
-        bool m_hasVertexInput;
-        bool m_hasMVP;
-        bool m_depthTest;
-        bool m_depthWrite;
-        std::vector<std::vector<std::tuple<std::string, std::string>>> m_bindingSets;
+        bool m_hasVertexInput = false;
+        bool m_hasMVP = false;
+        bool m_depthTest = false;
+        bool m_depthWrite = false;
 
-        VkDescriptorSetLayout m_descriptorSetLayout = VK_NULL_HANDLE;
+        std::vector<SetLayoutInfo> m_setLayouts;
+        std::map<std::string, BindingInfo> m_bindings;
+
+//        VkDescriptorSetLayout m_descriptorSetLayout = VK_NULL_HANDLE;
         VkDescriptorPool m_descriptorPool = VK_NULL_HANDLE;
         std::vector<VkDescriptorSet> m_descriptorSets;
         VkPipelineLayout m_pipelineLayout = VK_NULL_HANDLE;
         VkPipeline m_graphicsPipeline = VK_NULL_HANDLE;
+
+    private:
+        static VkDescriptorType GetTypeFromStr(const std::string& type) noexcept;
+        GUID m_guid;
     };
 }
 

@@ -1,7 +1,7 @@
 #ifndef SHADER_H
 #define SHADER_H
 
-#include "Resource.h"
+#include "Common/Resource.h"
 
 namespace JoyEngine {
     class Shader final: public Resource {

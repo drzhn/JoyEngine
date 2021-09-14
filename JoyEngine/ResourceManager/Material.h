@@ -4,7 +4,7 @@
 #include <map>
 #include <string>
 
-#include "Resource.h"
+#include "Common/Resource.h"
 #include "SharedMaterial.h"
 #include "Utils/GUID.h"
 

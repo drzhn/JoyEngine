@@ -30,7 +30,7 @@ namespace JoyEngine {
 
         [[nodiscard]]GUID GetMaterialGuid() const noexcept;
 
-        [[nodiscard]]Mesh *GetMesh() const noexcept;
+        [[nodiscard]]mesh *GetMesh() const noexcept;
 
         [[nodiscard]]Material *GetMaterial() const noexcept;
 

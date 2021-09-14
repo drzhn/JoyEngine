@@ -3,7 +3,7 @@
 
 #include <vulkan/vulkan.h>
 
-#include "Resource.h"
+#include "Common/Resource.h"
 #include "Utils/GUID.h"
 
 namespace JoyEngine {

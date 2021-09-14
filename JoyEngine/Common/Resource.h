@@ -1,6 +1,8 @@
 #ifndef RESOURCE_H
 #define RESOURCE_H
 
+#include "Utils/GUID.h"
+
 namespace JoyEngine {
     class Resource {
     public:

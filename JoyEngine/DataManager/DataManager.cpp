@@ -59,34 +59,26 @@ namespace JoyEngine {
         }
     }
 
-    void DataManager::ParseSharedMaterial(const GUID &sharedMaterialGuid,
-                                          GUID &vertexShader,
-                                          GUID &fragmentShader,
-                                          bool &hasVertexInput,
-                                          bool &hasMVP,
-                                          bool &depthTest,
-                                          bool &depthWrite,
-                                          std::vector<std::vector<std::tuple<std::string, std::string>>> &bindingSets) {
+    rapidjson::Document DataManager::GetSerializedData(const GUID &sharedMaterialGuid, DataType type) {
         std::vector<char> data = GetData<char>(sharedMaterialGuid);
         rapidjson::Document json;
         json.Parse<rapidjson::kParseStopWhenDoneFlag>(data.data());
-        ASSERT(json["type"].GetString() == std::string("sharedMaterial"));
-
-        vertexShader = GUID::StringToGuid(json["vertexShader"].GetString());
-        fragmentShader = GUID::StringToGuid(json["fragmentShader"].GetString());
-        hasVertexInput = json["hasVertexInput"].GetBool();
-        hasMVP = json["hasMVP"].GetBool();
-        depthTest = json["depthTest"].GetBool();
-        depthWrite = json["depthWrite"].GetBool();
-        for (auto &bindingSet: json["bindingSets"].GetArray()) {
-            std::vector<std::tuple<std::string, std::string>> bindingData;
-            for (auto &binding: bindingSet.GetArray()) {
-                bindingData.emplace_back(
-                        binding["type"].GetString(),
-                        binding["name"].GetString()
-                );
-            }
-            bindingSets.push_back(bindingData);
+        std::string s;
+        switch (type) {
+            case mesh:
+                s = "mesh";
+            case texture:
+                s = "texture";
+            case shader:
+                s = "shader";
+            case material:
+                s = "material";
+            case sharedMaterial:
+                s = "sharedMaterial";
+            default:
+                ASSERT(false);
         }
+        ASSERT(json.HasMember("type") && json["type"].GetString() == std::string(s));
+        return json;
     }
 }

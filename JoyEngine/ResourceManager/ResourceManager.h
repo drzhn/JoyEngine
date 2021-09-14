@@ -9,7 +9,7 @@
 
 #include "IJoyGraphicsContext.h"
 
-#include "Resource.h"
+#include "Common/Resource.h"
 #include "Mesh.h"
 #include "Material.h"
 #include "SharedMaterial.h"

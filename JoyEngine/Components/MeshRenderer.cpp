@@ -31,7 +31,7 @@ namespace JoyEngine {
             ResourceManager::GetInstance()->UnloadResource(meshGuid);
         }
         m_meshGuid = meshGuid;
-        ResourceManager::GetInstance()->LoadResource<Mesh>(meshGuid);
+        ResourceManager::GetInstance()->LoadResource<mesh>(meshGuid);
     }
 
     void MeshRenderer::SetMaterial(GUID materialGuid) {
@@ -52,8 +52,8 @@ namespace JoyEngine {
         return m_materialGuid.value();
     }
 
-    Mesh *MeshRenderer::GetMesh() const noexcept {
-        return ResourceManager::GetInstance()->GetResource<Mesh>(m_meshGuid.value());
+    mesh *MeshRenderer::GetMesh() const noexcept {
+        return ResourceManager::GetInstance()->GetResource<mesh>(m_meshGuid.value());
     }
 
     Material *MeshRenderer::GetMaterial() const noexcept {

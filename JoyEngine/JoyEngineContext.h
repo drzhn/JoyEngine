@@ -9,6 +9,7 @@
 #include "MemoryManager/MemoryManager.h"
 #include "ResourceManager/ResourceManager.h"
 #include "DataManager/DataManager.h"
+#include "ResourceManager/DescriptorSetManager.h"
 #include "JoyGraphicsContext.h"
 #include "Utils/Assert.h"
 
@@ -35,12 +36,14 @@ namespace JoyEngine {
                 m_graphicsContext(new JoyGraphicsContext(instance, windowHandle)),
                 m_memoryManager(new MemoryManager(m_graphicsContext)),
                 m_dataManager(new DataManager()),
+                m_descriptorSetManager(new DescriptorSetManager(m_graphicsContext)),
                 m_resourceManager(new ResourceManager(m_graphicsContext)),
                 m_sceneManager(new SceneManager()),
                 m_renderManager(new RenderManager(m_graphicsContext, m_resourceManager)) {
             ASSERT(m_graphicsContext != nullptr);
             ASSERT(m_memoryManager != nullptr);
             ASSERT(m_dataManager != nullptr);
+            ASSERT(m_descriptorSetManager != nullptr);
             ASSERT(m_resourceManager != nullptr);
             ASSERT(m_sceneManager != nullptr);
             ASSERT(m_renderManager != nullptr);
@@ -92,6 +95,7 @@ namespace JoyEngine {
         JoyGraphicsContext *const m_graphicsContext = nullptr;
         MemoryManager *const m_memoryManager = nullptr;
         DataManager *const m_dataManager = nullptr;
+        DescriptorSetManager *const m_descriptorSetManager = nullptr;
         ResourceManager *const m_resourceManager = nullptr;
         SceneManager *const m_sceneManager = nullptr;
         RenderManager *const m_renderManager = nullptr;

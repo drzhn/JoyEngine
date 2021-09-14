@@ -5,11 +5,21 @@
 #include <map>
 #include <filesystem>
 
+#include <rapidjson/document.h>
+
 #include "Utils/FileUtils.h"
 #include "Utils/GUID.h"
 
 
 namespace JoyEngine {
+    enum DataType {
+        mesh,
+        texture,
+        shader,
+        material,
+        sharedMaterial
+    };
+
     class DataManager {
     public:
         DataManager();
@@ -33,15 +43,7 @@ namespace JoyEngine {
 
         void ParseMaterial(const GUID &materialGuid, GUID &sharedMaterialGuid, std::map<std::string, GUID> &bindings);
 
-        void ParseSharedMaterial(const GUID &sharedMaterialGuid,
-                                 GUID &vertexShader,
-                                 GUID &fragmentShader,
-                                 bool &hasVertexInput,
-                                 bool &hasMVP,
-                                 bool &depthTest,
-                                 bool &depthWrite,
-                                 std::vector<std::vector<std::tuple<std::string, std::string>>> &bindingSets
-        );
+        rapidjson::Document GetSerializedData(const GUID &, DataType);
 
     private:
         static DataManager *m_instance;

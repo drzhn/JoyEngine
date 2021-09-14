@@ -8,7 +8,7 @@
 
 namespace JoyEngine {
 
-    Mesh::Mesh(GUID guid) {
+    mesh::Mesh(GUID guid) {
         std::vector<Vertex> vertices;
         std::vector<uint32_t> indices;
         std::ifstream modelStream;
@@ -33,7 +33,7 @@ namespace JoyEngine {
         }
     }
 
-    Mesh::~Mesh() {
+    mesh::~Mesh() {
         MemoryManager::GetInstance()->DestroyBuffer(m_vertexBuffer, m_vertexBufferMemory);
         MemoryManager::GetInstance()->DestroyBuffer(m_indexBuffer, m_indexBufferMemory);
     }

@@ -3,6 +3,7 @@
 #include "RenderManager/VulkanAllocator.h"
 
 namespace JoyEngine {
+    IJoyGraphicsContext *IJoyGraphicsContext::m_instance = nullptr;
 
     JoyGraphicsContext::JoyGraphicsContext(HINSTANCE instance, HWND windowHandle) :
             m_windowInstance(instance),
@@ -13,6 +14,8 @@ namespace JoyEngine {
         PickPhysicalDevice();
         CreateLogicalDevice();
         CreateCommandPool();
+
+        m_instance = this;
     }
 
     JoyGraphicsContext::~JoyGraphicsContext() {
