@@ -6,7 +6,6 @@
 #include <list>
 #include <memory>
 
-#include "IJoyGraphicsContext.h"
 #include "Utils/Assert.h"
 #include "Common/Resource.h"
 
@@ -59,25 +58,13 @@ namespace JoyEngine {
     class DescriptorSetManager {
     public:
 
-        DescriptorSetManager() = delete;
-
-        explicit DescriptorSetManager(IJoyGraphicsContext *);
-
-        static DescriptorSetManager *GetInstance() noexcept {
-            ASSERT(m_instance != nullptr);
-            return m_instance;
-        }
+        DescriptorSetManager() = default;
 
         void RegisterPool(uint64_t hash, VkDescriptorSetLayout setLayout, const std::vector<VkDescriptorType> &types);
 
         void UnregisterPool(uint64_t hash);
 
     private:
-        static DescriptorSetManager *m_instance;
-
-        IJoyGraphicsContext *const m_graphicsContext;
-        const VkAllocationCallbacks *m_allocator;
-
         std::map<uint64_t, std::unique_ptr<DescriptorPoolList>> m_pools;
     };
 }

@@ -12,7 +12,7 @@
 
 #include <vulkan/vulkan.h>
 
-#include "IJoyGraphicsContext.h"
+#include "JoyGraphicsContext.h"
 
 #include "ResourceManager/ResourceManager.h"
 #include "ResourceManager/Texture.h"
@@ -31,14 +31,11 @@ namespace JoyEngine {
     class RenderObject;
 
     class RenderManager {
-    public:
-        RenderManager() = default;
 
-        RenderManager(IJoyGraphicsContext *const graphicsContext, ResourceManager *const resourceManager);
+    public:
+        RenderManager();
 
         ~RenderManager();
-
-        static RenderManager *GetInstance() noexcept { return m_instance; }
 
         void Init();
 
@@ -50,13 +47,15 @@ namespace JoyEngine {
 
         void DrawFrame();
 
-        const int MAX_FRAMES_IN_FLIGHT = 2;
-
-        void CreateRenderPass();
-
         uint32_t RegisterMeshRenderer(MeshRenderer *meshRenderer);
 
         void UnregisterMeshRenderer(uint32_t);
+
+        [[nodiscard]]Swapchain *GetSwapchain() const noexcept { return m_swapchain.get(); }
+
+    private:
+
+        void CreateRenderPass();
 
         void CreateGBufferResources();
 
@@ -71,9 +70,9 @@ namespace JoyEngine {
         void CreateSyncObjects();
 
     private:
-        static RenderManager *m_instance;
+        const int MAX_FRAMES_IN_FLIGHT = 2;
 
-        IJoyGraphicsContext *const m_graphicsContext;
+        JoyGraphicsContext *const m_graphicsContext;
         ResourceManager *const m_resourceManager;
         const VkAllocationCallbacks *m_allocator;
         std::unique_ptr<Swapchain> m_swapchain;

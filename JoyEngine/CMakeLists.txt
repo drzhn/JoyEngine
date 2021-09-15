@@ -10,6 +10,7 @@ endif()
 add_library(
         JoyEngine
 
+        JoyContext.cpp
         JoyGraphicsContext.cpp
 
         RenderManager/RenderManager.cpp
@@ -22,7 +23,6 @@ add_library(
         RenderManager/RenderObject.cpp
         RenderManager/Swapchain.cpp
         DataManager/DataManager.cpp
-        ResourceManager/Resource.cpp
         ResourceManager/Mesh.cpp
         ResourceManager/Texture.cpp
         ResourceManager/Material.cpp

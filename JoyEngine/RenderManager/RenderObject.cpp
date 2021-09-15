@@ -1,5 +1,7 @@
 #include "RenderObject.h"
 
+#include "JoyContext.h"
+
 #include <array>
 #include <stdexcept>
 #include <vector>
@@ -8,13 +10,12 @@
 
 namespace JoyEngine {
     RenderObject::RenderObject(MeshRenderer *const meshRenderer,
-                               IJoyGraphicsContext *const graphicsContext,
                                VkRenderPass renderPass,
                                Swapchain *swapchain) :
             m_meshRenderer(meshRenderer),
-            m_graphicsContext(graphicsContext),
+            m_graphicsContext(JoyContext::Graphics()),
             m_renderPass(renderPass),
-            m_allocator(graphicsContext->GetAllocationCallbacks()),
+            m_allocator(JoyContext::Graphics()->GetAllocationCallbacks()),
             m_swapchain(swapchain) {
         CreateDescriptorSetLayout();
         CreateGraphicsPipeline();
@@ -287,8 +288,8 @@ namespace JoyEngine {
 
             VkDescriptorImageInfo imageInfo{};
             imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-            imageInfo.imageView = ResourceManager::GetInstance()->GetTexture(m_meshRenderer->GetTexture()->GetGuid())->GetImageView();
-            imageInfo.sampler = ResourceManager::GetInstance()->GetTexture(m_meshRenderer->GetTexture()->GetGuid())->GetSampler();
+//            imageInfo.imageView = JoyContext::Resource()->GetTexture(m_meshRenderer->GetTexture()->GetGuid())->GetImageView();
+//            imageInfo.sampler = JoyContext::Resource()->GetTexture(m_meshRenderer->GetTexture()->GetGuid())->GetSampler();
 
             std::array<VkWriteDescriptorSet, 2> descriptorWrites{};
 

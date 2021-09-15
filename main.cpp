@@ -5,7 +5,7 @@
 #include <windows.h>
 
 #include "WindowHandler.h"
-#include "JoyEngineContext.h"
+#include "JoyContext.h"
 
 #include <iostream>
 #include <stdexcept>
@@ -50,7 +50,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
     if (hwnd == nullptr) {
         return 0;
     }
-    JoyEngine::JoyEngineContext *graphicsContext = new JoyEngine::JoyEngineContext(hInstance, hwnd);
+    JoyEngine::JoyContext *graphicsContext = new JoyEngine::JoyContext(hInstance, hwnd);
     graphicsContext->Init();
 
     WindowHandler::RegisterMessageHandler(graphicsContext, hwnd);

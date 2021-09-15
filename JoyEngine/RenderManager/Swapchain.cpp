@@ -1,5 +1,7 @@
 #include "Swapchain.h"
 
+#include "JoyContext.h"
+
 #include "MemoryManager/MemoryManager.h"
 
 #include "RenderManager/VulkanTypes.h"
@@ -9,9 +11,9 @@
 
 namespace JoyEngine {
 
-    Swapchain::Swapchain(IJoyGraphicsContext *const graphicsContext) :
-            m_graphicsContext(graphicsContext),
-            m_allocator(m_graphicsContext->GetAllocationCallbacks()) {
+    Swapchain::Swapchain() :
+            m_graphicsContext(JoyContext::Graphics()),
+            m_allocator(JoyContext::Graphics()->GetAllocationCallbacks()) {
         SwapChainSupportDetails swapChainSupport = querySwapChainSupport(
                 m_graphicsContext->GetVkPhysicalDevice(),
                 m_graphicsContext->GetVkSurfaceKHR());

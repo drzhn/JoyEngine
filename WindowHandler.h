@@ -2,7 +2,7 @@
 #define WINDOW_HANDLER_H
 
 #include "windows.h"
-#include "JoyEngine/JoyEngineContext.h"
+#include "JoyEngine/JoyContext.h"
 
 class WindowHandler {
 public :

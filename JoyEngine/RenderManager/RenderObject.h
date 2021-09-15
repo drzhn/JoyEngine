@@ -4,7 +4,7 @@
 #include <vulkan/vulkan.h>
 
 #include "RenderManager/RenderManager.h"
-#include "IJoyGraphicsContext.h"
+#include "JoyGraphicsContext.h"
 
 #include "Components/MeshRenderer.h"
 #include "Swapchain.h"
@@ -15,7 +15,6 @@ namespace JoyEngine {
         RenderObject() = delete;
 
         explicit RenderObject(MeshRenderer *meshRenderer,
-                              IJoyGraphicsContext *graphicsContext,
                               VkRenderPass renderPass,
                               Swapchain *swapchain);
 
@@ -32,7 +31,7 @@ namespace JoyEngine {
         void UpdateUniformBuffer(uint32_t currentImage);
 
     private:
-        IJoyGraphicsContext *const m_graphicsContext;
+        JoyGraphicsContext *const m_graphicsContext;
         const VkAllocationCallbacks *m_allocator;
         MeshRenderer *const m_meshRenderer;
         Swapchain *m_swapchain;

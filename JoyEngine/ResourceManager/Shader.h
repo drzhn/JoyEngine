@@ -1,6 +1,8 @@
 #ifndef SHADER_H
 #define SHADER_H
 
+#include <vulkan/vulkan.h>
+
 #include "Common/Resource.h"
 
 namespace JoyEngine {

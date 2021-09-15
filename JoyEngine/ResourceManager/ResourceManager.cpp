@@ -3,18 +3,15 @@
 #include <string>
 #include <iostream>
 
-
+#include "JoyContext.h"
 
 #include "Utils/FileUtils.h"
 #include "RenderManager/VulkanUtils.h"
 
 namespace JoyEngine {
 
-    ResourceManager *ResourceManager::m_instance = nullptr;
-
-    ResourceManager::ResourceManager(IJoyGraphicsContext *const graphicsContext) :
-            m_graphicsContext(graphicsContext),
-            m_allocator(graphicsContext->GetAllocationCallbacks()) {
-        ResourceManager::m_instance = this;
+    ResourceManager::ResourceManager() :
+            m_graphicsContext(JoyContext::Graphics()),
+            m_allocator(JoyContext::Graphics()->GetAllocationCallbacks()) {
     }
 }

@@ -7,7 +7,7 @@
 #include <memory>
 #include <vulkan/vulkan.h>
 
-#include "IJoyGraphicsContext.h"
+#include "JoyGraphicsContext.h"
 
 #include "Common/Resource.h"
 #include "Mesh.h"
@@ -26,14 +26,7 @@ namespace JoyEngine {
     class ResourceManager {
     public:
 
-        ResourceManager() = delete;
-
-        explicit ResourceManager(IJoyGraphicsContext *);
-
-        static ResourceManager *GetInstance() noexcept {
-            ASSERT(m_instance != nullptr);
-            return m_instance;
-        }
+        ResourceManager();
 
         void Init() {}
 
@@ -69,24 +62,20 @@ namespace JoyEngine {
         template<class T>
         T *GetResource(GUID guid) {
             ASSERT(IsResourceLoaded(guid));
-//#ifdef DEBUG
+#ifdef DEBUG
             T *ptr = dynamic_cast<T *>(m_loadedResources[guid].get());
             ASSERT(ptr != nullptr);
-//#else
-//            T *ptr = reinterpret_cast<T *>(m_loadedResources[guid].get());
-//#endif //DEBUG
+#else
+            T *ptr = reinterpret_cast<T *>(m_loadedResources[guid].get());
+#endif //DEBUG
             return ptr;
         }
 
     private:
-        static ResourceManager *m_instance;
-
-        IJoyGraphicsContext *const m_graphicsContext;
+        JoyGraphicsContext *const m_graphicsContext;
         const VkAllocationCallbacks *m_allocator;
 
         std::map<GUID, std::unique_ptr<Resource>> m_loadedResources;
-
-
     };
 }
 

@@ -18,8 +18,8 @@ namespace JoyEngine {
         uint32_t bindingIndex;
         VkDescriptorType type;
     };
+
     struct SetLayoutInfo {
-        VkDescriptorSetLayout setLayout;
         bool isStatic;
         uint64_t hash;
     };
@@ -44,18 +44,21 @@ namespace JoyEngine {
         bool m_depthTest = false;
         bool m_depthWrite = false;
 
-        std::vector<SetLayoutInfo> m_setLayouts;
+        std::vector<SetLayoutInfo> m_setLayoutInfos;
+        std::vector<VkDescriptorSetLayout> m_setLayouts;
         std::map<std::string, BindingInfo> m_bindings;
 
-//        VkDescriptorSetLayout m_descriptorSetLayout = VK_NULL_HANDLE;
-        VkDescriptorPool m_descriptorPool = VK_NULL_HANDLE;
-        std::vector<VkDescriptorSet> m_descriptorSets;
+//        std::vector<VkDescriptorSet> m_descriptorSets;
         VkPipelineLayout m_pipelineLayout = VK_NULL_HANDLE;
         VkPipeline m_graphicsPipeline = VK_NULL_HANDLE;
 
     private:
-        static VkDescriptorType GetTypeFromStr(const std::string& type) noexcept;
+        static VkDescriptorType GetTypeFromStr(const std::string &type) noexcept;
+
         GUID m_guid;
+
+    private:
+        void CreateGraphicsPipeline();
     };
 }
 

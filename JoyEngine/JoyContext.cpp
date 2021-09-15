@@ -1,0 +1,78 @@
+#include "JoyContext.h"
+
+namespace JoyEngine {
+
+    JoyContext *JoyContext::m_instance = nullptr;
+
+    JoyContext::JoyContext(HINSTANCE instance, HWND windowHandle) :
+            m_windowHandle(windowHandle),
+            m_graphicsContext(new JoyGraphicsContext(instance, windowHandle)),
+            m_memoryManager(new MemoryManager()),
+            m_dataManager(new DataManager()),
+            m_descriptorSetManager(new DescriptorSetManager()),
+            m_resourceManager(new ResourceManager()),
+            m_sceneManager(new SceneManager()),
+            m_renderManager(new RenderManager()) {
+        ASSERT(m_graphicsContext != nullptr);
+        ASSERT(m_memoryManager != nullptr);
+        ASSERT(m_dataManager != nullptr);
+        ASSERT(m_descriptorSetManager != nullptr);
+        ASSERT(m_resourceManager != nullptr);
+        ASSERT(m_sceneManager != nullptr);
+        ASSERT(m_renderManager != nullptr);
+        m_instance = this;
+        std::cout << "Context created" << std::endl;
+    }
+
+    void JoyContext::Init() {
+        m_memoryManager->Init();
+        m_sceneManager->Init();
+        m_renderManager->Init();
+    }
+
+    void JoyContext::Start() {
+        m_memoryManager->Start();
+        m_renderManager->Start();
+    }
+
+    void JoyContext::Update() {
+        m_renderManager->Update();
+    }
+
+    void JoyContext::Stop() {
+        m_renderManager->Stop(); // will destroy managers in reverse order
+        m_memoryManager->Stop();
+    }
+
+    JoyContext::~JoyContext() {
+        Stop();
+        delete m_sceneManager; // unregister mesh renderers, remove descriptor set, pipelines, pipeline layouts
+        delete m_resourceManager; //delete all scene render data (buffers, textures)
+        delete m_renderManager; //delete swapchain, synchronisation, framebuffers
+        delete m_memoryManager; //free gpu memory
+        delete m_graphicsContext; //delete surface, device, instance
+        std::cout << "Context destroyed" << std::endl;
+    }
+
+    void JoyContext::HandleMessage(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
+        InternalHandleMessage(uMsg, wParam, lParam);
+    }
+
+    void JoyContext::InternalHandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam) {
+
+    }
+
+    JoyGraphicsContext *const JoyContext::Graphics() noexcept { return m_instance->m_graphicsContext; }
+
+    MemoryManager *const JoyContext::Memory() noexcept { return m_instance->m_memoryManager; }
+
+    DataManager *const JoyContext::Data() noexcept { return m_instance->m_dataManager; }
+
+    DescriptorSetManager *const JoyContext::DescriptorSet() noexcept { return m_instance->m_descriptorSetManager; }
+
+    ResourceManager *const JoyContext::Resource() noexcept { return m_instance->m_resourceManager; }
+
+    SceneManager *const JoyContext::Scene() noexcept { return m_instance->m_sceneManager; }
+
+    RenderManager *const JoyContext::Render() noexcept { return m_instance->m_renderManager; }
+}

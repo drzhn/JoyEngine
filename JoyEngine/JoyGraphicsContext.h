@@ -1,41 +1,43 @@
 #ifndef JOY_GRAPHICS_CONTEXT_H
 #define JOY_GRAPHICS_CONTEXT_H
 
+#include <vector>
+
 #include "windows.h"
 #include <vulkan/vulkan.h>
-#include "IJoyGraphicsContext.h"
+#include "RenderManager/VulkanAllocator.h"
 
 namespace JoyEngine {
-    class JoyGraphicsContext : public IJoyGraphicsContext {
+    class JoyGraphicsContext {
     public:
         JoyGraphicsContext(HINSTANCE instance, HWND windowHandle);
 
         ~JoyGraphicsContext();
 
-        [[nodiscard]] HINSTANCE GetHINSTANCE() const noexcept override { return m_windowInstance; }
+        [[nodiscard]] HINSTANCE GetHINSTANCE() const noexcept { return m_windowInstance; }
 
-        [[nodiscard]] HWND GetHWND() const noexcept override { return m_windowHandle; }
+        [[nodiscard]] HWND GetHWND() const noexcept { return m_windowHandle; }
 
-        [[nodiscard]] const VkAllocationCallbacks *GetAllocationCallbacks() const noexcept override {
+        [[nodiscard]] const VkAllocationCallbacks *GetAllocationCallbacks() const noexcept {
 //            return nullptr;
             return m_allocator->GetAllocationCallbacks();
         }
 
-        [[nodiscard]] VkInstance GetVkInstance() const noexcept override { return m_vkInstance; }
+        [[nodiscard]] VkInstance GetVkInstance() const noexcept { return m_vkInstance; }
 
-        [[nodiscard]] VkPhysicalDevice GetVkPhysicalDevice() const noexcept override { return m_physicalDevice; }
+        [[nodiscard]] VkPhysicalDevice GetVkPhysicalDevice() const noexcept { return m_physicalDevice; }
 
-        [[nodiscard]] VkDevice GetVkDevice() const noexcept override { return m_logicalDevice; }
+        [[nodiscard]] VkDevice GetVkDevice() const noexcept { return m_logicalDevice; }
 
-        [[nodiscard]] VkDebugUtilsMessengerEXT GetVkDebugUtilsMessengerEXT() const noexcept override { return m_debugMessenger; }
+        [[nodiscard]] VkDebugUtilsMessengerEXT GetVkDebugUtilsMessengerEXT() const noexcept { return m_debugMessenger; }
 
-        [[nodiscard]] VkSurfaceKHR GetVkSurfaceKHR() const noexcept override { return m_surface; }
+        [[nodiscard]] VkSurfaceKHR GetVkSurfaceKHR() const noexcept { return m_surface; }
 
-        [[nodiscard]] VkQueue GetGraphicsVkQueue() const noexcept override { return m_graphicsQueue; }
+        [[nodiscard]] VkQueue GetGraphicsVkQueue() const noexcept { return m_graphicsQueue; }
 
-        [[nodiscard]] VkQueue GetPresentVkQueue() const noexcept override { return m_presentQueue; }
+        [[nodiscard]] VkQueue GetPresentVkQueue() const noexcept { return m_presentQueue; }
 
-        [[nodiscard]]  VkCommandPool GetVkCommandPool() const noexcept override { return m_commandPool; }
+        [[nodiscard]]  VkCommandPool GetVkCommandPool() const noexcept { return m_commandPool; }
 
     private:
         void CreateInstance();

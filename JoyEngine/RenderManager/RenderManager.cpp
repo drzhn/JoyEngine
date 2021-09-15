@@ -4,6 +4,10 @@
 #include <array>
 #include <set>
 #include <chrono>
+#include <memory>
+
+#include "JoyContext.h"
+#include "Swapchain.h"
 
 #include "ResourceManager/ResourceManager.h"
 #include "ResourceManager/Mesh.h"
@@ -27,15 +31,11 @@
 
 namespace JoyEngine {
 
-    RenderManager *RenderManager::m_instance = nullptr;
-
-    RenderManager::RenderManager(IJoyGraphicsContext *const graphicsContext,
-                                 ResourceManager *const resourceManager) :
-            m_graphicsContext(graphicsContext),
-            m_resourceManager(resourceManager),
+    RenderManager::RenderManager() :
+            m_graphicsContext(JoyContext::Graphics()),
+            m_resourceManager(JoyContext::Resource()),
             m_allocator(m_graphicsContext->GetAllocationCallbacks()),
-            m_swapchain(new Swapchain(graphicsContext)) {
-        m_instance = this;
+            m_swapchain(new Swapchain()) {
         CreateRenderPass();
         CreateGBufferResources();
         CreateFramebuffers();
@@ -141,7 +141,7 @@ namespace JoyEngine {
     uint32_t RenderManager::RegisterMeshRenderer(MeshRenderer *meshRenderer) {
         m_renderObjects.insert(std::make_pair(
                 m_renderObjectIndex,
-                std::make_unique<RenderObject>(meshRenderer, m_graphicsContext, m_renderPass, m_swapchain.get())
+                std::make_unique<RenderObject>(meshRenderer, m_renderPass, m_swapchain.get())
         ));
         return m_renderObjectIndex++;
     }
@@ -284,13 +284,13 @@ namespace JoyEngine {
         for (auto const &x: m_renderObjects) {
             RenderObject *ro = x.second.get();
             VkBuffer vertexBuffers[] = {
-                    m_resourceManager->GetResource<mesh>(ro->GetMeshRenderer()->GetMeshGuid())->GetVertexBuffer()
+                    m_resourceManager->GetResource<Mesh>(ro->GetMeshRenderer()->GetMeshGuid())->GetVertexBuffer()
             };
             VkDeviceSize offsets[] = {0};
             vkCmdBindVertexBuffers(commandBuffers[imageIndex], 0, 1, vertexBuffers, offsets);
 
             vkCmdBindIndexBuffer(commandBuffers[imageIndex],
-                                 m_resourceManager->GetResource<mesh>(ro->GetMeshRenderer()->GetMeshGuid())->GetIndexBuffer(),
+                                 m_resourceManager->GetResource<Mesh>(ro->GetMeshRenderer()->GetMeshGuid())->GetIndexBuffer(),
                                  0,
                                  VK_INDEX_TYPE_UINT32);
 
@@ -304,7 +304,7 @@ namespace JoyEngine {
                                     &ro->GetDescriptorSet()[imageIndex], 0, nullptr);
 
             vkCmdDrawIndexed(commandBuffers[imageIndex],
-                             static_cast<uint32_t>(m_resourceManager->GetResource<mesh>(ro->GetMeshRenderer()->GetMeshGuid())->GetIndexSize()),
+                             static_cast<uint32_t>(m_resourceManager->GetResource<Mesh>(ro->GetMeshRenderer()->GetMeshGuid())->GetIndexSize()),
                              1,
                              0,
                              0,

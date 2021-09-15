@@ -1,27 +1,18 @@
 #ifndef MEMORY_MANAGER_H
 #define MEMORY_MANAGER_H
 
-#include "IJoyGraphicsContext.h"
+#include "JoyGraphicsContext.h"
 #include "GPUMemoryManager.h"
-#include "ResourceManager/Resource.h"
+#include "Common/Resource.h"
 #include "Utils/Assert.h"
 
 namespace JoyEngine {
 
+    class JoyContext;
+
     class MemoryManager {
     public:
-        MemoryManager() = delete;
-
-        MemoryManager(IJoyGraphicsContext *const graphicsContext) :
-                m_graphicsContext(graphicsContext),
-                m_allocator(graphicsContext->GetAllocationCallbacks()) {
-            m_instance = this;
-        }
-
-        static MemoryManager *GetInstance() {
-            ASSERT(m_instance != nullptr);
-            return m_instance;
-        }
+        MemoryManager();
 
         void Init() {}
 
@@ -79,14 +70,13 @@ namespace JoyEngine {
 
         void DestroySampler(VkSampler sampler);
 
-        void CreateShaderModule(const uint32_t* code, size_t codeSize, VkShaderModule &shaderModule);
+        void CreateShaderModule(const uint32_t *code, size_t codeSize, VkShaderModule &shaderModule);
 
         void DestroyShaderModule(VkShaderModule shaderModule);
 
     private:
-        IJoyGraphicsContext *const m_graphicsContext;
+        JoyGraphicsContext *const m_graphicsContext;
         const VkAllocationCallbacks *m_allocator;
-        static MemoryManager *m_instance;
 
 
         void CopyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size);

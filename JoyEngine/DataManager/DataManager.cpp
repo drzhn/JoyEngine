@@ -9,8 +9,6 @@
 
 namespace JoyEngine {
 
-    DataManager *DataManager::m_instance = nullptr;
-
     DataManager::DataManager() {
         ParseDatabase(m_pathDatabase, readFile<char>(m_dataPath + m_databaseFilename).data());
     }

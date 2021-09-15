@@ -26,11 +26,6 @@ namespace JoyEngine {
 
         ~DataManager();
 
-        static DataManager *GetInstance() noexcept {
-            ASSERT(m_instance != nullptr);
-            return m_instance;
-        }
-
         template<typename T>
         std::vector<T> GetData(GUID guid) {
             if (m_pathDatabase.find(guid) == m_pathDatabase.end()) {
@@ -46,8 +41,6 @@ namespace JoyEngine {
         rapidjson::Document GetSerializedData(const GUID &, DataType);
 
     private:
-        static DataManager *m_instance;
-
         const std::string m_dataPath = R"(D:\CppProjects\JoyEngine\JoyData\)";
         const std::string m_databaseFilename = R"(data.db)";
         std::map<GUID, std::filesystem::path> m_pathDatabase;

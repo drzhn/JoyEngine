@@ -1,13 +1,8 @@
 #include "DescriptorSetManager.h"
 
-namespace JoyEngine {
-    DescriptorSetManager *DescriptorSetManager::m_instance = nullptr;
+#include "JoyContext.h"
 
-    DescriptorSetManager::DescriptorSetManager(IJoyGraphicsContext *const graphicsContext) :
-            m_graphicsContext(graphicsContext),
-            m_allocator(graphicsContext->GetAllocationCallbacks()) {
-        DescriptorSetManager::m_instance = this;
-    }
+namespace JoyEngine {
 
     void DescriptorSetManager::RegisterPool(uint64_t hash, VkDescriptorSetLayout setLayout, const std::vector<VkDescriptorType> &types) {
         if (m_pools.find(hash) != m_pools.end()) {
@@ -33,12 +28,12 @@ namespace JoyEngine {
 
     DescriptorPool::DescriptorPool(VkDescriptorSetLayout setLayout, const std::vector<VkDescriptorType> &types) {
         uint32_t poolSize = types.size();
-        VkDescriptorPoolSize poolSizes[poolSize];
+        std::vector<VkDescriptorPoolSize> poolSizes(poolSize);
         for (uint32_t i = 0; i < poolSize; i++) {
-            poolSizes[i] = {
+            poolSizes.push_back({
                     types[i],
                     DESCRIPTOR_POOL_SIZE
-            };
+            });
         }
 
         VkDescriptorPoolCreateInfo poolInfo{
@@ -47,12 +42,12 @@ namespace JoyEngine {
                 0,
                 DESCRIPTOR_POOL_SIZE,
                 poolSize,
-                poolSizes
+                poolSizes.data()
         };
 
-        VkResult res = vkCreateDescriptorPool(IJoyGraphicsContext::GetInstance()->GetVkDevice(),
+        VkResult res = vkCreateDescriptorPool(JoyContext::Graphics()->GetVkDevice(),
                                               &poolInfo,
-                                              IJoyGraphicsContext::GetInstance()->GetAllocationCallbacks(),
+                                              JoyContext::Graphics()->GetAllocationCallbacks(),
                                               &m_pool);
         ASSERT(res == VK_SUCCESS);
 
@@ -68,7 +63,7 @@ namespace JoyEngine {
         };
 
         VkDescriptorSet sets[DESCRIPTOR_POOL_SIZE];
-        res = vkAllocateDescriptorSets(IJoyGraphicsContext::GetInstance()->GetVkDevice(), &allocInfo, sets);
+        res = vkAllocateDescriptorSets(JoyContext::Graphics()->GetVkDevice(), &allocInfo, sets);
         ASSERT(res == VK_SUCCESS);
         for (int i = 0; i < DESCRIPTOR_POOL_SIZE; i++) {
             m_freeList.push_back(sets[i]);
@@ -76,9 +71,9 @@ namespace JoyEngine {
     }
 
     DescriptorPool::~DescriptorPool() {
-        vkDestroyDescriptorPool(IJoyGraphicsContext::GetInstance()->GetVkDevice(),
+        vkDestroyDescriptorPool(JoyContext::Graphics()->GetVkDevice(),
                                 m_pool,
-                                IJoyGraphicsContext::GetInstance()->GetAllocationCallbacks());
+                                JoyContext::Graphics()->GetAllocationCallbacks());
     }
 
     VkDescriptorSet DescriptorPool::Allocate() {
@@ -133,6 +128,7 @@ namespace JoyEngine {
         for (const auto &item: descriptorSets) {
             m_usedDescriptorSets[item]->Free(item);
             m_usedDescriptorSets.erase(item);
+            // TODO after Free() we need to delete each pool where GetSize() == DESCRIPTOR_POOL_SIZE except one
         }
     }
 }

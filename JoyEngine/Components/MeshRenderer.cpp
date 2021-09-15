@@ -1,7 +1,9 @@
 #include "MeshRenderer.h"
 
+#include "JoyContext.h"
+
 #include "RenderManager/RenderManager.h"
-#include "ResourceManager/Resource.h"
+#include "Common/Resource.h"
 
 namespace JoyEngine {
     MeshRenderer::MeshRenderer(Transform *t) : Component(t),
@@ -11,12 +13,12 @@ namespace JoyEngine {
 
     void MeshRenderer::Enable() {
         ASSERT(m_meshGuid.has_value() && m_materialGuid.has_value());
-        m_index = RenderManager::GetInstance()->RegisterMeshRenderer(this);
+        m_index = JoyContext::Render()->RegisterMeshRenderer(this);
         m_enabled = true;
     }
 
     void MeshRenderer::Disable() {
-        RenderManager::GetInstance()->UnregisterMeshRenderer(m_index);
+        JoyContext::Render()->UnregisterMeshRenderer(m_index);
         m_enabled = false;
     }
 
@@ -28,18 +30,18 @@ namespace JoyEngine {
 
     void MeshRenderer::SetMesh(GUID meshGuid) {
         if (m_meshGuid.has_value()) {
-            ResourceManager::GetInstance()->UnloadResource(meshGuid);
+            JoyContext::Resource()->UnloadResource(meshGuid);
         }
         m_meshGuid = meshGuid;
-        ResourceManager::GetInstance()->LoadResource<mesh>(meshGuid);
+        JoyContext::Resource()->LoadResource<Mesh>(meshGuid);
     }
 
     void MeshRenderer::SetMaterial(GUID materialGuid) {
         if (m_materialGuid.has_value()) {
-            ResourceManager::GetInstance()->UnloadResource(materialGuid);
+            JoyContext::Resource()->UnloadResource(materialGuid);
         }
         m_materialGuid = materialGuid;
-        ResourceManager::GetInstance()->LoadResource<Material>(materialGuid);
+        JoyContext::Resource()->LoadResource<Material>(materialGuid);
     }
 
     GUID MeshRenderer::GetMeshGuid() const noexcept {
@@ -52,11 +54,11 @@ namespace JoyEngine {
         return m_materialGuid.value();
     }
 
-    mesh *MeshRenderer::GetMesh() const noexcept {
-        return ResourceManager::GetInstance()->GetResource<mesh>(m_meshGuid.value());
+    Mesh *MeshRenderer::GetMesh() const noexcept {
+        return JoyContext::Resource()->GetResource<Mesh>(m_meshGuid.value());
     }
 
     Material *MeshRenderer::GetMaterial() const noexcept {
-        return ResourceManager::GetInstance()->GetResource<Material>(m_materialGuid.value());
+        return JoyContext::Resource()->GetResource<Material>(m_materialGuid.value());
     }
 }

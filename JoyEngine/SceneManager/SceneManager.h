@@ -4,7 +4,6 @@
 #include <map>
 #include <memory>
 
-//#include "ResourceManager/ResourceManager.h"
 
 #include "Scene.h"
 #include "Utils/GUID.h"

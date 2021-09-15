@@ -5,12 +5,12 @@
 #include <vector>
 #include <vulkan/vulkan.h>
 
-#include "IJoyGraphicsContext.h"
+#include "JoyGraphicsContext.h"
 
 namespace JoyEngine {
     class Swapchain {
     public:
-        Swapchain(IJoyGraphicsContext *const graphicsContext);
+        Swapchain();
 
         ~Swapchain();
 
@@ -27,7 +27,7 @@ namespace JoyEngine {
         [[nodiscard]] std::vector<VkImageView> GetSwapChainImageViews() const noexcept { return m_swapChainImageViews; };
 
     private:
-        IJoyGraphicsContext *const m_graphicsContext;
+        JoyGraphicsContext *const m_graphicsContext;
         const VkAllocationCallbacks* m_allocator;
         uint32_t m_swapchainImageCount = 0;
         VkSwapchainKHR m_swapChain;

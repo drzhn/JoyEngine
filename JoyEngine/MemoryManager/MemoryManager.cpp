@@ -4,6 +4,8 @@
 #include <iostream>
 #include <stdexcept>
 
+#include "JoyContext.h"
+
 #include "RenderManager/VulkanUtils.h"
 #include "Utils/FileUtils.h"
 
@@ -13,7 +15,10 @@
 
 namespace JoyEngine {
 
-    MemoryManager *MemoryManager::m_instance;
+    MemoryManager::MemoryManager() :
+            m_graphicsContext(JoyContext::Graphics()),
+            m_allocator(JoyContext::Graphics()->GetAllocationCallbacks()) {
+    }
 
     void MemoryManager::CreateTextureImage(const unsigned char* filedata, int len, VkImage &textureImage, VkDeviceMemory &textureImageMemory) {
         int texWidth, texHeight, texChannels;
@@ -387,4 +392,6 @@ namespace JoyEngine {
                         VK_IMAGE_ASPECT_COLOR_BIT,
                         imageView);
     }
+
+
 }

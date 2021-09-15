@@ -1,6 +1,6 @@
 #include "WindowHandler.h"
 
-#include <JoyEngineContext.h>
+#include <JoyContext.h>
 
 HWND WindowHandler::m_hwnd = nullptr;
 bool WindowHandler::m_windowDestroyed = false;

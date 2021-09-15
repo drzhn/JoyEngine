@@ -1,25 +1,25 @@
 #include "Texture.h"
 
+#include "JoyContext.h"
+
 #include <vector>
-#include "DataManager/DataManager.h"
-#include "MemoryManager/MemoryManager.h"
 
 namespace JoyEngine {
     Texture::Texture(GUID guid) {
-        std::vector<unsigned char> imageData = DataManager::GetInstance()->GetData<unsigned char>(guid);
-        MemoryManager::GetInstance()->CreateTexture(m_textureImage,
+        std::vector<unsigned char> imageData = JoyContext::Data()->GetData<unsigned char>(guid);
+        JoyContext::Memory()->CreateTexture(m_textureImage,
                                                     m_textureImageView,
                                                     m_textureImageMemory,
                                                     imageData.data(),
                                                     static_cast<int>(imageData.size()));
-        MemoryManager::GetInstance()->CreateTextureSampler(m_textureSampler);
+        JoyContext::Memory()->CreateTextureSampler(m_textureSampler);
     }
 
     Texture::~Texture() {
         if (m_textureSampler != VK_NULL_HANDLE) {
-            MemoryManager::GetInstance()->DestroySampler(m_textureSampler);
+            JoyContext::Memory()->DestroySampler(m_textureSampler);
         }
-        MemoryManager::GetInstance()->DestroyImage(m_textureImageView,
+        JoyContext::Memory()->DestroyImage(m_textureImageView,
                                                    m_textureImage,
                                                    m_textureImageMemory);
     }
