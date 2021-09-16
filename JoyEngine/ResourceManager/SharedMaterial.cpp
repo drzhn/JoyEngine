@@ -9,14 +9,23 @@
 #include "ResourceManager/ResourceManager.h"
 #include "ResourceManager/DescriptorSetManager.h"
 #include "RenderManager/VulkanTypes.h"
+#include "RenderManager/RenderManager.h"
 
 namespace JoyEngine {
     SharedMaterial::SharedMaterial(GUID guid) {
         m_guid = guid;
+        Initialize();
+        CreateGraphicsPipeline();
+    }
+
+    void SharedMaterial::Initialize() {
         rapidjson::Document json = JoyContext::Data()->GetSerializedData(m_guid, sharedMaterial);
 
         m_vertexShader = GUID::StringToGuid(json["vertexShader"].GetString());
         m_fragmentShader = GUID::StringToGuid(json["fragmentShader"].GetString());
+
+        JoyContext::Resource()->LoadResource<Shader>(m_vertexShader);
+        JoyContext::Resource()->LoadResource<Shader>(m_fragmentShader);
 
         m_hasVertexInput = json["hasVertexInput"].GetBool();
         m_hasMVP = json["hasMVP"].GetBool();
@@ -32,6 +41,7 @@ namespace JoyEngine {
             const uint32_t bindingSetArraySize = bindingSetArray.Size();
             std::vector<VkDescriptorSetLayoutBinding> bindings(bindingSetArraySize);
             std::vector<VkDescriptorType> types(bindingSetArraySize);
+
             for (uint32_t bindingIndex = 0; bindingIndex < bindingSetArraySize; bindingIndex++) {
                 std::string typeStr = bindingSetArray[bindingIndex]["type"].GetString();
                 std::string nameStr = bindingSetArray[bindingIndex]["name"].GetString();
@@ -70,7 +80,7 @@ namespace JoyEngine {
             setIndex++;
         }
 
-        CreateGraphicsPipeline();
+        ASSERT(m_setLayouts.size() == m_setLayoutInfos.size());
     }
 
     void SharedMaterial::CreateGraphicsPipeline() {
@@ -197,7 +207,7 @@ namespace JoyEngine {
         pipelineInfo.pMultisampleState = &multisampling;
         pipelineInfo.pColorBlendState = &colorBlending;
         pipelineInfo.layout = m_pipelineLayout;
-        //pipelineInfo.renderPass = m_renderPass;
+        pipelineInfo.renderPass = JoyContext::Render()->GetMainRenderPass();
         pipelineInfo.pDepthStencilState = &depthStencil;
         pipelineInfo.subpass = 0;
         pipelineInfo.basePipelineHandle = VK_NULL_HANDLE;
@@ -238,6 +248,14 @@ namespace JoyEngine {
         return JoyContext::Resource()->GetResource<Shader>(m_fragmentShader);
     }
 
+    VkPipeline SharedMaterial::GetPipeline() const noexcept {
+        return m_graphicsPipeline;
+    }
+
+    VkPipelineLayout SharedMaterial::GetPipelineLayout() const noexcept {
+        return m_pipelineLayout;
+    }
+
     VkDescriptorType SharedMaterial::GetTypeFromStr(const std::string &type) noexcept {
         if (type == "texture")
             return VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
@@ -247,5 +265,15 @@ namespace JoyEngine {
         return VK_DESCRIPTOR_TYPE_MAX_ENUM;
     }
 
+    BindingInfo SharedMaterial::GetBindingInfoByName(const std::string &name) noexcept {
+        return m_bindings[name];
+    }
 
+    SetLayoutInfo SharedMaterial::GetSetLayoutInfo(uint32_t setIndex) noexcept {
+        return m_setLayoutInfos[setIndex];
+    }
+
+    uint32_t SharedMaterial::GetSetLayoutSize() const noexcept {
+        return m_setLayouts.size();
+    }
 }

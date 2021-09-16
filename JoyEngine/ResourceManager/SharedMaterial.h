@@ -36,6 +36,18 @@ namespace JoyEngine {
 
         [[nodiscard]] Shader *GetFragmentShader() const noexcept;
 
+        [[nodiscard]] VkPipeline GetPipeline() const noexcept;
+
+        [[nodiscard]] VkPipelineLayout GetPipelineLayout() const noexcept;
+
+        BindingInfo GetBindingInfoByName(const std::string &name) noexcept;
+
+        SetLayoutInfo GetSetLayoutInfo(uint32_t setIndex) noexcept;
+
+        [[nodiscard]] uint32_t GetSetLayoutSize() const noexcept;
+
+        static VkDescriptorType GetTypeFromStr(const std::string &type) noexcept;
+
     private :
         GUID m_vertexShader;
         GUID m_fragmentShader;
@@ -48,16 +60,16 @@ namespace JoyEngine {
         std::vector<VkDescriptorSetLayout> m_setLayouts;
         std::map<std::string, BindingInfo> m_bindings;
 
-//        std::vector<VkDescriptorSet> m_descriptorSets;
         VkPipelineLayout m_pipelineLayout = VK_NULL_HANDLE;
         VkPipeline m_graphicsPipeline = VK_NULL_HANDLE;
 
     private:
-        static VkDescriptorType GetTypeFromStr(const std::string &type) noexcept;
 
         GUID m_guid;
 
     private:
+        void Initialize();
+
         void CreateGraphicsPipeline();
     };
 }

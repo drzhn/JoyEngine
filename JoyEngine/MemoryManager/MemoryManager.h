@@ -1,10 +1,7 @@
 #ifndef MEMORY_MANAGER_H
 #define MEMORY_MANAGER_H
 
-#include "JoyGraphicsContext.h"
-#include "GPUMemoryManager.h"
-#include "Common/Resource.h"
-#include "Utils/Assert.h"
+#include <vulkan/vulkan.h>
 
 namespace JoyEngine {
 
@@ -12,7 +9,7 @@ namespace JoyEngine {
 
     class MemoryManager {
     public:
-        MemoryManager();
+        MemoryManager() = default;
 
         void Init() {}
 
@@ -75,10 +72,6 @@ namespace JoyEngine {
         void DestroyShaderModule(VkShaderModule shaderModule);
 
     private:
-        JoyGraphicsContext *const m_graphicsContext;
-        const VkAllocationCallbacks *m_allocator;
-
-
         void CopyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size);
 
         VkCommandBuffer BeginSingleTimeCommands();

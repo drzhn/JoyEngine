@@ -27,8 +27,6 @@ namespace JoyEngine {
         [[nodiscard]] std::vector<VkImageView> GetSwapChainImageViews() const noexcept { return m_swapChainImageViews; };
 
     private:
-        JoyGraphicsContext *const m_graphicsContext;
-        const VkAllocationCallbacks* m_allocator;
         uint32_t m_swapchainImageCount = 0;
         VkSwapchainKHR m_swapChain;
         std::vector<VkImage> m_swapChainImages;

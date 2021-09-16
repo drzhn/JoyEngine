@@ -35,7 +35,6 @@ namespace JoyEngine {
         [[nodiscard]]Material *GetMaterial() const noexcept;
 
     private:
-        uint32_t m_index;
         std::optional<GUID> m_meshGuid;
         std::optional<GUID> m_materialGuid;
     };

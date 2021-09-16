@@ -10,8 +10,4 @@
 
 namespace JoyEngine {
 
-    ResourceManager::ResourceManager() :
-            m_graphicsContext(JoyContext::Graphics()),
-            m_allocator(JoyContext::Graphics()->GetAllocationCallbacks()) {
-    }
 }

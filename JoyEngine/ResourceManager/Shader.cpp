@@ -4,6 +4,9 @@
 
 #include <vector>
 
+#include "DataManager/DataManager.h"
+#include "MemoryManager/MemoryManager.h"
+
 namespace JoyEngine {
 
     Shader::Shader(GUID guid) {

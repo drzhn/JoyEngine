@@ -26,7 +26,7 @@ namespace JoyEngine {
     class ResourceManager {
     public:
 
-        ResourceManager();
+        ResourceManager() = default;
 
         void Init() {}
 
@@ -72,9 +72,6 @@ namespace JoyEngine {
         }
 
     private:
-        JoyGraphicsContext *const m_graphicsContext;
-        const VkAllocationCallbacks *m_allocator;
-
         std::map<GUID, std::unique_ptr<Resource>> m_loadedResources;
     };
 }

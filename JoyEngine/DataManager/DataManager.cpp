@@ -25,7 +25,7 @@ namespace JoyEngine {
     }
 
     void DataManager::GetDataStream(std::ifstream &stream, GUID guid) {
-        getFileStream(stream, GetPath(guid).string());
+        getFileStream(stream, m_dataPath + GetPath(guid).string());
     }
 
     void DataManager::ParseDatabase(std::map<GUID, std::filesystem::path> &pathDatabase, const char *data) {
@@ -65,14 +65,19 @@ namespace JoyEngine {
         switch (type) {
             case mesh:
                 s = "mesh";
+                break;
             case texture:
                 s = "texture";
+                break;
             case shader:
                 s = "shader";
+                break;
             case material:
                 s = "material";
+                break;
             case sharedMaterial:
                 s = "sharedMaterial";
+                break;
             default:
                 ASSERT(false);
         }

@@ -4,6 +4,9 @@
 
 #include <vector>
 
+#include "DataManager/DataManager.h"
+#include "MemoryManager/MemoryManager.h"
+
 namespace JoyEngine {
     Texture::Texture(GUID guid) {
         std::vector<unsigned char> imageData = JoyContext::Data()->GetData<unsigned char>(guid);

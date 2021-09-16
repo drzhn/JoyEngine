@@ -45,7 +45,7 @@ namespace JoyEngine {
 
         std::vector<VkDescriptorSet> Allocate(uint32_t count);
 
-        void Free(const std::vector<VkDescriptorSet>& descriptorSets);
+        void Free(VkDescriptorSet descriptorSet);
 
     private:
         VkDescriptorSetLayout m_setLayout;
@@ -64,8 +64,13 @@ namespace JoyEngine {
 
         void UnregisterPool(uint64_t hash);
 
+        std::vector<VkDescriptorSet> Allocate(uint64_t hash, uint32_t count);
+
+        void Free(const std::vector<VkDescriptorSet>& descriptorSets);
+
     private:
         std::map<uint64_t, std::unique_ptr<DescriptorPoolList>> m_pools;
+        std::map<VkDescriptorSet, uint64_t> m_usedDescriptorSets;
     };
 }
 

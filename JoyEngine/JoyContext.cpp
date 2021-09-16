@@ -1,5 +1,13 @@
 #include "JoyContext.h"
 
+#include "SceneManager/SceneManager.h"
+#include "RenderManager/RenderManager.h"
+#include "MemoryManager/MemoryManager.h"
+#include "ResourceManager/ResourceManager.h"
+#include "DataManager/DataManager.h"
+#include "ResourceManager/DescriptorSetManager.h"
+#include "JoyGraphicsContext.h"
+
 namespace JoyEngine {
 
     JoyContext *JoyContext::m_instance = nullptr;
@@ -26,8 +34,8 @@ namespace JoyEngine {
 
     void JoyContext::Init() {
         m_memoryManager->Init();
-        m_sceneManager->Init();
         m_renderManager->Init();
+        m_sceneManager->Init();
     }
 
     void JoyContext::Start() {
@@ -62,17 +70,38 @@ namespace JoyEngine {
 
     }
 
-    JoyGraphicsContext *const JoyContext::Graphics() noexcept { return m_instance->m_graphicsContext; }
+    JoyGraphicsContext *const JoyContext::Graphics() noexcept {
+        ASSERT(m_instance != nullptr && m_instance->m_graphicsContext != nullptr);
+        return m_instance->m_graphicsContext;
+    }
 
-    MemoryManager *const JoyContext::Memory() noexcept { return m_instance->m_memoryManager; }
+    MemoryManager *const JoyContext::Memory() noexcept {
+        ASSERT(m_instance != nullptr && m_instance->m_memoryManager != nullptr);
+        return m_instance->m_memoryManager;
+    }
 
-    DataManager *const JoyContext::Data() noexcept { return m_instance->m_dataManager; }
+    DataManager *const JoyContext::Data() noexcept {
+        ASSERT(m_instance != nullptr && m_instance->m_dataManager != nullptr);
+        return m_instance->m_dataManager;
+    }
 
-    DescriptorSetManager *const JoyContext::DescriptorSet() noexcept { return m_instance->m_descriptorSetManager; }
+    DescriptorSetManager *const JoyContext::DescriptorSet() noexcept {
+        ASSERT(m_instance != nullptr && m_instance->m_descriptorSetManager != nullptr);
+        return m_instance->m_descriptorSetManager;
+    }
 
-    ResourceManager *const JoyContext::Resource() noexcept { return m_instance->m_resourceManager; }
+    ResourceManager *const JoyContext::Resource() noexcept {
+        ASSERT(m_instance != nullptr && m_instance->m_resourceManager != nullptr);
+        return m_instance->m_resourceManager;
+    }
 
-    SceneManager *const JoyContext::Scene() noexcept { return m_instance->m_sceneManager; }
+    SceneManager *const JoyContext::Scene() noexcept {
+        ASSERT(m_instance != nullptr && m_instance->m_sceneManager != nullptr);
+        return m_instance->m_sceneManager;
+    }
 
-    RenderManager *const JoyContext::Render() noexcept { return m_instance->m_renderManager; }
+    RenderManager *const JoyContext::Render() noexcept {
+        ASSERT(m_instance != nullptr && m_instance->m_renderManager != nullptr);
+        return m_instance->m_renderManager;
+    }
 }

@@ -9,7 +9,7 @@
 #include "Utils/GUID.h"
 
 namespace JoyEngine {
-    class Material final: public Resource {
+    class Material final : public Resource {
     public :
         Material() = delete;
 
@@ -19,9 +19,19 @@ namespace JoyEngine {
 
         [[nodiscard]] SharedMaterial *GetSharedMaterial() const noexcept;
 
+        [[nodiscard]] std::map<uint32_t, std::vector<VkDescriptorSet>> GetDescriptorMap() const noexcept;
+
+    private:
+        void CreateDescriptorSets();
+
+        void LoadResources();
+
     private :
         GUID m_sharedMaterialGuid;
-        std::map <std::string, GUID> m_bindings;
+        SharedMaterial *m_sharedMaterial;
+        std::map<std::string, GUID> m_bindings;
+
+        std::map<uint32_t, std::vector<VkDescriptorSet>> m_descriptorSets;
     };
 }
 

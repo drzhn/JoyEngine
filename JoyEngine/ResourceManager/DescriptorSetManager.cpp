@@ -2,6 +2,10 @@
 
 #include "JoyContext.h"
 
+#include "JoyGraphicsContext.h"
+#include "DataManager/DataManager.h"
+#include "MemoryManager/MemoryManager.h"
+
 namespace JoyEngine {
 
     void DescriptorSetManager::RegisterPool(uint64_t hash, VkDescriptorSetLayout setLayout, const std::vector<VkDescriptorType> &types) {
@@ -24,16 +28,33 @@ namespace JoyEngine {
         }
     }
 
+    std::vector<VkDescriptorSet> DescriptorSetManager::Allocate(uint64_t hash, uint32_t count) {
+        std::vector<VkDescriptorSet> sets = m_pools[hash]->Allocate(count);
+        for (const auto &set: sets) {
+            m_usedDescriptorSets.insert({set, hash});
+        }
+        return sets;
+    }
+
+    void DescriptorSetManager::Free(const std::vector<VkDescriptorSet> &descriptorSets) {
+        for (const auto &descriptorSet: descriptorSets) {
+            uint64_t hash = m_usedDescriptorSets[descriptorSet];
+            m_pools[hash]->Free(descriptorSet);
+            m_usedDescriptorSets.erase(descriptorSet);
+        }
+    }
+
 // =========== Descriptor Pool  =============
 
     DescriptorPool::DescriptorPool(VkDescriptorSetLayout setLayout, const std::vector<VkDescriptorType> &types) {
         uint32_t poolSize = types.size();
         std::vector<VkDescriptorPoolSize> poolSizes(poolSize);
         for (uint32_t i = 0; i < poolSize; i++) {
-            poolSizes.push_back({
+            VkDescriptorPoolSize size = {
                     types[i],
                     DESCRIPTOR_POOL_SIZE
-            });
+            };
+            poolSizes[i] = size;
         }
 
         VkDescriptorPoolCreateInfo poolInfo{
@@ -45,10 +66,12 @@ namespace JoyEngine {
                 poolSizes.data()
         };
 
-        VkResult res = vkCreateDescriptorPool(JoyContext::Graphics()->GetVkDevice(),
-                                              &poolInfo,
-                                              JoyContext::Graphics()->GetAllocationCallbacks(),
-                                              &m_pool);
+        VkResult res = vkCreateDescriptorPool(
+                JoyContext::Graphics()->GetVkDevice(),
+                &poolInfo,
+                JoyContext::Graphics()->GetAllocationCallbacks(),
+                &m_pool);
+
         ASSERT(res == VK_SUCCESS);
 
         VkDescriptorSetLayout layouts[DESCRIPTOR_POOL_SIZE];
@@ -58,7 +81,7 @@ namespace JoyEngine {
                 VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO,
                 nullptr,
                 m_pool,
-                DESCRIPTOR_POOL_SIZE,
+                DESCRIPTOR_POOL_SIZE-1,
                 layouts
         };
 
@@ -124,11 +147,9 @@ namespace JoyEngine {
         return sets;
     }
 
-    void DescriptorPoolList::Free(const std::vector<VkDescriptorSet> &descriptorSets) {
-        for (const auto &item: descriptorSets) {
-            m_usedDescriptorSets[item]->Free(item);
-            m_usedDescriptorSets.erase(item);
-            // TODO after Free() we need to delete each pool where GetSize() == DESCRIPTOR_POOL_SIZE except one
-        }
+    void DescriptorPoolList::Free(VkDescriptorSet descriptorSet) {
+        m_usedDescriptorSets[descriptorSet]->Free(descriptorSet);
+        m_usedDescriptorSets.erase(descriptorSet);
+        // TODO after Free() we need to delete each pool where GetSize() == DESCRIPTOR_POOL_SIZE except one
     }
 }

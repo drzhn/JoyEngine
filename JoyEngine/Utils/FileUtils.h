@@ -24,6 +24,7 @@ namespace JoyEngine {
 
     static void getFileStream(std::ifstream &stream, const std::string &filename) {
         stream.open(filename);
+        bool isOpen = stream.is_open();
         ASSERT(stream.is_open());
     }
 }

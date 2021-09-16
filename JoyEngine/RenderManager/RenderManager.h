@@ -22,7 +22,6 @@
 #include "RenderManager/VulkanTypes.h"
 #include "RenderManager/VulkanUtils.h"
 
-#include "RenderObject.h"
 #include "Swapchain.h"
 
 #include "Utils/FileUtils.h"
@@ -47,11 +46,13 @@ namespace JoyEngine {
 
         void DrawFrame();
 
-        uint32_t RegisterMeshRenderer(MeshRenderer *meshRenderer);
+        void RegisterMeshRenderer(MeshRenderer *meshRenderer);
 
-        void UnregisterMeshRenderer(uint32_t);
+        void UnregisterMeshRenderer(MeshRenderer *meshRenderer);
 
-        [[nodiscard]]Swapchain *GetSwapchain() const noexcept { return m_swapchain.get(); }
+        [[nodiscard]]Swapchain *GetSwapchain() const noexcept;
+
+        [[nodiscard]]VkRenderPass GetMainRenderPass() const noexcept;
 
     private:
 
@@ -72,14 +73,10 @@ namespace JoyEngine {
     private:
         const int MAX_FRAMES_IN_FLIGHT = 2;
 
-        JoyGraphicsContext *const m_graphicsContext;
-        ResourceManager *const m_resourceManager;
-        const VkAllocationCallbacks *m_allocator;
         std::unique_ptr<Swapchain> m_swapchain;
         VkRenderPass m_renderPass;
 
-        uint32_t m_renderObjectIndex = 0;
-        std::map<uint32_t, std::unique_ptr<RenderObject>> m_renderObjects;
+        std::set<MeshRenderer *> m_meshRenderers;
         std::unique_ptr<Texture> m_depthTexture;
         std::unique_ptr<Texture> m_normalTexture;
         std::unique_ptr<Texture> m_positionTexture;

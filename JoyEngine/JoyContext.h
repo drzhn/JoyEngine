@@ -4,19 +4,18 @@
 #include <iostream>
 #include "windows.h"
 
-#include "SceneManager/SceneManager.h"
-#include "RenderManager/RenderManager.h"
-#include "MemoryManager/MemoryManager.h"
-#include "ResourceManager/ResourceManager.h"
-#include "DataManager/DataManager.h"
-#include "ResourceManager/DescriptorSetManager.h"
-#include "JoyGraphicsContext.h"
 #include "Utils/Assert.h"
 
 
 namespace JoyEngine {
 
+    class JoyGraphicsContext;
+
     class MemoryManager;
+
+    class DataManager;
+
+    class DescriptorSetManager;
 
     class ResourceManager;
 
@@ -31,6 +30,8 @@ namespace JoyEngine {
 
     class JoyContext : public IWindowMessageHandler {
     public:
+        JoyContext() = delete;
+
         JoyContext(HINSTANCE instance, HWND windowHandle);
 
         void Init();

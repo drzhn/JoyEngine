@@ -6,19 +6,18 @@
 #include "Common/Resource.h"
 
 namespace JoyEngine {
-    MeshRenderer::MeshRenderer(Transform *t) : Component(t),
-                                               m_index(UINT32_MAX) {
+    MeshRenderer::MeshRenderer(Transform *t) : Component(t){
 
     }
 
     void MeshRenderer::Enable() {
         ASSERT(m_meshGuid.has_value() && m_materialGuid.has_value());
-        m_index = JoyContext::Render()->RegisterMeshRenderer(this);
+        JoyContext::Render()->RegisterMeshRenderer(this);
         m_enabled = true;
     }
 
     void MeshRenderer::Disable() {
-        JoyContext::Render()->UnregisterMeshRenderer(m_index);
+        JoyContext::Render()->UnregisterMeshRenderer(this);
         m_enabled = false;
     }
 
