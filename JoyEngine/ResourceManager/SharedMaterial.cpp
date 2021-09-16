@@ -46,6 +46,7 @@ namespace JoyEngine {
                 std::string typeStr = bindingSetArray[bindingIndex]["type"].GetString();
                 std::string nameStr = bindingSetArray[bindingIndex]["name"].GetString();
                 VkDescriptorType type = GetTypeFromStr(typeStr);
+                types[bindingIndex] = type;
                 VkShaderStageFlags stageFlagBits = VK_SHADER_STAGE_FRAGMENT_BIT | VK_SHADER_STAGE_VERTEX_BIT;
                 uint32_t descriptorCount = 1;
                 bindings[bindingIndex] = {
@@ -74,7 +75,7 @@ namespace JoyEngine {
                                                        &setLayout);
             ASSERT(res == VK_SUCCESS);
 
-            m_setLayouts.push_back({setLayout});
+            m_setLayouts.push_back(setLayout);
             m_setLayoutInfos.push_back({isStatic, hash});
             JoyContext::DescriptorSet()->RegisterPool(hash, setLayout, types);
             setIndex++;
@@ -185,10 +186,21 @@ namespace JoyEngine {
         colorBlending.blendConstants[2] = 0.0f; // Optional
         colorBlending.blendConstants[3] = 0.0f; // Optional
 
-        VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
-        pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-        pipelineLayoutInfo.setLayoutCount = m_setLayouts.size();
-        pipelineLayoutInfo.pSetLayouts = m_setLayouts.data();
+        VkPushConstantRange pushConstantRange{
+                VK_SHADER_STAGE_VERTEX_BIT,
+                0,
+                sizeof(UniformBufferObject)
+        };
+
+        VkPipelineLayoutCreateInfo pipelineLayoutInfo{
+                VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO,
+                nullptr,
+                0,
+                static_cast<uint32_t>(m_setLayouts.size()),
+                m_setLayouts.data(),
+                1,
+                &pushConstantRange
+        };
 
         VkResult res = vkCreatePipelineLayout(JoyContext::Graphics()->GetVkDevice(),
                                               &pipelineLayoutInfo,

@@ -7,7 +7,7 @@ layout(location = 2) in vec3 fragNormal;
 
 layout(location = 0) out vec4 outColor;
 
-layout(binding = 1) uniform sampler2D texSampler;
+layout(binding = 0) uniform sampler2D texSampler;
 
 void main() {
     outColor = texture(texSampler, fragTexCoord);

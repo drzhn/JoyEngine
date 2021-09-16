@@ -63,7 +63,7 @@ namespace JoyEngine {
             m_descriptorSets.insert({i, set});
         }
 
-        std::vector<VkWriteDescriptorSet> descriptorWrites(m_bindings.size());
+        std::vector<VkWriteDescriptorSet> descriptorWrites;
 
         for (const auto &binding: m_bindings) {
 

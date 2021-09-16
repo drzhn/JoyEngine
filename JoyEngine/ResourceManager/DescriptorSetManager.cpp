@@ -81,7 +81,7 @@ namespace JoyEngine {
                 VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO,
                 nullptr,
                 m_pool,
-                DESCRIPTOR_POOL_SIZE-1,
+                DESCRIPTOR_POOL_SIZE,
                 layouts
         };
 
@@ -126,7 +126,7 @@ namespace JoyEngine {
         std::vector<VkDescriptorSet> sets;
         uint32_t numAllocated = 0;
         for (auto &pool: m_poolList) {
-            while (pool->GetSize() > 0 || numAllocated < count) {
+            while (pool->GetSize() > 0 && numAllocated < count) {
                 VkDescriptorSet set = pool->Allocate();
                 m_usedDescriptorSets.insert({set, pool.get()});
                 sets.push_back(set);
@@ -136,7 +136,7 @@ namespace JoyEngine {
         while (numAllocated < count) {
             std::unique_ptr<DescriptorPool> newPool = std::make_unique<DescriptorPool>(m_setLayout, m_types);
 
-            while (newPool->GetSize() > 0 || numAllocated < count) {
+            while (newPool->GetSize() > 0 && numAllocated < count) {
                 VkDescriptorSet set = newPool->Allocate();
                 m_usedDescriptorSets.insert({set, newPool.get()});
                 sets.push_back(set);
