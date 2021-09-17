@@ -25,6 +25,8 @@ namespace JoyEngine {
         if (m_enabled) {
             Disable();
         }
+        JoyContext::Resource()->UnloadResource(m_materialGuid.value());
+        JoyContext::Resource()->UnloadResource(m_meshGuid.value());
     }
 
     void MeshRenderer::SetMesh(GUID meshGuid) {

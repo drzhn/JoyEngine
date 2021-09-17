@@ -70,37 +70,37 @@ namespace JoyEngine {
 
     }
 
-    JoyGraphicsContext *const JoyContext::Graphics() noexcept {
+    JoyGraphicsContext *JoyContext::Graphics() noexcept {
         ASSERT(m_instance != nullptr && m_instance->m_graphicsContext != nullptr);
         return m_instance->m_graphicsContext;
     }
 
-    MemoryManager *const JoyContext::Memory() noexcept {
+    MemoryManager *JoyContext::Memory() noexcept {
         ASSERT(m_instance != nullptr && m_instance->m_memoryManager != nullptr);
         return m_instance->m_memoryManager;
     }
 
-    DataManager *const JoyContext::Data() noexcept {
+    DataManager *JoyContext::Data() noexcept {
         ASSERT(m_instance != nullptr && m_instance->m_dataManager != nullptr);
         return m_instance->m_dataManager;
     }
 
-    DescriptorSetManager *const JoyContext::DescriptorSet() noexcept {
+    DescriptorSetManager *JoyContext::DescriptorSet() noexcept {
         ASSERT(m_instance != nullptr && m_instance->m_descriptorSetManager != nullptr);
         return m_instance->m_descriptorSetManager;
     }
 
-    ResourceManager *const JoyContext::Resource() noexcept {
+    ResourceManager *JoyContext::Resource() noexcept {
         ASSERT(m_instance != nullptr && m_instance->m_resourceManager != nullptr);
         return m_instance->m_resourceManager;
     }
 
-    SceneManager *const JoyContext::Scene() noexcept {
+    SceneManager *JoyContext::Scene() noexcept {
         ASSERT(m_instance != nullptr && m_instance->m_sceneManager != nullptr);
         return m_instance->m_sceneManager;
     }
 
-    RenderManager *const JoyContext::Render() noexcept {
+    RenderManager *JoyContext::Render() noexcept {
         ASSERT(m_instance != nullptr && m_instance->m_renderManager != nullptr);
         return m_instance->m_renderManager;
     }

@@ -17,7 +17,8 @@ namespace JoyEngine {
         texture,
         shader,
         material,
-        sharedMaterial
+        sharedMaterial,
+        scene
     };
 
     class DataManager {

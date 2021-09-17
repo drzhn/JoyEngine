@@ -1,17 +1,17 @@
 #ifndef SCENE_H
 #define SCENE_H
 
-#include <utility>
 #include <vector>
 #include <string>
 #include <memory>
 
 #include "GameObject.h"
+#include "Utils/GUID.h"
 
 namespace JoyEngine {
     class Scene {
     public :
-        Scene(const std::string &name);
+        Scene(const GUID &guid);
 
         void Update() {
             // Update GameObjects throw logic in components;

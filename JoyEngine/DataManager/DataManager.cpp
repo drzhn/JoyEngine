@@ -78,6 +78,9 @@ namespace JoyEngine {
             case sharedMaterial:
                 s = "sharedMaterial";
                 break;
+            case scene:
+                s = "scene";
+                break;
             default:
                 ASSERT(false);
         }

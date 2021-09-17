@@ -46,19 +46,19 @@ namespace JoyEngine {
 
         void HandleMessage(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) override;
 
-        static JoyGraphicsContext *const Graphics() noexcept;
+        static JoyGraphicsContext *Graphics() noexcept;
 
-        static MemoryManager *const Memory() noexcept;
+        static MemoryManager *Memory() noexcept;
 
-        static DataManager *const Data() noexcept;
+        static DataManager *Data() noexcept;
 
-        static DescriptorSetManager *const DescriptorSet() noexcept;
+        static DescriptorSetManager *DescriptorSet() noexcept;
 
-        static ResourceManager *const Resource() noexcept;
+        static ResourceManager *Resource() noexcept;
 
-        static SceneManager *const Scene() noexcept;
+        static SceneManager *Scene() noexcept;
 
-        static RenderManager *const Render() noexcept;
+        static RenderManager *Render() noexcept;
 
     private:
         void InternalHandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam);

@@ -1,28 +1,11 @@
 #include "RenderManager.h"
 
-#include <windows.h>
-#include <array>
-#include <set>
 #include <chrono>
 #include <memory>
 
 #include "JoyContext.h"
-#include "Swapchain.h"
-
-#include "ResourceManager/ResourceManager.h"
-#include "ResourceManager/Mesh.h"
 
 #include "MemoryManager/MemoryManager.h"
-
-#include "RenderManager/VulkanAllocator.h"
-#include "RenderManager/VulkanTypes.h"
-#include "RenderManager/VulkanUtils.h"
-
-#include <Libs/glm/glm/glm.hpp>
-#include <Libs/stb/stb_image.h>
-#include <Libs/tinyobjloader/tiny_obj_loader.h>
-#include <array>
-
 
 #define GLM_FORCE_RADIANS
 #define STB_IMAGE_IMPLEMENTATION
@@ -124,11 +107,11 @@ namespace JoyEngine {
         dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
         dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
 
-        std::array<VkAttachmentDescription, 2> attachments = {colorAttachment, depthAttachment};
+        VkAttachmentDescription attachments[] = {colorAttachment, depthAttachment};
         VkRenderPassCreateInfo renderPassInfo{};
         renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
-        renderPassInfo.attachmentCount = static_cast<uint32_t>(attachments.size());
-        renderPassInfo.pAttachments = attachments.data();
+        renderPassInfo.attachmentCount = 2;
+        renderPassInfo.pAttachments = attachments;
         renderPassInfo.subpassCount = 1;
         renderPassInfo.pSubpasses = &subpass;
         renderPassInfo.dependencyCount = 1;
@@ -154,69 +137,75 @@ namespace JoyEngine {
         m_depthTexture = std::make_unique<Texture>();
         VkFormat depthFormat = findDepthFormat(JoyContext::Graphics()->GetVkPhysicalDevice());
 
-        MemoryManager::CreateImage(JoyContext::Graphics()->GetVkPhysicalDevice(),
-                                   JoyContext::Graphics()->GetVkDevice(),
-                                   JoyContext::Graphics()->GetAllocationCallbacks(),
-                                   m_swapchain->GetSwapChainExtent().width,
-                                   m_swapchain->GetSwapChainExtent().height,
-                                   depthFormat,
-                                   VK_IMAGE_TILING_OPTIMAL,
-                                   VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT,
-                                   VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
-                                   m_depthTexture->GetImage(),
-                                   m_depthTexture->GetDeviceMemory());
-        MemoryManager::CreateImageView(JoyContext::Graphics()->GetVkDevice(),
-                                       JoyContext::Graphics()->GetAllocationCallbacks(),
-                                       m_depthTexture->GetImage(),
-                                       depthFormat,
-                                       VK_IMAGE_ASPECT_DEPTH_BIT,
-                                       m_depthTexture->GetImageView());
+        JoyContext::Memory()->CreateImage(
+                JoyContext::Graphics()->GetVkPhysicalDevice(),
+                JoyContext::Graphics()->GetVkDevice(),
+                JoyContext::Graphics()->GetAllocationCallbacks(),
+                m_swapchain->GetSwapChainExtent().width,
+                m_swapchain->GetSwapChainExtent().height,
+                depthFormat,
+                VK_IMAGE_TILING_OPTIMAL,
+                VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT,
+                VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+                m_depthTexture->GetImage(),
+                m_depthTexture->GetDeviceMemory());
+        JoyContext::Memory()->CreateImageView(
+                JoyContext::Graphics()->GetVkDevice(),
+                JoyContext::Graphics()->GetAllocationCallbacks(),
+                m_depthTexture->GetImage(),
+                depthFormat,
+                VK_IMAGE_ASPECT_DEPTH_BIT,
+                m_depthTexture->GetImageView());
 
         m_normalTexture = std::make_unique<Texture>();
 
-        MemoryManager::CreateImage(JoyContext::Graphics()->GetVkPhysicalDevice(),
-                                   JoyContext::Graphics()->GetVkDevice(),
-                                   JoyContext::Graphics()->GetAllocationCallbacks(),
-                                   m_swapchain->GetSwapChainExtent().width,
-                                   m_swapchain->GetSwapChainExtent().height,
-                                   VK_FORMAT_R8G8B8A8_UNORM,
-                                   VK_IMAGE_TILING_OPTIMAL,
-                                   VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT,
-                                   VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
-                                   m_normalTexture->GetImage(),
-                                   m_normalTexture->GetDeviceMemory());
-        MemoryManager::CreateImageView(JoyContext::Graphics()->GetVkDevice(),
-                                       JoyContext::Graphics()->GetAllocationCallbacks(),
-                                       m_normalTexture->GetImage(),
-                                       VK_FORMAT_R8G8B8A8_UNORM,
-                                       VK_IMAGE_ASPECT_COLOR_BIT,
-                                       m_normalTexture->GetImageView());
+        JoyContext::Memory()->CreateImage(
+                JoyContext::Graphics()->GetVkPhysicalDevice(),
+                JoyContext::Graphics()->GetVkDevice(),
+                JoyContext::Graphics()->GetAllocationCallbacks(),
+                m_swapchain->GetSwapChainExtent().width,
+                m_swapchain->GetSwapChainExtent().height,
+                VK_FORMAT_R8G8B8A8_UNORM,
+                VK_IMAGE_TILING_OPTIMAL,
+                VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT,
+                VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+                m_normalTexture->GetImage(),
+                m_normalTexture->GetDeviceMemory());
+        JoyContext::Memory()->CreateImageView(
+                JoyContext::Graphics()->GetVkDevice(),
+                JoyContext::Graphics()->GetAllocationCallbacks(),
+                m_normalTexture->GetImage(),
+                VK_FORMAT_R8G8B8A8_UNORM,
+                VK_IMAGE_ASPECT_COLOR_BIT,
+                m_normalTexture->GetImageView());
 
         m_positionTexture = std::make_unique<Texture>();
 
-        MemoryManager::CreateImage(JoyContext::Graphics()->GetVkPhysicalDevice(),
-                                   JoyContext::Graphics()->GetVkDevice(),
-                                   JoyContext::Graphics()->GetAllocationCallbacks(),
-                                   m_swapchain->GetSwapChainExtent().width,
-                                   m_swapchain->GetSwapChainExtent().height,
-                                   VK_FORMAT_R8G8B8A8_UNORM,
-                                   VK_IMAGE_TILING_OPTIMAL,
-                                   VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT,
-                                   VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
-                                   m_positionTexture->GetImage(),
-                                   m_positionTexture->GetDeviceMemory());
-        MemoryManager::CreateImageView(JoyContext::Graphics()->GetVkDevice(),
-                                       JoyContext::Graphics()->GetAllocationCallbacks(),
-                                       m_positionTexture->GetImage(),
-                                       VK_FORMAT_R8G8B8A8_UNORM,
-                                       VK_IMAGE_ASPECT_COLOR_BIT,
-                                       m_positionTexture->GetImageView());
+        JoyContext::Memory()->CreateImage(
+                JoyContext::Graphics()->GetVkPhysicalDevice(),
+                JoyContext::Graphics()->GetVkDevice(),
+                JoyContext::Graphics()->GetAllocationCallbacks(),
+                m_swapchain->GetSwapChainExtent().width,
+                m_swapchain->GetSwapChainExtent().height,
+                VK_FORMAT_R8G8B8A8_UNORM,
+                VK_IMAGE_TILING_OPTIMAL,
+                VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT,
+                VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+                m_positionTexture->GetImage(),
+                m_positionTexture->GetDeviceMemory());
+        JoyContext::Memory()->CreateImageView(
+                JoyContext::Graphics()->GetVkDevice(),
+                JoyContext::Graphics()->GetAllocationCallbacks(),
+                m_positionTexture->GetImage(),
+                VK_FORMAT_R8G8B8A8_UNORM,
+                VK_IMAGE_ASPECT_COLOR_BIT,
+                m_positionTexture->GetImageView());
     }
 
     void RenderManager::CreateFramebuffers() {
         m_swapChainFramebuffers.resize(m_swapchain->GetSwapchainImageCount());
         for (size_t i = 0; i < m_swapchain->GetSwapchainImageCount(); i++) {
-            std::array<VkImageView, 2> attachments = {
+            VkImageView attachments[2] = {
                     m_swapchain->GetSwapChainImageViews()[i],
                     m_depthTexture->GetImageView()
             };
@@ -224,8 +213,8 @@ namespace JoyEngine {
             VkFramebufferCreateInfo framebufferInfo{};
             framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
             framebufferInfo.renderPass = m_renderPass;
-            framebufferInfo.attachmentCount = static_cast<uint32_t>(attachments.size());
-            framebufferInfo.pAttachments = attachments.data();
+            framebufferInfo.attachmentCount = 2;
+            framebufferInfo.pAttachments = attachments;
             framebufferInfo.width = m_swapchain->GetSwapChainExtent().width;
             framebufferInfo.height = m_swapchain->GetSwapChainExtent().height;
             framebufferInfo.layers = 1;
@@ -269,12 +258,12 @@ namespace JoyEngine {
         renderPassInfo.renderArea.offset = {0, 0};
         renderPassInfo.renderArea.extent = m_swapchain->GetSwapChainExtent();
 
-        std::array<VkClearValue, 2> clearValues{};
+        VkClearValue clearValues[2];
         clearValues[0].color = {0.0f, 0.0f, 0.0f, 1.0f};
         clearValues[1].depthStencil = {1.0f, 0};
 
-        renderPassInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
-        renderPassInfo.pClearValues = clearValues.data();
+        renderPassInfo.clearValueCount = 2;
+        renderPassInfo.pClearValues = clearValues;
 
         vkCmdBeginRenderPass(commandBuffers[imageIndex], &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
 

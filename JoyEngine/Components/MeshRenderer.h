@@ -20,7 +20,7 @@ namespace JoyEngine {
 
         void Disable() final;
 
-        ~MeshRenderer();
+        ~MeshRenderer() override;
 
         void SetMesh(GUID meshGuid);
 

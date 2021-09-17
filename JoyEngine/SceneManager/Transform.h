@@ -3,7 +3,7 @@
 
 #include <list>
 
-#include "Libs/glm/glm/glm.hpp"
+#include <glm/glm.hpp>
 
 class Transform {
 public :

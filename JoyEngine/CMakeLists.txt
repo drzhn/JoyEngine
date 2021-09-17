@@ -20,6 +20,7 @@ add_library(
         SceneManager/GameObject.cpp
         SceneManager/Transform.cpp
         Components/MeshRenderer.cpp
+        Components/Component.cpp
         RenderManager/Swapchain.cpp
         DataManager/DataManager.cpp
         ResourceManager/Mesh.cpp

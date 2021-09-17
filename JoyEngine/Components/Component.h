@@ -6,9 +6,9 @@
 namespace JoyEngine {
     class Component {
     public:
-        Component(Transform *t) : m_transform(t) {}
+        explicit Component(Transform *t);
 
-        ~Component() = default;
+        virtual ~Component() = default;
 
         virtual void Enable() = 0;
 

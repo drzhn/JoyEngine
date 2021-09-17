@@ -20,7 +20,7 @@ namespace JoyEngine {
 //                m_scene(nullptr) {}
 
         void Init() {
-            m_scene = std::make_unique<Scene>(R"(D:\CppProjects\JoyEngine\JoyData\scenes\room.json)");
+            m_scene = std::make_unique<Scene>(GUID::StringToGuid("11dcfeba-c2b6-4c2e-a3c7-51054ff06f1d"));
         }
 
         void Start() {
