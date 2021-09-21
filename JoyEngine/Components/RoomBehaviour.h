@@ -6,7 +6,6 @@
 
 namespace JoyEngine {
 
-    int Foo();
 
     class RoomBehaviour : public Component {
 

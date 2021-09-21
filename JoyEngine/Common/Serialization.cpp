@@ -2,17 +2,6 @@
 
 namespace JoyEngine {
 
-    template<typename Type>
-    SerializedObjectCreator<Type>::SerializedObjectCreator(const std::string &className) {
-        SerializableClassFactory::GetInstance()->RegisterClass(className, this);
-    }
-
-    template<typename Type>
-    std::unique_ptr<Serializable> SerializedObjectCreator<Type>::Create() {
-        std::unique_ptr<Type> asset = std::make_unique<Type>();
-        ASSERT(dynamic_cast<Serializable *>(asset.get()) != nullptr);
-        return std::unique_ptr<Type>(std::move(asset));
-    }
 
     SerializableClassFactory *SerializableClassFactory::m_instance = nullptr;
 

@@ -6,7 +6,6 @@
 #include "Common/Serialization.h"
 #include "Components/Component.h"
 #include "DataManager/DataManager.h"
-#include "Components/RoomBehaviour.h"
 
 namespace JoyEngine {
     Scene::Scene(const GUID &guid) {
@@ -32,7 +31,6 @@ namespace JoyEngine {
                                         GUID::StringToGuid(component["material"].GetString()));
                 }
                 if (std::string(component["type"].GetString()) == "component") {
-                    int a = Foo();
                     ASSERT(component.HasMember("component"));
                     auto type = component["component"].GetString();
                     ASSERT(SerializableClassFactory::GetInstance() != nullptr);

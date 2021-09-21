@@ -3,14 +3,9 @@
 
 namespace JoyEngine {
 
-//    DECLARE_CLASS(RoomBehaviour)
+    DECLARE_CLASS(RoomBehaviour)
 
-    SerializedObjectCreator<RoomBehaviour> RoomBehaviour_creator = SerializedObjectCreator<RoomBehaviour>("RoomBehaviour");
-
-    int Foo() {
-        std::cout << "sdfsdf";
-        return 56;
-    }
+//    SerializedObjectCreator<RoomBehaviour> RoomBehaviour_creator = SerializedObjectCreator<RoomBehaviour>("RoomBehaviour");
 
 
     void RoomBehaviour::Enable() {
