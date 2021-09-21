@@ -2,39 +2,28 @@
 //    return !*s ? hash : hashQuickConstexpr(s + 1, uint32_t(hash * uint64_t(33) ^ *s));
 //}
 //
-//#define reflectable_class(T) constexpr uint32_t T##_typeId = hashQuickConstexpr(#T); class T
+//#define REFLECTABLE(T) constexpr uint32_t T##_typeId = hashQuickConstexpr(#T); class T
 //#define typeId(T) T##_typeId
-//
-//reflectable_class(Example) {
-//public:
-//    int a = 0;
-//};
+//#define HASH(T) hashQuickConstexpr(#T)
 
 #include <iostream>
+#include "Common/Serialization.h"
+
+namespace JoyEngine {
+
+}
 
 class A {
 public:
-    A() {
-        std::cout << "A created" << std::endl;
-    }
-
-    virtual ~A() {
-        std::cout << "A destroyed" << std::endl;
-
-    }
+    A() { std::cout << "Foo From A"; };
 };
 
-class B : public A {
-public:
-    B() {
-        std::cout << "B created" << std::endl;
-    }
+//class B : public A {
+//public:
+//    void Foo() override { std::cout << "Foo From B"; };
+//};
 
-    ~B() {
-        std::cout << "B destroyed" << std::endl;
-    }
-};
-
+static A a;
 int main() {
-    A a = B();
+    return 0;
 }

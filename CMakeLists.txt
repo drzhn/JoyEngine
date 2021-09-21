@@ -9,5 +9,6 @@ add_subdirectory(JoyEngine)
 target_link_libraries(JoyMain JoyEngine)
 
 if (CMAKE_BUILD_TYPE MATCHES Debug)
-    add_definitions(-DDEBUG=1)
+    add_definitions(-D DEBUG=1)
 endif()
+add_compile_options(/P output)

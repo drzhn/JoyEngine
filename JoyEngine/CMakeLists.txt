@@ -4,7 +4,7 @@ project(JoyEngine)
 set(CMAKE_CXX_STANDARD 17)
 
 if (CMAKE_BUILD_TYPE MATCHES Debug)
-    add_definitions(-DDEBUG=1)
+    add_definitions(-D DEBUG=1)
 endif()
 
 add_library(
@@ -29,7 +29,8 @@ add_library(
         ResourceManager/SharedMaterial.cpp
         ResourceManager/Shader.cpp
         ResourceManager/ResourceManager.cpp
-        ResourceManager/DescriptorSetManager.cpp )
+        ResourceManager/DescriptorSetManager.cpp
+        Common/Serialization.cpp)
 ############## make #include "<folder>/<header>.h" possible ##############
 target_include_directories(JoyEngine PUBLIC .)
 
@@ -57,9 +58,13 @@ target_include_directories(JoyEngine PUBLIC Libs/stb) # somehow this is not a li
 add_subdirectory(Libs/rapidjson)
 target_include_directories(JoyEngine PUBLIC Libs/rapidjson/include)
 
+INCLUDE("Gameplay.cmake")
+target_link_libraries(JoyEngine JoyGameplay)
+
 ############################ TEST ############################
 
-add_executable(RenderTest Tests/Test.cpp)
+add_executable(RenderTest Tests/Test.cpp Common/Serialization.cpp)
 target_include_directories(RenderTest PUBLIC .)
 target_include_directories(RenderTest PUBLIC Libs/rapidjson/include)
+target_link_libraries(RenderTest glm)
 

@@ -26,6 +26,23 @@
           "type": "renderer",
           "model": "fc972e06-70d9-4271-8615-825003b43f74",
           "material": "70cfb3fd-9105-4987-b37a-ad1f74529f9d"
+        },
+        {
+          "type": "component",
+          "component": "RoomBehaviour",
+          "fields": [
+            {
+              "m_speed": 2
+            },
+            {
+              "m_color": {
+                "r": 0.4,
+                "g": 0.5,
+                "b": 0.8,
+                "a": 1
+              }
+            }
+          ]
         }
       ]
     }

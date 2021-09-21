@@ -1,10 +1,12 @@
 #include "Scene.h"
 
-#include "JoyContext.h"
 #include "rapidjson/document.h"
-#include "DataManager/DataManager.h"
 
-#include <glm/glm.hpp>
+#include "JoyContext.h"
+#include "Common/Serialization.h"
+#include "Components/Component.h"
+#include "DataManager/DataManager.h"
+#include "Components/RoomBehaviour.h"
 
 namespace JoyEngine {
     Scene::Scene(const GUID &guid) {
@@ -29,7 +31,17 @@ namespace JoyEngine {
                     go->AddMeshRenderer(GUID::StringToGuid(component["model"].GetString()),
                                         GUID::StringToGuid(component["material"].GetString()));
                 }
-
+                if (std::string(component["type"].GetString()) == "component") {
+                    int a = Foo();
+                    ASSERT(component.HasMember("component"));
+                    auto type = component["component"].GetString();
+                    ASSERT(SerializableClassFactory::GetInstance() != nullptr);
+                    std::unique_ptr<Serializable> s = SerializableClassFactory::GetInstance()->Deserialize(component["fields"], component["component"].GetString());
+                    auto *c_ptr = dynamic_cast<Component *>(s.release());
+                    ASSERT(c_ptr != nullptr);
+                    std::unique_ptr<Component> c(c_ptr);
+                    go->AddComponent(std::move(c));
+                }
             }
             m_objects.push_back(std::move(go));
         }
