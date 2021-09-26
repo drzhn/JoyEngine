@@ -30,6 +30,11 @@ namespace JoyEngine {
 		m_localRotation = QuatAroundX * QuatAroundY * QuatAroundZ;
 	}
 
+	void Transform::SetRotation(glm::quat rot) noexcept
+	{
+		m_localRotation = rot;
+	}
+
 	glm::quat Transform::GetRotation() const noexcept { return m_localRotation; }
 
 	void Transform::SetScale(glm::vec3 scale) noexcept { m_localScale = scale; }

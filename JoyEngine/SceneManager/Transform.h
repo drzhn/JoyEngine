@@ -20,6 +20,7 @@ namespace JoyEngine
 		[[nodiscard]] glm::vec3 GetPosition() const noexcept;
 
 		void SetRotation(glm::vec3 rot) noexcept;
+		void SetRotation(glm::quat rot) noexcept;
 
 		[[nodiscard]] glm::quat GetRotation() const noexcept;
 

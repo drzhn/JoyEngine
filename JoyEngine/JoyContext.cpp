@@ -7,6 +7,7 @@
 #include "DataManager/DataManager.h"
 #include "ResourceManager/DescriptorSetManager.h"
 #include "JoyGraphicsContext.h"
+#include "Common/Time.h"
 
 namespace JoyEngine {
 
@@ -33,6 +34,8 @@ namespace JoyEngine {
     }
 
     void JoyContext::Init() {
+        Time::Init();
+
         m_memoryManager->Init();
         m_renderManager->Init();
         m_sceneManager->Init();
@@ -44,6 +47,8 @@ namespace JoyEngine {
     }
 
     void JoyContext::Update() {
+        Time::Update();
+
         m_sceneManager->Update();
         m_renderManager->Update();
     }
