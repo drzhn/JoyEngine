@@ -2,14 +2,14 @@
 #define SERIALIZABLE_H
 
 namespace JoyEngine {
-    class Serializable {
-    public:
-        Serializable() = default;
+	class Serializable {
+	public:
+		Serializable() = default;
 
-        virtual ~Serializable() = default;
+		virtual ~Serializable() = default;
 
-        //virtual void Serialize() = 0;
-    };
+		//virtual void Serialize() = 0;
+	};
 }
 
 #endif //SERIALIZABLE_H

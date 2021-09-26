@@ -58,7 +58,7 @@ namespace JoyEngine {
 
         void RegisterClassFieldOffset(const std::string &className, const std::string &filedName, FieldInfo fieldInfo);
 
-        std::unique_ptr<Serializable> Deserialize(rapidjson::Value &value, const std::string &className);
+        std::unique_ptr<Serializable> Deserialize(rapidjson::Value &fieldsJson, const std::string &className);
 
         // don't want to make storages static because of exceptions before main()
         static SerializableClassFactory *GetInstance() {

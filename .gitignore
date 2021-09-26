@@ -25,6 +25,12 @@
 *.out
 *.app
 
+*.vcxproj
+*.vcxproj.filters
+*.vcxproj.user
+
 .idea/
+.vs/
+x64/
 JoyEngine/Bin/
 JoyEngine/Bin_release/

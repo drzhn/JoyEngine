@@ -20,8 +20,8 @@ namespace JoyEngine {
             ASSERT(a >= 0 && a <= 1);
             this->r = r;
             this->g = g;
-            this->b = a;
-            this->a = b;
+            this->b = b;
+            this->a = a;
         }
 
         float r;

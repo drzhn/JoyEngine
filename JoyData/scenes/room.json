@@ -30,19 +30,15 @@
         {
           "type": "component",
           "component": "RoomBehaviour",
-          "fields": [
-            {
-              "m_speed": 2
-            },
-            {
-              "m_color": {
-                "r": 0.4,
-                "g": 0.5,
-                "b": 0.8,
-                "a": 1
-              }
+          "fields": {
+            "m_speed": 2,
+            "m_color": {
+              "r": 0.4,
+              "g": 0.5,
+              "b": 0.8,
+              "a": 1
             }
-          ]
+          }
         }
       ]
     }

@@ -6,9 +6,12 @@
 #include "Common/Serialization.h"
 #include "Components/Component.h"
 #include "DataManager/DataManager.h"
+//#include "GameplayComponents/RoomBehaviour.h"
 
 namespace JoyEngine {
     Scene::Scene(const GUID &guid) {
+        //Goo();
+
         rapidjson::Document json = JoyContext::Data()->GetSerializedData(guid, scene);
         m_name = json["name"].GetString();
 
