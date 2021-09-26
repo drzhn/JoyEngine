@@ -1,35 +1,39 @@
 #ifndef TRANSFORM_H
 #define TRANSFORM_H
 
-#include <list>
+#include <glm/glm.hpp>
+#include <glm/gtc/quaternion.hpp> 
+#include <glm/gtx/quaternion.hpp>
 
-#include <Libs/glm/glm/glm.hpp>
 
-class Transform {
-public :
-    Transform() :
-            m_localPosition(glm::vec3(0, 0, 0)),
-            m_localRotation(glm::vec3(0, 0, 0)),
-            m_localScale(glm::vec3(1, 1, 1)) {
-    }
+namespace JoyEngine
+{
 
-    void SetPosition(glm::vec3 pos) noexcept { m_localPosition = pos; };
+	class Transform {
+	public:
+		Transform();
 
-    [[nodiscard]] glm::vec3 GetPosition() const noexcept { return m_localPosition; }
+		Transform(glm::vec3 pos, glm::vec3 rot, glm::vec3 scale);
 
-    void SetRotation(glm::vec3 pos) noexcept { m_localRotation = pos; };
+		void SetPosition(glm::vec3 pos) noexcept;
 
-    [[nodiscard]] glm::vec3 GetRotation() const noexcept { return m_localRotation; }
+		[[nodiscard]] glm::vec3 GetPosition() const noexcept;
 
-    void SetScale(glm::vec3 pos) noexcept { m_localScale = pos; };
+		void SetRotation(glm::vec3 rot) noexcept;
 
-    [[nodiscard]] glm::vec3 GetScale() const noexcept { return m_localScale; }
+		[[nodiscard]] glm::quat GetRotation() const noexcept;
 
-private:
-    glm::vec3 m_localPosition;
-    glm::vec3 m_localRotation;
-    glm::vec3 m_localScale;
-};
+		void SetScale(glm::vec3 scale) noexcept;
 
+		[[nodiscard]] glm::vec3 GetScale() const noexcept;
+
+		[[nodiscard]] glm::mat4 GetModelMatrix();
+
+	private:
+		glm::vec3 m_localPosition;
+		glm::quat m_localRotation;
+		glm::vec3 m_localScale;
+	};
+}
 
 #endif //TRANSFORM_H

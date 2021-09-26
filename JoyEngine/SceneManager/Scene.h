@@ -13,9 +13,7 @@ namespace JoyEngine {
     public :
         Scene(const GUID &guid);
 
-        void Update() {
-            // Update GameObjects throw logic in components;
-        }
+        void Update();
 
     private:
         std::string m_name;

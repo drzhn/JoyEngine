@@ -12,13 +12,13 @@
 namespace JoyEngine {
     class MeshRenderer : public Component {
     public:
-        MeshRenderer() = delete;
-
-        explicit MeshRenderer(Transform *t);
+        MeshRenderer() = default;
 
         void Enable() final;
 
         void Disable() final;
+
+        void Update() final {};
 
         ~MeshRenderer() override;
 

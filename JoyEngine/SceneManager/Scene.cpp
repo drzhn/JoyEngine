@@ -5,18 +5,21 @@
 #include "JoyContext.h"
 #include "Common/Serialization.h"
 #include "Components/Component.h"
+#include "Components/MeshRenderer.h"
+#include "Components/Camera.h"
 #include "DataManager/DataManager.h"
-//#include "GameplayComponents/RoomBehaviour.h"
 
 namespace JoyEngine {
     Scene::Scene(const GUID &guid) {
-        //Goo();
 
         rapidjson::Document json = JoyContext::Data()->GetSerializedData(guid, scene);
         m_name = json["name"].GetString();
 
-        auto GetVectorValueFromField = [](rapidjson::Value &val, const char *name) -> glm::vec3 {
-            return {val[name]["x"].GetFloat(), val[name]["y"].GetFloat(), val[name]["z"].GetFloat()};
+        auto GetVectorValueFromField = [](rapidjson::Value& val, const char* name) -> glm::vec3 {
+            float x = val[name]["x"].GetFloat();
+            float y = val[name]["y"].GetFloat();
+            float z = val[name]["z"].GetFloat();
+            return glm::vec3(x,y,z);
         };
 
         rapidjson::Value &val = json["objects"];
@@ -29,11 +32,14 @@ namespace JoyEngine {
             go->GetTransform()->SetScale(GetVectorValueFromField(transformValue, "localScale"));
 
             for (auto &component: obj["components"].GetArray()) {
-                if (std::string(component["type"].GetString()) == "renderer") {
-                    go->AddMeshRenderer(GUID::StringToGuid(component["model"].GetString()),
-                                        GUID::StringToGuid(component["material"].GetString()));
+                std::string type = std::string(component["type"].GetString());
+                if (type == "renderer") {
+                    std::unique_ptr<MeshRenderer> mr = std::make_unique<MeshRenderer>();
+                    mr->SetMesh(GUID::StringToGuid(component["model"].GetString()));
+                    mr->SetMaterial(GUID::StringToGuid(component["material"].GetString()));
+                    go->AddComponent(std::move(mr));
                 }
-                if (std::string(component["type"].GetString()) == "component") {
+                else if (type == "component") {
                     ASSERT(component.HasMember("component"));
                     auto type = component["component"].GetString();
                     ASSERT(SerializableClassFactory::GetInstance() != nullptr);
@@ -43,8 +49,18 @@ namespace JoyEngine {
                     std::unique_ptr<Component> c(c_ptr);
                     go->AddComponent(std::move(c));
                 }
+                else if (type == "camera") {
+                    go->AddComponent(std::move(std::make_unique<Camera>()));
+                }
             }
             m_objects.push_back(std::move(go));
+        }
+    }
+
+    void Scene::Update()
+    {
+        for (const auto& o : m_objects) {
+            o->Update();
         }
     }
 

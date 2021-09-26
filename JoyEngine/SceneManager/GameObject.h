@@ -26,9 +26,10 @@ namespace JoyEngine {
             }
         }
 
+        void Update();
+
         Transform *GetTransform() { return &m_transform; }
 
-        void AddMeshRenderer(GUID meshGuid, GUID materialGuid);
         void AddComponent(std::unique_ptr<Component> component);
 
     private:

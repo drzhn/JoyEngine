@@ -6,10 +6,6 @@
 #include "Common/Resource.h"
 
 namespace JoyEngine {
-    MeshRenderer::MeshRenderer(Transform *t) : Component(t){
-
-    }
-
     void MeshRenderer::Enable() {
         ASSERT(m_meshGuid.has_value() && m_materialGuid.has_value());
         JoyContext::Render()->RegisterMeshRenderer(this);

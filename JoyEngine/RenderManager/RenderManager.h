@@ -18,6 +18,7 @@
 #include "ResourceManager/Texture.h"
 
 #include "Components/MeshRenderer.h"
+#include "Components/Camera.h"
 #include "RenderManager/VulkanAllocator.h"
 #include "RenderManager/VulkanTypes.h"
 #include "RenderManager/VulkanUtils.h"
@@ -27,68 +28,76 @@
 #include "Utils/FileUtils.h"
 
 namespace JoyEngine {
-    class RenderObject;
+	class RenderObject;
 
-    class RenderManager {
+	class RenderManager {
 
-    public:
-        RenderManager();
+	public:
+		RenderManager();
 
-        ~RenderManager();
+		~RenderManager();
 
-        void Init();
+		void Init();
 
-        void Start() {}
+		void Start() {}
 
-        void Stop();
+		void Stop();
 
-        void Update();
+		void Update();
 
-        void DrawFrame();
+		void DrawFrame();
 
-        void RegisterMeshRenderer(MeshRenderer *meshRenderer);
+		void RegisterMeshRenderer(MeshRenderer* meshRenderer);
 
-        void UnregisterMeshRenderer(MeshRenderer *meshRenderer);
+		void UnregisterMeshRenderer(MeshRenderer* meshRenderer);
 
-        [[nodiscard]]Swapchain *GetSwapchain() const noexcept;
+		void RegisterCamera(Camera* camera);
 
-        [[nodiscard]]VkRenderPass GetMainRenderPass() const noexcept;
+		void UnregisterCamera(Camera* camera);
 
-    private:
+		[[nodiscard]] Swapchain* GetSwapchain() const noexcept;
 
-        void CreateRenderPass();
+		[[nodiscard]] VkRenderPass GetMainRenderPass() const noexcept;
 
-        void CreateGBufferResources();
+		[[nodiscard]] float GetAspect() const noexcept;
 
-        void CreateFramebuffers();
+	private:
 
-        void CreateCommandBuffers();
+		void CreateRenderPass();
 
-        void WriteCommandBuffers(uint32_t imageIndex);
+		void CreateGBufferResources();
 
-        void ResetCommandBuffers(uint32_t imageIndex);
+		void CreateFramebuffers();
 
-        void CreateSyncObjects();
+		void CreateCommandBuffers();
 
-    private:
-        const int MAX_FRAMES_IN_FLIGHT = 2;
+		void WriteCommandBuffers(uint32_t imageIndex);
 
-        std::unique_ptr<Swapchain> m_swapchain;
-        VkRenderPass m_renderPass;
+		void ResetCommandBuffers(uint32_t imageIndex);
 
-        std::set<MeshRenderer *> m_meshRenderers;
-        std::unique_ptr<Texture> m_depthTexture;
-        std::unique_ptr<Texture> m_normalTexture;
-        std::unique_ptr<Texture> m_positionTexture;
-        std::vector<VkFramebuffer> m_swapChainFramebuffers;
-        std::vector<VkCommandBuffer> commandBuffers;
+		void CreateSyncObjects();
 
-        std::vector<VkSemaphore> m_imageAvailableSemaphores;
-        std::vector<VkSemaphore> m_renderFinishedSemaphores;
-        std::vector<VkFence> m_inFlightFences;
-        std::vector<VkFence> m_imagesInFlight;
-        size_t currentFrame = 0;
-    };
+	private:
+		const int MAX_FRAMES_IN_FLIGHT = 2;
+
+		std::unique_ptr<Swapchain> m_swapchain;
+		VkRenderPass m_renderPass;
+
+		std::set<MeshRenderer*> m_meshRenderers;
+		Camera* m_currentCamera;
+
+		std::unique_ptr<Texture> m_depthTexture;
+		std::unique_ptr<Texture> m_normalTexture;
+		std::unique_ptr<Texture> m_positionTexture;
+		std::vector<VkFramebuffer> m_swapChainFramebuffers;
+		std::vector<VkCommandBuffer> commandBuffers;
+
+		std::vector<VkSemaphore> m_imageAvailableSemaphores;
+		std::vector<VkSemaphore> m_renderFinishedSemaphores;
+		std::vector<VkFence> m_inFlightFences;
+		std::vector<VkFence> m_imagesInFlight;
+		size_t currentFrame = 0;
+	};
 
 
 }

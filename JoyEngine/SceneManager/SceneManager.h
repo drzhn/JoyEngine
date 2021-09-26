@@ -15,10 +15,6 @@ namespace JoyEngine {
     public:
         SceneManager() = default;
 
-//        explicit SceneManager(ResourceManager *resourceManager) :
-//                m_resourceManager(resourceManager),
-//                m_scene(nullptr) {}
-
         void Init() {
             m_scene = std::make_unique<Scene>(GUID::StringToGuid("11dcfeba-c2b6-4c2e-a3c7-51054ff06f1d"));
         }
@@ -29,6 +25,10 @@ namespace JoyEngine {
 
         void Stop() {
             m_scene = nullptr;
+        }
+
+        void Update() {
+            m_scene->Update();
         }
 
         ~SceneManager() {

@@ -42,7 +42,7 @@ namespace JoyEngine {
         rapidjson::Document GetSerializedData(const GUID &, DataType);
 
     private:
-        const std::string m_dataPath = R"(D:\CppProjects\JoyEngine\JoyData\)";
+        const std::string m_dataPath = R"(D:\CppProjects\JoyEngine\JoyEngineVS\JoyData\)";
         const std::string m_databaseFilename = R"(data.db)";
         std::map<GUID, std::filesystem::path> m_pathDatabase;
 

@@ -44,6 +44,7 @@ namespace JoyEngine {
     }
 
     void JoyContext::Update() {
+        m_sceneManager->Update();
         m_renderManager->Update();
     }
 

@@ -3,9 +3,7 @@
 
 namespace JoyEngine {
 
-//    DECLARE_CLASS(RoomBehaviour)
-
-    static SerializedObjectCreator<RoomBehaviour> RoomBehaviour_creator = SerializedObjectCreator<RoomBehaviour>("RoomBehaviour");
+    DECLARE_CLASS(RoomBehaviour)
 
 
     void RoomBehaviour::Enable() {
@@ -16,8 +14,10 @@ namespace JoyEngine {
         m_enabled = false;
     }
 
-    void Goo() {
+    void RoomBehaviour::Update()
+    {
 
     }
+
 }
 

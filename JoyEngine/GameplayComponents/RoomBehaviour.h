@@ -6,7 +6,6 @@
 
 namespace JoyEngine {
 
-    void Goo();
     class RoomBehaviour;
 
     class RoomBehaviour : public Component {
@@ -23,6 +22,8 @@ namespace JoyEngine {
         void Enable() final;
 
         void Disable() final;
+
+        void Update() final;
     };
 
 }
