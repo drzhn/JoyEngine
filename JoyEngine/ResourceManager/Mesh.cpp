@@ -14,17 +14,17 @@ namespace JoyEngine {
         std::vector<Vertex> vertices;
         std::vector<uint32_t> indices;
         std::ifstream modelStream;
-        JoyContext::Data()->GetDataStream(modelStream, guid);
+        JoyContext::Data->GetDataStream(modelStream, guid);
         ModelLoader::LoadModel(vertices, indices, modelStream);
         m_vertexSize = vertices.size();
         m_indexSize = indices.size();
-        JoyContext::Memory()->CreateGPUBuffer(vertices.data(),
+        JoyContext::Memory->CreateGPUBuffer(vertices.data(),
                                                       sizeof(Vertex),
                                                       vertices.size(),
                                                       m_vertexBuffer,
                                                       m_vertexBufferMemory,
                                                       VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
-        JoyContext::Memory()->CreateGPUBuffer(indices.data(),
+        JoyContext::Memory->CreateGPUBuffer(indices.data(),
                                                       sizeof(uint32_t),
                                                       indices.size(),
                                                       m_indexBuffer,
@@ -36,7 +36,7 @@ namespace JoyEngine {
     }
 
     Mesh::~Mesh() {
-        JoyContext::Memory()->DestroyBuffer(m_vertexBuffer, m_vertexBufferMemory);
-        JoyContext::Memory()->DestroyBuffer(m_indexBuffer, m_indexBufferMemory);
+        JoyContext::Memory->DestroyBuffer(m_vertexBuffer, m_vertexBufferMemory);
+        JoyContext::Memory->DestroyBuffer(m_indexBuffer, m_indexBufferMemory);
     }
 }

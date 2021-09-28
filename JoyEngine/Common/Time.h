@@ -7,7 +7,7 @@ namespace JoyEngine {
 
 	class Time
 	{
-	public :
+	public:
 		static void Init() noexcept;
 		static void Update() noexcept;
 		static float GetDeltaTime() noexcept;

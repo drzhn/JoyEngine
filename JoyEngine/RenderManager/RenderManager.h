@@ -12,7 +12,7 @@
 
 #include <vulkan/vulkan.h>
 
-#include "JoyGraphicsContext.h"
+#include "GraphicsManager/GraphicsManager.h"
 
 #include "ResourceManager/ResourceManager.h"
 #include "ResourceManager/Texture.h"

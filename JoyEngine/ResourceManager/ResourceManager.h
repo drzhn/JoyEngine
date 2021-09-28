@@ -7,7 +7,7 @@
 #include <memory>
 #include <vulkan/vulkan.h>
 
-#include "JoyGraphicsContext.h"
+#include "GraphicsManager/GraphicsManager.h"
 
 #include "Common/Resource.h"
 #include "Mesh.h"
@@ -21,7 +21,7 @@ namespace JoyEngine {
 
 //    class IJoyGraphicsContext;
 
-//    class JoyGraphicsContext;
+//    class GraphicsManager;
 
     class ResourceManager {
     public:

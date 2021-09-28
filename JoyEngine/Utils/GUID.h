@@ -10,7 +10,7 @@ namespace JoyEngine {
         uint16_t Data3 = 0;
         uint8_t Data4[8] = {0, 0, 0, 0, 0, 0, 0, 0};
 
-        bool operator<(const JoyEngine::GUID &guid) const {
+        bool operator<(const GUID &guid) const {
             if (Data1 != guid.Data1) {
                 return Data1 < guid.Data1;
             }

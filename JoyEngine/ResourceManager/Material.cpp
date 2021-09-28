@@ -4,6 +4,7 @@
 
 #include <rapidjson/document.h>
 
+#include "GraphicsManager/GraphicsManager.h"
 #include "DataManager/DataManager.h"
 #include "ResourceManager/ResourceManager.h"
 #include "ResourceManager/DescriptorSetManager.h"
@@ -12,11 +13,11 @@
 namespace JoyEngine {
     Material::Material(GUID guid) {
 
-        rapidjson::Document json = JoyContext::Data()->GetSerializedData(guid, material);
+        rapidjson::Document json = JoyContext::Data->GetSerializedData(guid, material);
 
         m_sharedMaterialGuid = GUID::StringToGuid(json["sharedMaterial"].GetString());
-        JoyContext::Resource()->LoadResource<SharedMaterial>(m_sharedMaterialGuid);
-        m_sharedMaterial = JoyContext::Resource()->GetResource<SharedMaterial>(m_sharedMaterialGuid);
+        JoyContext::Resource->LoadResource<SharedMaterial>(m_sharedMaterialGuid);
+        m_sharedMaterial = JoyContext::Resource->GetResource<SharedMaterial>(m_sharedMaterialGuid);
 
         for (auto &binding: json["bindings"].GetArray()) {
             m_bindings.insert({
@@ -33,11 +34,11 @@ namespace JoyEngine {
 
     Material::~Material() {
         for (const auto &item: m_descriptorSets) {
-            JoyContext::DescriptorSet()->Free(item.second);
+            JoyContext::DescriptorSet->Free(item.second);
         }
-        JoyContext::Resource()->UnloadResource(m_sharedMaterialGuid);
+        JoyContext::Resource->UnloadResource(m_sharedMaterialGuid);
         for (const auto &item: m_bindings) {
-            JoyContext::Resource()->UnloadResource(item.second);
+            JoyContext::Resource->UnloadResource(item.second);
         }
     }
 
@@ -46,7 +47,7 @@ namespace JoyEngine {
             VkDescriptorType type = m_sharedMaterial->GetBindingInfoByName(binding.first).type;
             switch (type) {
                 case VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER:
-                    JoyContext::Resource()->LoadResource<Texture>(binding.second);
+                    JoyContext::Resource->LoadResource<Texture>(binding.second);
                     break;
                 default:
                     ASSERT(false);
@@ -57,9 +58,9 @@ namespace JoyEngine {
     void Material::CreateDescriptorSets() {
         for (uint32_t i = 0; i < m_sharedMaterial->GetSetLayoutSize(); i++) {
             SetLayoutInfo setLayoutInfo = m_sharedMaterial->GetSetLayoutInfo(i);
-            std::vector<VkDescriptorSet> set = JoyContext::DescriptorSet()->Allocate(
+            std::vector<VkDescriptorSet> set = JoyContext::DescriptorSet->Allocate(
                     setLayoutInfo.hash,
-                    setLayoutInfo.isStatic ? 1 : JoyContext::Render()->GetSwapchain()->GetSwapchainImageCount());
+                    setLayoutInfo.isStatic ? 1 : JoyContext::Render->GetSwapchain()->GetSwapchainImageCount());
             m_descriptorSets.insert({i, set});
         }
 
@@ -82,7 +83,7 @@ namespace JoyEngine {
 
             switch (bindingInfo.type) {
                 case VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER: {
-                    Texture *texture = JoyContext::Resource()->GetResource<Texture>(resourceGuid);
+                    Texture *texture = JoyContext::Resource->GetResource<Texture>(resourceGuid);
                     imageInfo = {
                             texture->GetSampler(),
                             texture->GetImageView(),
@@ -118,7 +119,7 @@ namespace JoyEngine {
             }
         }
         vkUpdateDescriptorSets(
-                JoyContext::Graphics()->GetVkDevice(),
+                JoyContext::Graphics->GetVkDevice(),
                 static_cast<uint32_t>(descriptorWrites.size()),
                 descriptorWrites.data(),
                 0,

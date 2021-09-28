@@ -1,5 +1,5 @@
-#ifndef JOY_GRAPHICS_CONTEXT_H
-#define JOY_GRAPHICS_CONTEXT_H
+#ifndef GRAPHICS_MANAGER_H
+#define GRAPHICS_MANAGER_H
 
 #include <vector>
 
@@ -8,11 +8,11 @@
 #include "RenderManager/VulkanAllocator.h"
 
 namespace JoyEngine {
-    class JoyGraphicsContext {
+    class GraphicsManager {
     public:
-        JoyGraphicsContext(HINSTANCE instance, HWND windowHandle);
+        GraphicsManager(HINSTANCE instance, HWND windowHandle);
 
-        ~JoyGraphicsContext();
+        ~GraphicsManager();
 
         [[nodiscard]] HINSTANCE GetHINSTANCE() const noexcept { return m_windowInstance; }
 
@@ -77,4 +77,4 @@ namespace JoyEngine {
     };
 }
 
-#endif //JOY_GRAPHICS_CONTEXT_H
+#endif //GRAPHICS_MANAGER_H

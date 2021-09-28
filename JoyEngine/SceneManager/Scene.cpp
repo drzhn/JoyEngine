@@ -12,7 +12,7 @@
 namespace JoyEngine {
     Scene::Scene(const GUID &guid) {
 
-        rapidjson::Document json = JoyContext::Data()->GetSerializedData(guid, scene);
+        rapidjson::Document json = JoyContext::Data->GetSerializedData(guid, scene);
         m_name = json["name"].GetString();
 
         auto GetVectorValueFromField = [](rapidjson::Value& val, const char* name) -> glm::vec3 {

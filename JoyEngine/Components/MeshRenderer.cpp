@@ -8,12 +8,12 @@
 namespace JoyEngine {
     void MeshRenderer::Enable() {
         ASSERT(m_meshGuid.has_value() && m_materialGuid.has_value());
-        JoyContext::Render()->RegisterMeshRenderer(this);
+        JoyContext::Render->RegisterMeshRenderer(this);
         m_enabled = true;
     }
 
     void MeshRenderer::Disable() {
-        JoyContext::Render()->UnregisterMeshRenderer(this);
+        JoyContext::Render->UnregisterMeshRenderer(this);
         m_enabled = false;
     }
 
@@ -21,24 +21,24 @@ namespace JoyEngine {
         if (m_enabled) {
             Disable();
         }
-        JoyContext::Resource()->UnloadResource(m_materialGuid.value());
-        JoyContext::Resource()->UnloadResource(m_meshGuid.value());
+        JoyContext::Resource->UnloadResource(m_materialGuid.value());
+        JoyContext::Resource->UnloadResource(m_meshGuid.value());
     }
 
     void MeshRenderer::SetMesh(GUID meshGuid) {
         if (m_meshGuid.has_value()) {
-            JoyContext::Resource()->UnloadResource(meshGuid);
+            JoyContext::Resource->UnloadResource(meshGuid);
         }
         m_meshGuid = meshGuid;
-        JoyContext::Resource()->LoadResource<Mesh>(meshGuid);
+        JoyContext::Resource->LoadResource<Mesh>(meshGuid);
     }
 
     void MeshRenderer::SetMaterial(GUID materialGuid) {
         if (m_materialGuid.has_value()) {
-            JoyContext::Resource()->UnloadResource(materialGuid);
+            JoyContext::Resource->UnloadResource(materialGuid);
         }
         m_materialGuid = materialGuid;
-        JoyContext::Resource()->LoadResource<Material>(materialGuid);
+        JoyContext::Resource->LoadResource<Material>(materialGuid);
     }
 
     GUID MeshRenderer::GetMeshGuid() const noexcept {
@@ -52,10 +52,10 @@ namespace JoyEngine {
     }
 
     Mesh *MeshRenderer::GetMesh() const noexcept {
-        return JoyContext::Resource()->GetResource<Mesh>(m_meshGuid.value());
+        return JoyContext::Resource->GetResource<Mesh>(m_meshGuid.value());
     }
 
     Material *MeshRenderer::GetMaterial() const noexcept {
-        return JoyContext::Resource()->GetResource<Material>(m_materialGuid.value());
+        return JoyContext::Resource->GetResource<Material>(m_materialGuid.value());
     }
 }

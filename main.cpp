@@ -50,7 +50,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
     if (hwnd == nullptr) {
         return 0;
     }
-    JoyEngine::JoyContext *graphicsContext = new JoyEngine::JoyContext(hInstance, hwnd);
+    JoyEngine::JoyEngine *graphicsContext = new JoyEngine::JoyEngine(hInstance, hwnd);
     graphicsContext->Init();
 
     WindowHandler::RegisterMessageHandler(graphicsContext, hwnd);

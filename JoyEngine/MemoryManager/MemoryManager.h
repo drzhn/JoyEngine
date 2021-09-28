@@ -5,7 +5,7 @@
 
 namespace JoyEngine {
 
-    class JoyContext;
+    class JoyEngine;
 
     class MemoryManager {
     public:

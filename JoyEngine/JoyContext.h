@@ -1,81 +1,37 @@
-#ifndef JOYGRAPHICSCONTEXT_H
-#define JOYGRAPHICSCONTEXT_H
+#ifndef JOY_CONTEXT_H
+#define JOY_CONTEXT_H
 
-#include <iostream>
-#include "windows.h"
+namespace JoyEngine
+{
+	class GraphicsManager;
+	class MemoryManager;
+	class DataManager;
+	class DescriptorSetManager;
+	class ResourceManager;
+	class SceneManager;
+	class RenderManager;
 
-#include "Utils/Assert.h"
+	class JoyContext
+	{
+	public:
+		static void Init(
+			GraphicsManager* graphicsContext,
+			MemoryManager* memoryManager,
+			DataManager* dataManager,
+			DescriptorSetManager* descriptorSetManager,
+			ResourceManager* resourceManager,
+			SceneManager* sceneManager,
+			RenderManager* renderManager
+		);
 
-
-namespace JoyEngine {
-
-    class JoyGraphicsContext;
-
-    class MemoryManager;
-
-    class DataManager;
-
-    class DescriptorSetManager;
-
-    class ResourceManager;
-
-    class SceneManager;
-
-    class RenderManager;
-
-    class IWindowMessageHandler {
-    public:
-        virtual void HandleMessage(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) = 0;
-    };
-
-    class JoyContext : public IWindowMessageHandler {
-    public:
-        JoyContext() = delete;
-
-        JoyContext(HINSTANCE instance, HWND windowHandle);
-
-        void Init();
-
-        void Start();
-
-        void Update();
-
-        void Stop();
-
-        ~JoyContext();
-
-        void HandleMessage(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) override;
-
-        static JoyGraphicsContext *Graphics() noexcept;
-
-        static MemoryManager *Memory() noexcept;
-
-        static DataManager *Data() noexcept;
-
-        static DescriptorSetManager *DescriptorSet() noexcept;
-
-        static ResourceManager *Resource() noexcept;
-
-        static SceneManager *Scene() noexcept;
-
-        static RenderManager *Render() noexcept;
-
-    private:
-        void InternalHandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam);
-
-    private:
-        static JoyContext *m_instance;
-        HWND m_windowHandle;
-
-        JoyGraphicsContext *const m_graphicsContext = nullptr;
-        MemoryManager *const m_memoryManager = nullptr;
-        DataManager *const m_dataManager = nullptr;
-        DescriptorSetManager *const m_descriptorSetManager = nullptr;
-        ResourceManager *const m_resourceManager = nullptr;
-        SceneManager *const m_sceneManager = nullptr;
-        RenderManager *const m_renderManager = nullptr;
-    };
+		static GraphicsManager* Graphics;
+		static MemoryManager* Memory;
+		static DataManager* Data;
+		static DescriptorSetManager* DescriptorSet;
+		static ResourceManager* Resource;
+		static SceneManager* Scene;
+		static RenderManager* Render;
+	};
 }
 
-
-#endif//JOYGRAPHICSCONTEXT_H
+#endif //JOY_CONTEXT_H

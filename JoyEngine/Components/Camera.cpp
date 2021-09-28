@@ -6,8 +6,8 @@
 namespace JoyEngine {
 	void Camera::Enable()
 	{
-		JoyContext::Render()->RegisterCamera(this);
-		m_aspect = JoyContext::Render()->GetAspect();
+		JoyContext::Render->RegisterCamera(this);
+		m_aspect = JoyContext::Render->GetAspect();
 		m_fov = 45;
 		m_near = 0.1f;
 		m_far = 10;
@@ -16,7 +16,7 @@ namespace JoyEngine {
 
 	void Camera::Disable()
 	{
-		JoyContext::Render()->UnregisterCamera(this);
+		JoyContext::Render->UnregisterCamera(this);
 		m_enabled = false;
 	}
 

@@ -5,7 +5,7 @@
 #include <vector>
 #include <vulkan/vulkan.h>
 
-#include "JoyGraphicsContext.h"
+#include "GraphicsManager/GraphicsManager.h"
 
 namespace JoyEngine {
     class Swapchain {

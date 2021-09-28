@@ -19,13 +19,13 @@ namespace JoyEngine {
     }
 
     void SharedMaterial::Initialize() {
-        rapidjson::Document json = JoyContext::Data()->GetSerializedData(m_guid, sharedMaterial);
+        rapidjson::Document json = JoyContext::Data->GetSerializedData(m_guid, sharedMaterial);
 
         m_vertexShader = GUID::StringToGuid(json["vertexShader"].GetString());
         m_fragmentShader = GUID::StringToGuid(json["fragmentShader"].GetString());
 
-        JoyContext::Resource()->LoadResource<Shader>(m_vertexShader);
-        JoyContext::Resource()->LoadResource<Shader>(m_fragmentShader);
+        JoyContext::Resource->LoadResource<Shader>(m_vertexShader);
+        JoyContext::Resource->LoadResource<Shader>(m_fragmentShader);
 
         m_hasVertexInput = json["hasVertexInput"].GetBool();
         m_hasMVP = json["hasMVP"].GetBool();
@@ -69,15 +69,15 @@ namespace JoyEngine {
             };
 
             VkDescriptorSetLayout setLayout;
-            VkResult res = vkCreateDescriptorSetLayout(JoyContext::Graphics()->GetVkDevice(),
+            VkResult res = vkCreateDescriptorSetLayout(JoyContext::Graphics->GetVkDevice(),
                                                        &layoutInfo,
-                                                       JoyContext::Graphics()->GetAllocationCallbacks(),
+                                                       JoyContext::Graphics->GetAllocationCallbacks(),
                                                        &setLayout);
             ASSERT(res == VK_SUCCESS);
 
             m_setLayouts.push_back(setLayout);
             m_setLayoutInfos.push_back({isStatic, hash});
-            JoyContext::DescriptorSet()->RegisterPool(hash, setLayout, types);
+            JoyContext::DescriptorSet->RegisterPool(hash, setLayout, types);
             setIndex++;
         }
 
@@ -114,7 +114,7 @@ namespace JoyEngine {
         inputAssembly.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
         inputAssembly.primitiveRestartEnable = VK_FALSE;
 
-        VkExtent2D swapchainExtent = JoyContext::Render()->GetSwapchain()->GetSwapChainExtent();
+        VkExtent2D swapchainExtent = JoyContext::Render->GetSwapchain()->GetSwapChainExtent();
 
         VkViewport viewport{};
         viewport.x = 0.0f;
@@ -202,9 +202,9 @@ namespace JoyEngine {
                 &pushConstantRange
         };
 
-        VkResult res = vkCreatePipelineLayout(JoyContext::Graphics()->GetVkDevice(),
+        VkResult res = vkCreatePipelineLayout(JoyContext::Graphics->GetVkDevice(),
                                               &pipelineLayoutInfo,
-                                              JoyContext::Graphics()->GetAllocationCallbacks(),
+                                              JoyContext::Graphics->GetAllocationCallbacks(),
                                               &m_pipelineLayout);
         ASSERT(res == VK_SUCCESS);
 
@@ -219,45 +219,45 @@ namespace JoyEngine {
         pipelineInfo.pMultisampleState = &multisampling;
         pipelineInfo.pColorBlendState = &colorBlending;
         pipelineInfo.layout = m_pipelineLayout;
-        pipelineInfo.renderPass = JoyContext::Render()->GetMainRenderPass();
+        pipelineInfo.renderPass = JoyContext::Render->GetMainRenderPass();
         pipelineInfo.pDepthStencilState = &depthStencil;
         pipelineInfo.subpass = 0;
         pipelineInfo.basePipelineHandle = VK_NULL_HANDLE;
 
-        res = vkCreateGraphicsPipelines(JoyContext::Graphics()->GetVkDevice(),
+        res = vkCreateGraphicsPipelines(JoyContext::Graphics->GetVkDevice(),
                                         VK_NULL_HANDLE,
                                         1,
                                         &pipelineInfo,
-                                        JoyContext::Graphics()->GetAllocationCallbacks(),
+                                        JoyContext::Graphics->GetAllocationCallbacks(),
                                         &m_graphicsPipeline);
         ASSERT(res == VK_SUCCESS);
     }
 
     SharedMaterial::~SharedMaterial() {
-        vkDestroyPipeline(JoyContext::Graphics()->GetVkDevice(),
+        vkDestroyPipeline(JoyContext::Graphics->GetVkDevice(),
                           m_graphicsPipeline,
-                          JoyContext::Graphics()->GetAllocationCallbacks());
-        vkDestroyPipelineLayout(JoyContext::Graphics()->GetVkDevice(),
+                          JoyContext::Graphics->GetAllocationCallbacks());
+        vkDestroyPipelineLayout(JoyContext::Graphics->GetVkDevice(),
                                 m_pipelineLayout,
-                                JoyContext::Graphics()->GetAllocationCallbacks());
+                                JoyContext::Graphics->GetAllocationCallbacks());
 
-        JoyContext::Resource()->UnloadResource(m_vertexShader);
-        JoyContext::Resource()->UnloadResource(m_fragmentShader);
+        JoyContext::Resource->UnloadResource(m_vertexShader);
+        JoyContext::Resource->UnloadResource(m_fragmentShader);
 
         for (uint32_t i = 0; i < m_setLayouts.size(); i++) {
-            vkDestroyDescriptorSetLayout(JoyContext::Graphics()->GetVkDevice(),
+            vkDestroyDescriptorSetLayout(JoyContext::Graphics->GetVkDevice(),
                                          m_setLayouts[i],
-                                         JoyContext::Graphics()->GetAllocationCallbacks());
-            JoyContext::DescriptorSet()->UnregisterPool(m_setLayoutInfos[i].hash);
+                                         JoyContext::Graphics->GetAllocationCallbacks());
+            JoyContext::DescriptorSet->UnregisterPool(m_setLayoutInfos[i].hash);
         }
     }
 
     Shader *SharedMaterial::GetVertexShader() const noexcept {
-        return JoyContext::Resource()->GetResource<Shader>(m_vertexShader);
+        return JoyContext::Resource->GetResource<Shader>(m_vertexShader);
     }
 
     Shader *SharedMaterial::GetFragmentShader() const noexcept {
-        return JoyContext::Resource()->GetResource<Shader>(m_fragmentShader);
+        return JoyContext::Resource->GetResource<Shader>(m_fragmentShader);
     }
 
     VkPipeline SharedMaterial::GetPipeline() const noexcept {

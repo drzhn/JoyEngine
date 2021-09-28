@@ -1,10 +1,10 @@
-#include "JoyGraphicsContext.h"
+#include "GraphicsManager/GraphicsManager.h"
 #include "RenderManager/VulkanUtils.h"
 #include "RenderManager/VulkanAllocator.h"
 
 namespace JoyEngine {
 
-    JoyGraphicsContext::JoyGraphicsContext(HINSTANCE instance, HWND windowHandle) :
+    GraphicsManager::GraphicsManager(HINSTANCE instance, HWND windowHandle) :
             m_windowInstance(instance),
             m_windowHandle(windowHandle) {
         CreateInstance();
@@ -15,7 +15,7 @@ namespace JoyEngine {
         CreateCommandPool();
     }
 
-    JoyGraphicsContext::~JoyGraphicsContext() {
+    GraphicsManager::~GraphicsManager() {
         vkDestroyCommandPool(m_logicalDevice, m_commandPool, m_allocator->GetAllocationCallbacks());
         vkDestroyDevice(m_logicalDevice, m_allocator->GetAllocationCallbacks());
 
@@ -27,7 +27,7 @@ namespace JoyEngine {
         vkDestroyInstance(m_vkInstance, m_allocator->GetAllocationCallbacks());
     }
 
-    void JoyGraphicsContext::CreateInstance() {
+    void GraphicsManager::CreateInstance() {
         m_allocator = new Allocator();
         if (enableValidationLayers && !checkValidationLayerSupport(validationLayerName)) {
             throw std::runtime_error("validation layers requested, but not available!");
@@ -67,7 +67,7 @@ namespace JoyEngine {
         }
     }
 
-    void JoyGraphicsContext::SetupDebugMessenger() {
+    void GraphicsManager::SetupDebugMessenger() {
         if (!enableValidationLayers) return;
 
         VkDebugUtilsMessengerCreateInfoEXT createInfo;
@@ -78,7 +78,7 @@ namespace JoyEngine {
         }
     }
 
-    void JoyGraphicsContext::CreateSurface() {
+    void GraphicsManager::CreateSurface() {
         VkWin32SurfaceCreateInfoKHR surfaceCreateInfoKhr = {
                 VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR,
                 nullptr,
@@ -93,7 +93,7 @@ namespace JoyEngine {
     }
 
 
-    void JoyGraphicsContext::PickPhysicalDevice() {
+    void GraphicsManager::PickPhysicalDevice() {
         uint32_t deviceCount = 0;
         vkEnumeratePhysicalDevices(m_vkInstance, &deviceCount, nullptr);
         if (deviceCount == 0) {
@@ -112,7 +112,7 @@ namespace JoyEngine {
         }
     }
 
-    void JoyGraphicsContext::CreateLogicalDevice() {
+    void GraphicsManager::CreateLogicalDevice() {
         QueueFamilyIndices indices = findQueueFamilies(m_physicalDevice, m_surface);
 
         std::vector<VkDeviceQueueCreateInfo> queueCreateInfos;
@@ -157,7 +157,7 @@ namespace JoyEngine {
         vkGetDeviceQueue(m_logicalDevice, indices.presentFamily.value(), 0, &m_presentQueue);
     }
 
-    void JoyGraphicsContext::CreateCommandPool() {
+    void GraphicsManager::CreateCommandPool() {
         QueueFamilyIndices queueFamilyIndices = findQueueFamilies(m_physicalDevice, m_surface);
 
         VkCommandPoolCreateInfo poolInfo{};
