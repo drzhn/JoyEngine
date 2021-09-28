@@ -98,7 +98,7 @@ namespace JoyEngine {
 //                    VkDescriptorBufferInfo bufferInfo{};
 //                    bufferInfo.buffer = m_uniformBuffers[i];
 //                    bufferInfo.offset = 0;
-//                    bufferInfo.range = sizeof(UniformBufferObject);
+//                    bufferInfo.range = sizeof(MVP);
                 default:
                     ASSERT(false);
             }

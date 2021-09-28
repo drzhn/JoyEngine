@@ -5,9 +5,10 @@
 #include "MemoryManager/MemoryManager.h"
 
 #include "RenderManager/VulkanTypes.h"
-#include "RenderManager/VulkanUtils.h"
+
 
 #include "ResourceManager/ResourceManager.h"
+#include "RenderManager/VulkanUtils.h"
 
 namespace JoyEngine {
 

@@ -6,6 +6,7 @@
 #include "JoyContext.h"
 
 #include "MemoryManager/MemoryManager.h"
+#include "RenderManager/VulkanUtils.h"
 
 #define GLM_FORCE_RADIANS
 #define STB_IMAGE_IMPLEMENTATION
@@ -26,10 +27,6 @@ namespace JoyEngine {
 	}
 
 	RenderManager::~RenderManager() {
-		//        for (auto &item: m_renderObjects) {
-		//            item.second = nullptr;
-		//        }
-
 		m_depthTexture = nullptr;
 		m_positionTexture = nullptr;
 		m_normalTexture = nullptr;
@@ -313,21 +310,19 @@ namespace JoyEngine {
 					item.second.size() == 1 ? &item.second[0] : item.second.data(),
 					0, nullptr);
 			}
-			auto currentTime = std::chrono::high_resolution_clock::now();
-			float time = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - startTime).count();
 
-			UniformBufferObject ubo{};
-			ubo.model = mr->GetTransform()->GetModelMatrix();
-			ubo.view = m_currentCamera->GetViewMatrix();
-			ubo.proj = m_currentCamera->GetProjMatrix();
+			MVP mvp{};
+			mvp.model = mr->GetTransform()->GetModelMatrix();
+			mvp.view = m_currentCamera->GetViewMatrix();
+			mvp.proj = m_currentCamera->GetProjMatrix();
 
 			vkCmdPushConstants(
 				commandBuffers[imageIndex],
 				mr->GetMaterial()->GetSharedMaterial()->GetPipelineLayout(),
 				VK_SHADER_STAGE_VERTEX_BIT,
 				0,
-				sizeof(UniformBufferObject),
-				&ubo);
+				sizeof(MVP),
+				&mvp);
 
 			vkCmdDrawIndexed(
 				commandBuffers[imageIndex],
@@ -390,10 +385,6 @@ namespace JoyEngine {
 		if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR) {
 			throw std::runtime_error("failed to acquire swap chain image!");
 		}
-
-		//        for (auto const &x: m_renderObjects) {
-		//            x.second->UpdateUniformBuffer(imageIndex);
-		//        }
 
 				// Check if a previous frame is using this image (i.e. there is its fence to wait on)
 		if (m_imagesInFlight[imageIndex] != VK_NULL_HANDLE) {

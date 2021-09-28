@@ -38,9 +38,9 @@ namespace JoyEngine {
 	glm::vec3 Transform::GetScale() const noexcept { return m_localScale; }
 
 	glm::mat4 Transform::GetModelMatrix() {
-		glm::mat4 translationMatrix = glm::translate(glm::mat4(1.0f), m_localPosition);
-		glm::mat4 rotationMatrix = glm::toMat4(m_localRotation);
-		glm::mat4 scaleMatrix = glm::scale(glm::mat4(1.0f), m_localScale);
+		const glm::mat4 translationMatrix = glm::translate(glm::mat4(1.0f), m_localPosition);
+		const glm::mat4 rotationMatrix = glm::toMat4(m_localRotation);
+		const glm::mat4 scaleMatrix = glm::scale(glm::mat4(1.0f), m_localScale);
 
 		return translationMatrix * rotationMatrix * scaleMatrix;
 	}

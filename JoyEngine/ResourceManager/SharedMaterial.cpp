@@ -189,7 +189,7 @@ namespace JoyEngine {
         VkPushConstantRange pushConstantRange{
                 VK_SHADER_STAGE_VERTEX_BIT,
                 0,
-                sizeof(UniformBufferObject)
+                sizeof(MVP)
         };
 
         VkPipelineLayoutCreateInfo pipelineLayoutInfo{
