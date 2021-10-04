@@ -11,8 +11,8 @@
 #include "GraphicsManager/GraphicsManager.h"
 #include "Common/Time.h"
 
-namespace JoyEngine {
-
+namespace JoyEngine
+{
 	JoyEngine::JoyEngine(HINSTANCE instance, HWND windowHandle) :
 		m_windowHandle(windowHandle),
 		m_graphicsContext(new GraphicsManager(instance, windowHandle)),
@@ -21,7 +21,8 @@ namespace JoyEngine {
 		m_descriptorSetManager(new DescriptorSetManager()),
 		m_resourceManager(new ResourceManager()),
 		m_sceneManager(new SceneManager()),
-		m_renderManager(new RenderManager()) {
+		m_renderManager(new RenderManager())
+	{
 		ASSERT(m_graphicsContext != nullptr);
 		ASSERT(m_memoryManager != nullptr);
 		ASSERT(m_dataManager != nullptr);
@@ -43,7 +44,8 @@ namespace JoyEngine {
 		std::cout << "Context created" << std::endl;
 	}
 
-	void JoyEngine::Init() {
+	void JoyEngine::Init() const noexcept
+	{
 		Time::Init();
 
 		m_memoryManager->Init();
@@ -51,24 +53,28 @@ namespace JoyEngine {
 		m_sceneManager->Init();
 	}
 
-	void JoyEngine::Start() {
+	void JoyEngine::Start() const noexcept
+	{
 		m_memoryManager->Start();
 		m_renderManager->Start();
 	}
 
-	void JoyEngine::Update() {
+	void JoyEngine::Update() const noexcept
+	{
 		Time::Update();
 
 		m_sceneManager->Update();
 		m_renderManager->Update();
 	}
 
-	void JoyEngine::Stop() {
+	void JoyEngine::Stop() const noexcept
+	{
 		m_renderManager->Stop(); // will destroy managers in reverse order
 		m_memoryManager->Stop();
 	}
 
-	JoyEngine::~JoyEngine() {
+	JoyEngine::~JoyEngine()
+	{
 		Stop();
 		delete m_sceneManager; // unregister mesh renderers, remove descriptor set, pipelines, pipeline layouts
 		delete m_resourceManager; //delete all scene render data (buffers, textures)
@@ -78,11 +84,12 @@ namespace JoyEngine {
 		std::cout << "Context destroyed" << std::endl;
 	}
 
-	void JoyEngine::HandleMessage(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
+	void JoyEngine::HandleMessage(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+	{
 		InternalHandleMessage(uMsg, wParam, lParam);
 	}
 
-	void JoyEngine::InternalHandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam) {
-
+	void JoyEngine::InternalHandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
+	{
 	}
 }

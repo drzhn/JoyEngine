@@ -43,6 +43,46 @@
       ]
     },
     {
+      "name": "roomCopy",
+      "transform": {
+        "localPosition": {
+          "x": 0.0,
+          "y": 0.0,
+          "z": 3.0
+        },
+        "localRotation": {
+          "x": 0.0,
+          "y": 0.0,
+          "z": 0.0
+        },
+        "localScale": {
+          "x": 0.05,
+          "y": 0.05,
+          "z": 0.05
+        }
+      },
+      "components": [
+        {
+          "type": "renderer",
+          "model": "13dc6d97-5ced-4b99-b296-bb9e6df2242a",
+          "material": "5647451b-5e36-4c31-ace8-33952da006a1"
+        },
+        {
+          "type": "component",
+          "component": "RoomBehaviour",
+          "fields": {
+            "m_speed": -4,
+            "m_color": {
+              "r": 0.4,
+              "g": 0.5,
+              "b": 0.8,
+              "a": 1
+            }
+          }
+        }
+      ]
+    },
+    {
       "name": "camera",
       "transform": {
         "localPosition": {

@@ -30,13 +30,13 @@ namespace JoyEngine {
 
         JoyEngine(HINSTANCE instance, HWND windowHandle);
 
-        void Init();
+        void Init() const noexcept;
 
-        void Start();
+        void Start() const noexcept;
 
-        void Update();
+        void Update() const noexcept;
 
-        void Stop();
+        void Stop() const noexcept;
 
         ~JoyEngine();
 
