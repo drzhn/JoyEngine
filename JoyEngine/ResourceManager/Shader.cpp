@@ -5,19 +5,35 @@
 #include <vector>
 
 #include "DataManager/DataManager.h"
-#include "MemoryManager/MemoryManager.h"
+#include "GraphicsManager/GraphicsManager.h"
 
-namespace JoyEngine {
+namespace JoyEngine
+{
+	std::string ParseVkResult(VkResult res);
 
-    Shader::Shader(GUID guid) :Resource(guid) {
-        std::vector<char> shaderData = JoyContext::Data->GetData<char>(guid);
-        JoyContext::Memory->CreateShaderModule(reinterpret_cast<const uint32_t *>(shaderData.data()),
-                                                         shaderData.size(),
-                                                         m_shaderModule);
-    }
+	Shader::Shader(GUID guid) : Resource(guid)
+	{
+		const std::vector<char> shaderData = JoyContext::Data->GetData<char>(guid);
 
-    Shader::~Shader() {
-        JoyContext::Memory->DestroyShaderModule(m_shaderModule);
-    }
+		VkShaderModuleCreateInfo createInfo{
+			VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO,
+			nullptr,
+			0,
+			shaderData.size(),
+			reinterpret_cast<const uint32_t*>(shaderData.data())
+		};
+		const VkResult res = vkCreateShaderModule(
+			JoyContext::Graphics->GetVkDevice(),
+			&createInfo,
+			JoyContext::Graphics->GetAllocationCallbacks(),
+			&m_shaderModule);
+		ASSERT_DESC(res == VK_SUCCESS, ParseVkResult(res));
+	}
 
+	Shader::~Shader()
+	{
+		vkDestroyShaderModule(
+			JoyContext::Graphics->GetVkDevice(), m_shaderModule,
+			JoyContext::Graphics->GetAllocationCallbacks());
+	}
 }

@@ -1,14 +1,18 @@
 #ifndef MESH_H
 #define MESH_H
 
+#include <memory>
+
 #include <vulkan/vulkan.h>
 
 #include "Common/Resource.h"
+#include "ResourceManager/Buffer.h"
 #include "Utils/GUID.h"
 
 namespace JoyEngine
 {
-	class Mesh final : public Resource {
+	class Mesh final : public Resource
+	{
 	public:
 		Mesh() = delete;
 
@@ -20,23 +24,17 @@ namespace JoyEngine
 
 		[[nodiscard]] size_t GetVertexSize() const noexcept { return m_vertexSize; }
 
-		[[nodiscard]] VkBuffer GetIndexBuffer() const noexcept { return m_indexBuffer; }
+		[[nodiscard]] VkBuffer GetIndexBuffer() const noexcept { return m_indexBuffer->GetBuffer(); }
 
-		[[nodiscard]] VkBuffer GetVertexBuffer() const noexcept { return m_vertexBuffer; }
+		[[nodiscard]] VkBuffer GetVertexBuffer() const noexcept { return m_vertexBuffer->GetBuffer(); }
 
-		[[nodiscard]] VkDeviceMemory GetIndexBufferMemory() const noexcept { return m_indexBufferMemory; }
-
-		[[nodiscard]] VkDeviceMemory GetVertexBufferMemory() const noexcept { return m_vertexBufferMemory; }
 
 	private:
 		size_t m_indexSize;
 		size_t m_vertexSize;
 
-		VkBuffer m_vertexBuffer = VK_NULL_HANDLE;
-		VkBuffer m_indexBuffer = VK_NULL_HANDLE;
-
-		VkDeviceMemory m_vertexBufferMemory = VK_NULL_HANDLE;
-		VkDeviceMemory m_indexBufferMemory = VK_NULL_HANDLE;
+		std::unique_ptr<Buffer> m_vertexBuffer;
+		std::unique_ptr<Buffer> m_indexBuffer;
 	};
 }
 

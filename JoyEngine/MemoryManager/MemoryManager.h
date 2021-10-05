@@ -27,38 +27,15 @@ namespace JoyEngine
 		void AllocateMemory(VkMemoryRequirements requirements, VkMemoryPropertyFlags properties,
 		                    VkDeviceMemory& out_imageMemory);
 
-		static void CreateBuffer(
-			VkPhysicalDevice physicalDevice,
-			VkDevice logicalDevice,
-			const VkAllocationCallbacks* allocator,
-			VkDeviceSize size,
-			VkBufferUsageFlags usage,
-			VkMemoryPropertyFlags properties,
-			VkBuffer& buffer,
-			VkDeviceMemory& bufferMemory);
-
-
-		void CreateGPUBuffer(
+		void LoadDataToBuffer(
 			void* data,
-			size_t stride,
-			size_t size,
-			VkBuffer& vertexBuffer,
-			VkDeviceMemory& vertexBufferMemory,
-			VkBufferUsageFlagBits usageFlag);
-
-		void DestroyBuffer(
-			VkBuffer vertexBuffer,
-			VkDeviceMemory vertexBufferMemory);
+			size_t bufferSize, VkBuffer gpuBuffer);
 
 		void LoadDataToImage(
 			const unsigned char* data,
 			uint32_t width,
 			uint32_t height,
 			VkImage textureImage);
-
-		void CreateShaderModule(const uint32_t* code, size_t codeSize, VkShaderModule& shaderModule);
-
-		void DestroyShaderModule(VkShaderModule shaderModule);
 
 	private:
 		void CopyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size);

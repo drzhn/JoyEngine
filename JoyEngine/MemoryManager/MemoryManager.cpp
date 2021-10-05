@@ -9,6 +9,7 @@
 
 #include "GraphicsManager/GraphicsManager.h"
 #include "RenderManager/VulkanUtils.h"
+#include "ResourceManager/Buffer.h"
 //#include "GPUMemoryManager.h"
 //#include "Common/Resource.h"
 #include "Utils/Assert.h"
@@ -42,101 +43,35 @@ namespace JoyEngine
 		VkImage textureImage)
 	{
 		VkDeviceSize imageSize = width * height * 4;
-		VkBuffer stagingBuffer;
-		VkDeviceMemory stagingBufferMemory;
-		CreateBuffer(JoyContext::Graphics->GetVkPhysicalDevice(),
-		             JoyContext::Graphics->GetVkDevice(),
-		             JoyContext::Graphics->GetAllocationCallbacks(),
-		             imageSize,
-		             VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
-		             VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
-		             stagingBuffer, stagingBufferMemory);
 
-		void* stagingBufferPtr;
-		vkMapMemory(JoyContext::Graphics->GetVkDevice(), stagingBufferMemory, 0, imageSize, 0, &stagingBufferPtr);
-		memcpy(stagingBufferPtr, data, imageSize);
-		vkUnmapMemory(JoyContext::Graphics->GetVkDevice(), stagingBufferMemory);
-
+		Buffer buffer = Buffer(
+			imageSize,
+			VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+			VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+		buffer.SetDeviceLocalData(data, imageSize);
 
 		TransitionImageLayout(textureImage,
 		                      VK_FORMAT_R8G8B8A8_SRGB,
 		                      VK_IMAGE_LAYOUT_UNDEFINED,
 		                      VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL
 		);
-		CopyBufferToImage(stagingBuffer, textureImage, width, height);
+		CopyBufferToImage(buffer.GetBuffer(), textureImage, width, height);
 		TransitionImageLayout(textureImage,
 		                      VK_FORMAT_R8G8B8A8_SRGB,
 		                      VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
 		                      VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
 		);
-
-		vkDestroyBuffer(JoyContext::Graphics->GetVkDevice(), stagingBuffer,
-		                JoyContext::Graphics->GetAllocationCallbacks());
-		vkFreeMemory(JoyContext::Graphics->GetVkDevice(), stagingBufferMemory,
-		             JoyContext::Graphics->GetAllocationCallbacks());
 	}
 
-
-	void MemoryManager::CreateBuffer(
-		VkPhysicalDevice physicalDevice,
-		VkDevice logicalDevice,
-		const VkAllocationCallbacks* allocator,
-		VkDeviceSize size,
-		VkBufferUsageFlags usage,
-		VkMemoryPropertyFlags properties,
-		VkBuffer& buffer,
-		VkDeviceMemory& bufferMemory)
+	void MemoryManager::LoadDataToBuffer(void* data, VkDeviceSize bufferSize, VkBuffer gpuBuffer)
 	{
-		VkBufferCreateInfo bufferInfo{};
-		bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
-		bufferInfo.size = size;
-		bufferInfo.usage = usage;
-		bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+		Buffer stagingBuffer = Buffer(
+			bufferSize,
+			VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+			VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+		stagingBuffer.SetDeviceLocalData(data, bufferSize);
 
-		if (vkCreateBuffer(logicalDevice, &bufferInfo, allocator, &buffer) != VK_SUCCESS)
-		{
-			throw std::runtime_error("failed to create buffer!");
-		}
-
-		VkMemoryRequirements memRequirements;
-		vkGetBufferMemoryRequirements(logicalDevice, buffer, &memRequirements);
-
-		VkMemoryAllocateInfo allocInfo{};
-		allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
-		allocInfo.allocationSize = memRequirements.size;
-		allocInfo.memoryTypeIndex = findMemoryType(physicalDevice, memRequirements.memoryTypeBits, properties);
-
-		if (vkAllocateMemory(logicalDevice, &allocInfo, allocator, &bufferMemory) != VK_SUCCESS)
-		{
-			throw std::runtime_error("failed to allocate buffer memory!");
-		}
-		vkBindBufferMemory(logicalDevice, buffer, bufferMemory, 0);
-	}
-
-	void MemoryManager::CreateShaderModule(const uint32_t* code, size_t codeSize, VkShaderModule& shaderModule)
-	{
-		VkShaderModuleCreateInfo createInfo{};
-		createInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
-		createInfo.codeSize = codeSize;
-		createInfo.pCode = code;
-		if (vkCreateShaderModule(JoyContext::Graphics->GetVkDevice(),
-		                         &createInfo,
-		                         JoyContext::Graphics->GetAllocationCallbacks(), &shaderModule) != VK_SUCCESS)
-		{
-			throw std::runtime_error("failed to create shader module!");
-		}
-	}
-
-	void MemoryManager::DestroyBuffer(VkBuffer buffer, VkDeviceMemory memory)
-	{
-		vkDestroyBuffer(JoyContext::Graphics->GetVkDevice(), buffer, JoyContext::Graphics->GetAllocationCallbacks());
-		vkFreeMemory(JoyContext::Graphics->GetVkDevice(), memory, JoyContext::Graphics->GetAllocationCallbacks());
-	}
-
-	void MemoryManager::DestroyShaderModule(VkShaderModule shaderModule)
-	{
-		vkDestroyShaderModule(JoyContext::Graphics->GetVkDevice(), shaderModule,
-		                      JoyContext::Graphics->GetAllocationCallbacks());
+		CopyBuffer(stagingBuffer.GetBuffer(), gpuBuffer, bufferSize);
 	}
 
 	void MemoryManager::CopyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size)
@@ -265,44 +200,5 @@ namespace JoyEngine
 		                     &commandBuffer);
 	}
 
-	void MemoryManager::CreateGPUBuffer(void* data,
-	                                    size_t stride,
-	                                    size_t size,
-	                                    VkBuffer& vertexBuffer,
-	                                    VkDeviceMemory& vertexBufferMemory,
-	                                    VkBufferUsageFlagBits usageFlag)
-	{
-		VkDeviceSize bufferSize = stride * size;
 
-		VkBuffer stagingBuffer;
-		VkDeviceMemory stagingBufferMemory;
-		CreateBuffer(JoyContext::Graphics->GetVkPhysicalDevice(),
-		             JoyContext::Graphics->GetVkDevice(),
-		             JoyContext::Graphics->GetAllocationCallbacks(),
-		             bufferSize,
-		             VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
-		             VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
-		             stagingBuffer,
-		             stagingBufferMemory);
-
-		void* mappedData;
-		vkMapMemory(JoyContext::Graphics->GetVkDevice(), stagingBufferMemory, 0, bufferSize, 0, &mappedData);
-		memcpy(mappedData, data, (size_t)bufferSize);
-		vkUnmapMemory(JoyContext::Graphics->GetVkDevice(), stagingBufferMemory);
-
-		CreateBuffer(JoyContext::Graphics->GetVkPhysicalDevice(),
-		             JoyContext::Graphics->GetVkDevice(),
-		             JoyContext::Graphics->GetAllocationCallbacks(),
-		             bufferSize,
-		             VK_BUFFER_USAGE_TRANSFER_DST_BIT | usageFlag, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
-		             vertexBuffer,
-		             vertexBufferMemory);
-
-		CopyBuffer(stagingBuffer, vertexBuffer, bufferSize);
-
-		vkDestroyBuffer(JoyContext::Graphics->GetVkDevice(), stagingBuffer,
-		                JoyContext::Graphics->GetAllocationCallbacks());
-		vkFreeMemory(JoyContext::Graphics->GetVkDevice(), stagingBufferMemory,
-		             JoyContext::Graphics->GetAllocationCallbacks());
-	}
 }
