@@ -119,7 +119,7 @@ namespace JoyEngine {
             }
         }
         vkUpdateDescriptorSets(
-                JoyContext::Graphics->GetVkDevice(),
+                JoyContext::Graphics->GetDevice(),
                 static_cast<uint32_t>(descriptorWrites.size()),
                 descriptorWrites.data(),
                 0,

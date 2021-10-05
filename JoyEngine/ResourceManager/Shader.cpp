@@ -23,7 +23,7 @@ namespace JoyEngine
 			reinterpret_cast<const uint32_t*>(shaderData.data())
 		};
 		const VkResult res = vkCreateShaderModule(
-			JoyContext::Graphics->GetVkDevice(),
+			JoyContext::Graphics->GetDevice(),
 			&createInfo,
 			JoyContext::Graphics->GetAllocationCallbacks(),
 			&m_shaderModule);
@@ -33,7 +33,7 @@ namespace JoyEngine
 	Shader::~Shader()
 	{
 		vkDestroyShaderModule(
-			JoyContext::Graphics->GetVkDevice(), m_shaderModule,
+			JoyContext::Graphics->GetDevice(), m_shaderModule,
 			JoyContext::Graphics->GetAllocationCallbacks());
 	}
 }

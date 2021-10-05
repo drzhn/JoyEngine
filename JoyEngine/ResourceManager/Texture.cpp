@@ -93,7 +93,7 @@ namespace JoyEngine
 
 
 		VkResult res = vkCreateImage(
-			JoyContext::Graphics->GetVkDevice(),
+			JoyContext::Graphics->GetDevice(),
 			&imageInfo,
 			JoyContext::Graphics->GetAllocationCallbacks(),
 			&m_textureImage);
@@ -101,11 +101,11 @@ namespace JoyEngine
 		ASSERT_DESC(res == VK_SUCCESS, ParseVkResult(res));
 
 		VkMemoryRequirements memRequirements;
-		vkGetImageMemoryRequirements(JoyContext::Graphics->GetVkDevice(), m_textureImage, &memRequirements);
+		vkGetImageMemoryRequirements(JoyContext::Graphics->GetDevice(), m_textureImage, &memRequirements);
 
 		JoyContext::Memory->AllocateMemory(memRequirements, m_propertiesFlags, m_textureImageMemory);
 
-		res = vkBindImageMemory(JoyContext::Graphics->GetVkDevice(), m_textureImage, m_textureImageMemory, 0);
+		res = vkBindImageMemory(JoyContext::Graphics->GetDevice(), m_textureImage, m_textureImageMemory, 0);
 		ASSERT_DESC(res == VK_SUCCESS, ParseVkResult(res));
 	}
 
@@ -134,7 +134,7 @@ namespace JoyEngine
 		};
 
 		const VkResult res = vkCreateImageView(
-			JoyContext::Graphics->GetVkDevice(),
+			JoyContext::Graphics->GetDevice(),
 			&viewInfo,
 			JoyContext::Graphics->GetAllocationCallbacks(),
 			&m_textureImageView);
@@ -144,7 +144,7 @@ namespace JoyEngine
 	void Texture::CreateImageSampler()
 	{
 		VkPhysicalDeviceProperties properties{};
-		vkGetPhysicalDeviceProperties(JoyContext::Graphics->GetVkPhysicalDevice(), &properties);
+		vkGetPhysicalDeviceProperties(JoyContext::Graphics->GetPhysicalDevice(), &properties);
 
 		VkSamplerCreateInfo samplerInfo{
 			VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO,
@@ -168,7 +168,7 @@ namespace JoyEngine
 		};
 
 		const VkResult res = vkCreateSampler(
-			JoyContext::Graphics->GetVkDevice(),
+			JoyContext::Graphics->GetDevice(),
 			&samplerInfo,
 			JoyContext::Graphics->GetAllocationCallbacks(),
 			&m_textureSampler);
@@ -180,14 +180,14 @@ namespace JoyEngine
 	{
 		if (m_textureSampler != VK_NULL_HANDLE)
 		{
-			vkDestroySampler(JoyContext::Graphics->GetVkDevice(), m_textureSampler,
+			vkDestroySampler(JoyContext::Graphics->GetDevice(), m_textureSampler,
 			                 JoyContext::Graphics->GetAllocationCallbacks());
 		}
-		vkDestroyImageView(JoyContext::Graphics->GetVkDevice(), m_textureImageView,
+		vkDestroyImageView(JoyContext::Graphics->GetDevice(), m_textureImageView,
 		                   JoyContext::Graphics->GetAllocationCallbacks());
-		vkDestroyImage(JoyContext::Graphics->GetVkDevice(), m_textureImage,
+		vkDestroyImage(JoyContext::Graphics->GetDevice(), m_textureImage,
 		               JoyContext::Graphics->GetAllocationCallbacks());
-		vkFreeMemory(JoyContext::Graphics->GetVkDevice(), m_textureImageMemory,
+		vkFreeMemory(JoyContext::Graphics->GetDevice(), m_textureImageMemory,
 		             JoyContext::Graphics->GetAllocationCallbacks());
 	}
 }

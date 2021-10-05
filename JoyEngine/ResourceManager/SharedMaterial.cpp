@@ -69,7 +69,7 @@ namespace JoyEngine {
             };
 
             VkDescriptorSetLayout setLayout;
-            VkResult res = vkCreateDescriptorSetLayout(JoyContext::Graphics->GetVkDevice(),
+            VkResult res = vkCreateDescriptorSetLayout(JoyContext::Graphics->GetDevice(),
                                                        &layoutInfo,
                                                        JoyContext::Graphics->GetAllocationCallbacks(),
                                                        &setLayout);
@@ -202,7 +202,7 @@ namespace JoyEngine {
                 &pushConstantRange
         };
 
-        VkResult res = vkCreatePipelineLayout(JoyContext::Graphics->GetVkDevice(),
+        VkResult res = vkCreatePipelineLayout(JoyContext::Graphics->GetDevice(),
                                               &pipelineLayoutInfo,
                                               JoyContext::Graphics->GetAllocationCallbacks(),
                                               &m_pipelineLayout);
@@ -224,7 +224,7 @@ namespace JoyEngine {
         pipelineInfo.subpass = 0;
         pipelineInfo.basePipelineHandle = VK_NULL_HANDLE;
 
-        res = vkCreateGraphicsPipelines(JoyContext::Graphics->GetVkDevice(),
+        res = vkCreateGraphicsPipelines(JoyContext::Graphics->GetDevice(),
                                         VK_NULL_HANDLE,
                                         1,
                                         &pipelineInfo,
@@ -234,10 +234,10 @@ namespace JoyEngine {
     }
 
     SharedMaterial::~SharedMaterial() {
-        vkDestroyPipeline(JoyContext::Graphics->GetVkDevice(),
+        vkDestroyPipeline(JoyContext::Graphics->GetDevice(),
                           m_graphicsPipeline,
                           JoyContext::Graphics->GetAllocationCallbacks());
-        vkDestroyPipelineLayout(JoyContext::Graphics->GetVkDevice(),
+        vkDestroyPipelineLayout(JoyContext::Graphics->GetDevice(),
                                 m_pipelineLayout,
                                 JoyContext::Graphics->GetAllocationCallbacks());
 
@@ -245,7 +245,7 @@ namespace JoyEngine {
         JoyContext::Resource->UnloadResource(m_fragmentShader);
 
         for (uint32_t i = 0; i < m_setLayouts.size(); i++) {
-            vkDestroyDescriptorSetLayout(JoyContext::Graphics->GetVkDevice(),
+            vkDestroyDescriptorSetLayout(JoyContext::Graphics->GetDevice(),
                                          m_setLayouts[i],
                                          JoyContext::Graphics->GetAllocationCallbacks());
             JoyContext::DescriptorSet->UnregisterPool(m_setLayoutInfos[i].hash);

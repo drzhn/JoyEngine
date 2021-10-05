@@ -16,7 +16,7 @@ namespace JoyEngine
 		m_usage(usage),
 		m_properties(properties)
 	{
-		const auto logicalDevice = JoyContext::Graphics->GetVkDevice();
+		const auto logicalDevice = JoyContext::Graphics->GetDevice();
 		const auto allocator = JoyContext::Graphics->GetAllocationCallbacks();
 
 		VkBufferCreateInfo bufferInfo{
@@ -48,15 +48,15 @@ namespace JoyEngine
 		ASSERT(size <= m_size);
 
 		void* bufferPtr;
-		vkMapMemory(JoyContext::Graphics->GetVkDevice(), m_bufferMemory, 0, size, 0, &bufferPtr);
+		vkMapMemory(JoyContext::Graphics->GetDevice(), m_bufferMemory, 0, size, 0, &bufferPtr);
 		memcpy(bufferPtr, data, size);
-		vkUnmapMemory(JoyContext::Graphics->GetVkDevice(), m_bufferMemory);
+		vkUnmapMemory(JoyContext::Graphics->GetDevice(), m_bufferMemory);
 	}
 
 	Buffer::~Buffer()
 	{
-		vkDestroyBuffer(JoyContext::Graphics->GetVkDevice(), m_buffer, JoyContext::Graphics->GetAllocationCallbacks());
-		vkFreeMemory(JoyContext::Graphics->GetVkDevice(), m_bufferMemory,
+		vkDestroyBuffer(JoyContext::Graphics->GetDevice(), m_buffer, JoyContext::Graphics->GetAllocationCallbacks());
+		vkFreeMemory(JoyContext::Graphics->GetDevice(), m_bufferMemory,
 		             JoyContext::Graphics->GetAllocationCallbacks());
 	}
 

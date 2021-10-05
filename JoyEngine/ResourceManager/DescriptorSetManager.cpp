@@ -67,7 +67,7 @@ namespace JoyEngine {
         };
 
         VkResult res = vkCreateDescriptorPool(
-                JoyContext::Graphics->GetVkDevice(),
+                JoyContext::Graphics->GetDevice(),
                 &poolInfo,
                 JoyContext::Graphics->GetAllocationCallbacks(),
                 &m_pool);
@@ -86,7 +86,7 @@ namespace JoyEngine {
         };
 
         VkDescriptorSet sets[DESCRIPTOR_POOL_SIZE];
-        res = vkAllocateDescriptorSets(JoyContext::Graphics->GetVkDevice(), &allocInfo, sets);
+        res = vkAllocateDescriptorSets(JoyContext::Graphics->GetDevice(), &allocInfo, sets);
         ASSERT(res == VK_SUCCESS);
         for (int i = 0; i < DESCRIPTOR_POOL_SIZE; i++) {
             m_freeList.push_back(sets[i]);
@@ -94,7 +94,7 @@ namespace JoyEngine {
     }
 
     DescriptorPool::~DescriptorPool() {
-        vkDestroyDescriptorPool(JoyContext::Graphics->GetVkDevice(),
+        vkDestroyDescriptorPool(JoyContext::Graphics->GetDevice(),
                                 m_pool,
                                 JoyContext::Graphics->GetAllocationCallbacks());
     }

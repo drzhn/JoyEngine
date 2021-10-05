@@ -24,12 +24,12 @@ namespace JoyEngine
 		allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
 		allocInfo.allocationSize = requirements.size;
 		allocInfo.memoryTypeIndex = findMemoryType(
-			JoyContext::Graphics->GetVkPhysicalDevice(),
+			JoyContext::Graphics->GetPhysicalDevice(),
 			requirements.memoryTypeBits,
 			properties);
 
 		const VkResult res = vkAllocateMemory(
-			JoyContext::Graphics->GetVkDevice(),
+			JoyContext::Graphics->GetDevice(),
 			&allocInfo,
 			JoyContext::Graphics->GetAllocationCallbacks(),
 			&out_imageMemory);
@@ -169,11 +169,11 @@ namespace JoyEngine
 		VkCommandBufferAllocateInfo allocInfo{};
 		allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
 		allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-		allocInfo.commandPool = JoyContext::Graphics->GetVkCommandPool();
+		allocInfo.commandPool = JoyContext::Graphics->GetCommandPool();
 		allocInfo.commandBufferCount = 1;
 
 		VkCommandBuffer commandBuffer;
-		vkAllocateCommandBuffers(JoyContext::Graphics->GetVkDevice(), &allocInfo, &commandBuffer);
+		vkAllocateCommandBuffers(JoyContext::Graphics->GetDevice(), &allocInfo, &commandBuffer);
 
 		VkCommandBufferBeginInfo beginInfo{};
 		beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
@@ -193,10 +193,10 @@ namespace JoyEngine
 		submitInfo.commandBufferCount = 1;
 		submitInfo.pCommandBuffers = &commandBuffer;
 
-		vkQueueSubmit(JoyContext::Graphics->GetGraphicsVkQueue(), 1, &submitInfo, VK_NULL_HANDLE);
-		vkQueueWaitIdle(JoyContext::Graphics->GetGraphicsVkQueue());
+		vkQueueSubmit(JoyContext::Graphics->GetGraphicsQueue(), 1, &submitInfo, VK_NULL_HANDLE);
+		vkQueueWaitIdle(JoyContext::Graphics->GetGraphicsQueue());
 
-		vkFreeCommandBuffers(JoyContext::Graphics->GetVkDevice(), JoyContext::Graphics->GetVkCommandPool(), 1,
+		vkFreeCommandBuffers(JoyContext::Graphics->GetDevice(), JoyContext::Graphics->GetCommandPool(), 1,
 		                     &commandBuffer);
 	}
 
