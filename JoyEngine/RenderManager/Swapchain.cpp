@@ -77,13 +77,34 @@ namespace JoyEngine {
         m_swapChainImageViews.resize(m_swapchainImageCount);
 
         for (uint32_t i = 0; i < m_swapchainImageCount; i++) {
-            MemoryManager::CreateImageView(
-                    JoyContext::Graphics->GetVkDevice(),
-                    JoyContext::Graphics->GetAllocationCallbacks(),
-                    m_swapChainImages[i],
-                    m_swapChainImageFormat,
-                    VK_IMAGE_ASPECT_COLOR_BIT,
-                    m_swapChainImageViews[i]);
+            const VkImageViewCreateInfo viewInfo{
+            VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
+            nullptr,
+            0,
+            m_swapChainImages[i],
+            VK_IMAGE_VIEW_TYPE_2D,
+            m_swapChainImageFormat,
+            {
+                VK_COMPONENT_SWIZZLE_IDENTITY,
+                VK_COMPONENT_SWIZZLE_IDENTITY,
+                VK_COMPONENT_SWIZZLE_IDENTITY,
+                VK_COMPONENT_SWIZZLE_IDENTITY
+            },
+            {
+                VK_IMAGE_ASPECT_COLOR_BIT,
+                0,
+                1,
+                0,
+                1
+            }
+            };
+
+            const VkResult res = vkCreateImageView(
+                JoyContext::Graphics->GetVkDevice(),
+                &viewInfo,
+                JoyContext::Graphics->GetAllocationCallbacks(),
+                &m_swapChainImageViews[i]);
+            ASSERT_DESC(res == VK_SUCCESS, ParseVkResult(res));
         }
     }
 

@@ -71,8 +71,11 @@ namespace JoyEngine {
         VkDevice m_logicalDevice;
         VkDebugUtilsMessengerEXT m_debugMessenger;
         VkSurfaceKHR m_surface;
+
         VkQueue m_graphicsQueue;
         VkQueue m_presentQueue;
+        VkQueue m_transferQueue;
+
         VkCommandPool m_commandPool;
     };
 }

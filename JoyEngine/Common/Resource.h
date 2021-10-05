@@ -8,6 +8,8 @@ namespace JoyEngine {
     public:
         Resource() = default;
 
+        Resource(GUID guid) :m_guid(guid) {};
+
         virtual ~Resource() = default;
 
         [[nodiscard]] uint32_t GetRefCount() const { return m_refCount; }
@@ -16,8 +18,15 @@ namespace JoyEngine {
 
         void DecreaseRefCount() { m_refCount--; }
 
+        [[nodiscard]] bool IsLoaded() const noexcept { return m_isLoaded; }
+        [[nodiscard]] GUID GetGuid() const noexcept { return m_guid; }
+
     private:
         uint32_t m_refCount = 0;
+        GUID m_guid;
+
+    protected:
+        bool m_isLoaded = false;
     };
 }
 

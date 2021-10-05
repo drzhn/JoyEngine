@@ -12,6 +12,7 @@
 #endif
 
 #define ASSERT(expr) if (expr) {} else { std::cerr << #expr << " " <<  __FILE__ <<  ":" << __LINE__ << std::endl; DEBUG_BREAK;}
+#define ASSERT_DESC(expr, message) if (expr) {} else { std::cerr << message << " " << #expr << " " <<  __FILE__ <<  ":" << __LINE__ << std::endl; DEBUG_BREAK;}
 
 #else
 #define ASSERT(expr)

@@ -11,7 +11,7 @@
 #include "RenderManager/RenderManager.h"
 
 namespace JoyEngine {
-    Material::Material(GUID guid) {
+    Material::Material(GUID guid) :Resource(guid) {
 
         rapidjson::Document json = JoyContext::Data->GetSerializedData(guid, material);
 

@@ -5,23 +5,10 @@
 #include <set>
 #include <Utils/Assert.h>
 #include <memory>
-#include <vulkan/vulkan.h>
-
-#include "GraphicsManager/GraphicsManager.h"
 
 #include "Common/Resource.h"
-#include "Mesh.h"
-#include "Material.h"
-#include "SharedMaterial.h"
-#include "Texture.h"
-#include "Shader.h"
-#include "RenderManager/VulkanAllocator.h"
 
 namespace JoyEngine {
-
-//    class IJoyGraphicsContext;
-
-//    class GraphicsManager;
 
     class ResourceManager {
     public:
@@ -35,27 +22,26 @@ namespace JoyEngine {
         void Stop() {}
 
         bool IsResourceLoaded(GUID guid) {
-            return m_loadedResources.find(guid) != m_loadedResources.end();
+            return m_isResourceInUse.find(guid) != m_isResourceInUse.end();
         }
 
         template<class T>
-        void LoadResource(GUID guid) {
-            if (IsResourceLoaded(guid)) {
-                m_loadedResources[guid]->IncreaseRefCount();
-                return;
+        T* LoadResource(GUID guid) {
+            if (!IsResourceLoaded(guid)) {
+                m_isResourceInUse.insert({ guid, std::make_unique<T>(guid) });
             }
-            m_loadedResources.insert({guid, std::make_unique<T>(guid)});
-            m_loadedResources[guid]->IncreaseRefCount();
+            m_isResourceInUse[guid]->IncreaseRefCount();
+            return GetResource<T>(guid);
         }
 
         void UnloadResource(GUID guid) {
             if (IsResourceLoaded(guid)) {
-                m_loadedResources[guid]->DecreaseRefCount();
+                m_isResourceInUse[guid]->DecreaseRefCount();
             } else {
                 ASSERT(false);
             }
-            if (m_loadedResources[guid]->GetRefCount() == 0) {
-                m_loadedResources.erase(guid);
+            if (m_isResourceInUse[guid]->GetRefCount() == 0) {
+                m_isResourceInUse.erase(guid);
             }
         }
 
@@ -63,16 +49,16 @@ namespace JoyEngine {
         T *GetResource(GUID guid) {
             ASSERT(IsResourceLoaded(guid));
 #ifdef DEBUG
-            T *ptr = dynamic_cast<T *>(m_loadedResources[guid].get());
+            T *ptr = dynamic_cast<T *>(m_isResourceInUse[guid].get());
             ASSERT(ptr != nullptr);
 #else
-            T *ptr = reinterpret_cast<T *>(m_loadedResources[guid].get());
+            T *ptr = reinterpret_cast<T *>(m_isResourceInUse[guid].get());
 #endif //DEBUG
             return ptr;
         }
 
     private:
-        std::map<GUID, std::unique_ptr<Resource>> m_loadedResources;
+        std::map<GUID, std::unique_ptr<Resource>> m_isResourceInUse;
     };
 }
 

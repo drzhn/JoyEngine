@@ -24,6 +24,9 @@ namespace JoyEngine
 		{
 		}
 
+		void AllocateMemory(VkMemoryRequirements requirements, VkMemoryPropertyFlags properties,
+		                    VkDeviceMemory& out_imageMemory);
+
 		static void CreateBuffer(
 			VkPhysicalDevice physicalDevice,
 			VkDevice logicalDevice,
@@ -34,26 +37,6 @@ namespace JoyEngine
 			VkBuffer& buffer,
 			VkDeviceMemory& bufferMemory);
 
-		static void CreateImage(
-			VkPhysicalDevice physicalDevice,
-			VkDevice logicalDevice,
-			const VkAllocationCallbacks* allocator,
-			uint32_t width,
-			uint32_t height,
-			VkFormat format,
-			VkImageTiling tiling,
-			VkImageUsageFlags usage,
-			VkMemoryPropertyFlags properties,
-			VkImage& image,
-			VkDeviceMemory& imageMemory);
-
-		static void CreateImageView(
-			VkDevice logicalDevice,
-			const VkAllocationCallbacks* allocator,
-			VkImage image,
-			VkFormat format,
-			VkImageAspectFlags aspectFlags,
-			VkImageView& imageView);
 
 		void CreateGPUBuffer(
 			void* data,
@@ -67,18 +50,11 @@ namespace JoyEngine
 			VkBuffer vertexBuffer,
 			VkDeviceMemory vertexBufferMemory);
 
-		void CreateTexture(
-			VkImage& image,
-			VkImageView& imageView,
-			VkDeviceMemory& memory,
+		void LoadDataToImage(
 			const unsigned char* data,
-			int length);
-
-		void CreateTextureSampler(VkSampler& textureSampler);
-
-		void DestroyImage(VkImageView imageView, VkImage image, VkDeviceMemory imageMemory);
-
-		void DestroySampler(VkSampler sampler);
+			uint32_t width,
+			uint32_t height,
+			VkImage textureImage);
 
 		void CreateShaderModule(const uint32_t* code, size_t codeSize, VkShaderModule& shaderModule);
 
@@ -91,8 +67,6 @@ namespace JoyEngine
 
 		void EndSingleTimeCommands(VkCommandBuffer commandBuffer);
 
-		void CreateTextureImage(const unsigned char*, int len, VkImage& textureImage,
-		                        VkDeviceMemory& textureImageMemory);
 
 		void TransitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout);
 

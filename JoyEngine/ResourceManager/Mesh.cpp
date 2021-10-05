@@ -10,7 +10,7 @@
 
 namespace JoyEngine {
 
-    Mesh::Mesh(GUID guid) {
+    Mesh::Mesh(GUID guid) :Resource(guid){
         std::vector<Vertex> vertices;
         std::vector<uint32_t> indices;
         std::ifstream modelStream;

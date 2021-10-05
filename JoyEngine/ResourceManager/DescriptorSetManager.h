@@ -39,7 +39,7 @@ namespace JoyEngine {
         std::list<VkDescriptorSet> m_freeList;
     };
 
-    class DescriptorPoolList final : public Resource {
+    class DescriptorPoolList {
     public:
         DescriptorPoolList(VkDescriptorSetLayout setLayout, const std::vector<VkDescriptorType> &types);
 
@@ -47,7 +47,14 @@ namespace JoyEngine {
 
         void Free(VkDescriptorSet descriptorSet);
 
+        [[nodiscard]] uint32_t GetRefCount() const { return m_refCount; }
+
+        void IncreaseRefCount() { m_refCount++; }
+
+        void DecreaseRefCount() { m_refCount--; }
+
     private:
+        uint32_t m_refCount;
         VkDescriptorSetLayout m_setLayout;
         const std::vector<VkDescriptorType> &m_types;
 

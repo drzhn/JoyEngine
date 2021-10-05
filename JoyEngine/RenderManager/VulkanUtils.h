@@ -49,6 +49,8 @@ namespace JoyEngine
 	VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities, HWND windowHandle);
 
 	uint32_t findMemoryType(VkPhysicalDevice device, uint32_t typeFilter, VkMemoryPropertyFlags properties);
+
+	std::string ParseVkResult(VkResult res);
 }
 
 #endif

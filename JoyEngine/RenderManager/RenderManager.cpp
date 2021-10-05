@@ -13,45 +13,53 @@
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
 #define TINYOBJLOADER_IMPLEMENTATION
 
-namespace JoyEngine {
-
-	static auto startTime = std::chrono::high_resolution_clock::now();
-
-	RenderManager::RenderManager() {
-
+namespace JoyEngine
+{
+	RenderManager::RenderManager()
+	{
 	}
 
-	void RenderManager::Stop() {
+	void RenderManager::Stop()
+	{
 		vkQueueWaitIdle(JoyContext::Graphics->GetPresentVkQueue());
 		vkDeviceWaitIdle(JoyContext::Graphics->GetVkDevice());
 	}
 
-	RenderManager::~RenderManager() {
+	RenderManager::~RenderManager()
+	{
 		m_depthTexture = nullptr;
 		m_positionTexture = nullptr;
 		m_normalTexture = nullptr;
 
-		for (size_t i = 0; i < m_swapChainFramebuffers.size(); i++) {
-			vkDestroyFramebuffer(JoyContext::Graphics->GetVkDevice(), m_swapChainFramebuffers[i], JoyContext::Graphics->GetAllocationCallbacks());
+		for (size_t i = 0; i < m_swapChainFramebuffers.size(); i++)
+		{
+			vkDestroyFramebuffer(JoyContext::Graphics->GetVkDevice(), m_swapChainFramebuffers[i],
+			                     JoyContext::Graphics->GetAllocationCallbacks());
 		}
 
 		vkFreeCommandBuffers(JoyContext::Graphics->GetVkDevice(),
-			JoyContext::Graphics->GetVkCommandPool(),
-			static_cast<uint32_t>(commandBuffers.size()),
-			commandBuffers.data());
+		                     JoyContext::Graphics->GetVkCommandPool(),
+		                     static_cast<uint32_t>(commandBuffers.size()),
+		                     commandBuffers.data());
 
-		vkDestroyRenderPass(JoyContext::Graphics->GetVkDevice(), m_renderPass, JoyContext::Graphics->GetAllocationCallbacks());
+		vkDestroyRenderPass(JoyContext::Graphics->GetVkDevice(), m_renderPass,
+		                    JoyContext::Graphics->GetAllocationCallbacks());
 
 		m_swapchain = nullptr;
 
-		for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
-			vkDestroySemaphore(JoyContext::Graphics->GetVkDevice(), m_renderFinishedSemaphores[i], JoyContext::Graphics->GetAllocationCallbacks());
-			vkDestroySemaphore(JoyContext::Graphics->GetVkDevice(), m_imageAvailableSemaphores[i], JoyContext::Graphics->GetAllocationCallbacks());
-			vkDestroyFence(JoyContext::Graphics->GetVkDevice(), m_inFlightFences[i], JoyContext::Graphics->GetAllocationCallbacks());
+		for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
+		{
+			vkDestroySemaphore(JoyContext::Graphics->GetVkDevice(), m_renderFinishedSemaphores[i],
+			                   JoyContext::Graphics->GetAllocationCallbacks());
+			vkDestroySemaphore(JoyContext::Graphics->GetVkDevice(), m_imageAvailableSemaphores[i],
+			                   JoyContext::Graphics->GetAllocationCallbacks());
+			vkDestroyFence(JoyContext::Graphics->GetVkDevice(), m_inFlightFences[i],
+			               JoyContext::Graphics->GetAllocationCallbacks());
 		}
 	}
 
-	void RenderManager::Init() {
+	void RenderManager::Init()
+	{
 		m_swapchain = std::make_unique<Swapchain>();
 
 		CreateRenderPass();
@@ -61,7 +69,8 @@ namespace JoyEngine {
 		CreateSyncObjects();
 	}
 
-	void RenderManager::CreateRenderPass() {
+	void RenderManager::CreateRenderPass()
+	{
 		VkAttachmentDescription depthAttachment{};
 		depthAttachment.format = findDepthFormat(JoyContext::Graphics->GetVkPhysicalDevice());
 		depthAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
@@ -99,12 +108,14 @@ namespace JoyEngine {
 		VkSubpassDependency dependency{};
 		dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
 		dependency.dstSubpass = 0;
-		dependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
+		dependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT |
+			VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
 		dependency.srcAccessMask = 0;
-		dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
+		dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT |
+			VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
 		dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
 
-		VkAttachmentDescription attachments[] = { colorAttachment, depthAttachment };
+		VkAttachmentDescription attachments[] = {colorAttachment, depthAttachment};
 		VkRenderPassCreateInfo renderPassInfo{};
 		renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
 		renderPassInfo.attachmentCount = 2;
@@ -114,17 +125,22 @@ namespace JoyEngine {
 		renderPassInfo.dependencyCount = 1;
 		renderPassInfo.pDependencies = &dependency;
 
-		if (vkCreateRenderPass(JoyContext::Graphics->GetVkDevice(), &renderPassInfo, JoyContext::Graphics->GetAllocationCallbacks(), &m_renderPass) != VK_SUCCESS) {
+		if (vkCreateRenderPass(JoyContext::Graphics->GetVkDevice(), &renderPassInfo,
+		                       JoyContext::Graphics->GetAllocationCallbacks(), &m_renderPass) != VK_SUCCESS)
+		{
 			throw std::runtime_error("failed to create render pass!");
 		}
 	}
 
-	void RenderManager::RegisterMeshRenderer(MeshRenderer* meshRenderer) {
+	void RenderManager::RegisterMeshRenderer(MeshRenderer* meshRenderer)
+	{
 		m_meshRenderers.insert(meshRenderer);
 	}
 
-	void RenderManager::UnregisterMeshRenderer(MeshRenderer* meshRenderer) {
-		if (m_meshRenderers.find(meshRenderer) == m_meshRenderers.end()) {
+	void RenderManager::UnregisterMeshRenderer(MeshRenderer* meshRenderer)
+	{
+		if (m_meshRenderers.find(meshRenderer) == m_meshRenderers.end())
+		{
 			ASSERT(false);
 		}
 		m_meshRenderers.erase(meshRenderer);
@@ -141,81 +157,72 @@ namespace JoyEngine {
 		m_currentCamera = nullptr;
 	}
 
-	void RenderManager::CreateGBufferResources() {
-		m_depthTexture = std::make_unique<Texture>();
+	void RenderManager::CreateGBufferResources()
+	{
 		VkFormat depthFormat = findDepthFormat(JoyContext::Graphics->GetVkPhysicalDevice());
 
-		JoyContext::Memory->CreateImage(
-			JoyContext::Graphics->GetVkPhysicalDevice(),
-			JoyContext::Graphics->GetVkDevice(),
-			JoyContext::Graphics->GetAllocationCallbacks(),
+		m_depthTexture = std::make_unique<Texture>(
 			m_swapchain->GetSwapChainExtent().width,
 			m_swapchain->GetSwapChainExtent().height,
 			depthFormat,
 			VK_IMAGE_TILING_OPTIMAL,
 			VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT,
 			VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
-			m_depthTexture->GetImage(),
-			m_depthTexture->GetDeviceMemory());
-		JoyContext::Memory->CreateImageView(
-			JoyContext::Graphics->GetVkDevice(),
-			JoyContext::Graphics->GetAllocationCallbacks(),
-			m_depthTexture->GetImage(),
-			depthFormat,
-			VK_IMAGE_ASPECT_DEPTH_BIT,
-			m_depthTexture->GetImageView());
+			VK_IMAGE_ASPECT_DEPTH_BIT);
 
-		m_normalTexture = std::make_unique<Texture>();
+		//m_normalTexture = std::make_unique<Texture>();
 
-		JoyContext::Memory->CreateImage(
-			JoyContext::Graphics->GetVkPhysicalDevice(),
-			JoyContext::Graphics->GetVkDevice(),
-			JoyContext::Graphics->GetAllocationCallbacks(),
-			m_swapchain->GetSwapChainExtent().width,
-			m_swapchain->GetSwapChainExtent().height,
-			VK_FORMAT_R8G8B8A8_UNORM,
-			VK_IMAGE_TILING_OPTIMAL,
-			VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT,
-			VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
-			m_normalTexture->GetImage(),
-			m_normalTexture->GetDeviceMemory());
-		JoyContext::Memory->CreateImageView(
-			JoyContext::Graphics->GetVkDevice(),
-			JoyContext::Graphics->GetAllocationCallbacks(),
-			m_normalTexture->GetImage(),
-			VK_FORMAT_R8G8B8A8_UNORM,
-			VK_IMAGE_ASPECT_COLOR_BIT,
-			m_normalTexture->GetImageView());
+		//JoyContext::Memory->CreateImage(
+		//	JoyContext::Graphics->GetVkPhysicalDevice(),
+		//	JoyContext::Graphics->GetVkDevice(),
+		//	JoyContext::Graphics->GetAllocationCallbacks(),
+		//	m_swapchain->GetSwapChainExtent().width,
+		//	m_swapchain->GetSwapChainExtent().height,
+		//	VK_FORMAT_R8G8B8A8_UNORM,
+		//	VK_IMAGE_TILING_OPTIMAL,
+		//	VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT,
+		//	VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+		//	m_normalTexture->GetImage(),
+		//	m_normalTexture->GetDeviceMemory());
+		//JoyContext::Memory->CreateImageView(
+		//	JoyContext::Graphics->GetVkDevice(),
+		//	JoyContext::Graphics->GetAllocationCallbacks(),
+		//	m_normalTexture->GetImage(),
+		//	VK_FORMAT_R8G8B8A8_UNORM,
+		//	VK_IMAGE_ASPECT_COLOR_BIT,
+		//	m_normalTexture->GetImageView());
 
-		m_positionTexture = std::make_unique<Texture>();
+		//m_positionTexture = std::make_unique<Texture>();
 
-		JoyContext::Memory->CreateImage(
-			JoyContext::Graphics->GetVkPhysicalDevice(),
-			JoyContext::Graphics->GetVkDevice(),
-			JoyContext::Graphics->GetAllocationCallbacks(),
-			m_swapchain->GetSwapChainExtent().width,
-			m_swapchain->GetSwapChainExtent().height,
-			VK_FORMAT_R8G8B8A8_UNORM,
-			VK_IMAGE_TILING_OPTIMAL,
-			VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT,
-			VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
-			m_positionTexture->GetImage(),
-			m_positionTexture->GetDeviceMemory());
-		JoyContext::Memory->CreateImageView(
-			JoyContext::Graphics->GetVkDevice(),
-			JoyContext::Graphics->GetAllocationCallbacks(),
-			m_positionTexture->GetImage(),
-			VK_FORMAT_R8G8B8A8_UNORM,
-			VK_IMAGE_ASPECT_COLOR_BIT,
-			m_positionTexture->GetImageView());
+		//JoyContext::Memory->CreateImage(
+		//	JoyContext::Graphics->GetVkPhysicalDevice(),
+		//	JoyContext::Graphics->GetVkDevice(),
+		//	JoyContext::Graphics->GetAllocationCallbacks(),
+		//	m_swapchain->GetSwapChainExtent().width,
+		//	m_swapchain->GetSwapChainExtent().height,
+		//	VK_FORMAT_R8G8B8A8_UNORM,
+		//	VK_IMAGE_TILING_OPTIMAL,
+		//	VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT,
+		//	VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+		//	m_positionTexture->GetImage(),
+		//	m_positionTexture->GetDeviceMemory());
+		//JoyContext::Memory->CreateImageView(
+		//	JoyContext::Graphics->GetVkDevice(),
+		//	JoyContext::Graphics->GetAllocationCallbacks(),
+		//	m_positionTexture->GetImage(),
+		//	VK_FORMAT_R8G8B8A8_UNORM,
+		//	VK_IMAGE_ASPECT_COLOR_BIT,
+		//	m_positionTexture->GetImageView());
 	}
 
-	void RenderManager::CreateFramebuffers() {
+	void RenderManager::CreateFramebuffers()
+	{
 		m_swapChainFramebuffers.resize(m_swapchain->GetSwapchainImageCount());
-		for (size_t i = 0; i < m_swapchain->GetSwapchainImageCount(); i++) {
+		for (size_t i = 0; i < m_swapchain->GetSwapchainImageCount(); i++)
+		{
 			VkImageView attachments[2] = {
-					m_swapchain->GetSwapChainImageViews()[i],
-					m_depthTexture->GetImageView()
+				m_swapchain->GetSwapChainImageViews()[i],
+				m_depthTexture->GetImageView()
 			};
 
 			VkFramebufferCreateInfo framebufferInfo{};
@@ -228,16 +235,17 @@ namespace JoyEngine {
 			framebufferInfo.layers = 1;
 
 			if (vkCreateFramebuffer(JoyContext::Graphics->GetVkDevice(),
-				&framebufferInfo,
-				JoyContext::Graphics->GetAllocationCallbacks(),
-				&m_swapChainFramebuffers[i]) != VK_SUCCESS) {
+			                        &framebufferInfo,
+			                        JoyContext::Graphics->GetAllocationCallbacks(),
+			                        &m_swapChainFramebuffers[i]) != VK_SUCCESS)
+			{
 				throw std::runtime_error("failed to create framebuffer!");
 			}
 		}
 	}
 
-	void RenderManager::CreateCommandBuffers() {
-
+	void RenderManager::CreateCommandBuffers()
+	{
 		commandBuffers.resize(m_swapChainFramebuffers.size());
 
 		VkCommandBufferAllocateInfo allocInfo{};
@@ -246,16 +254,20 @@ namespace JoyEngine {
 		allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
 		allocInfo.commandBufferCount = (uint32_t)commandBuffers.size();
 
-		if (vkAllocateCommandBuffers(JoyContext::Graphics->GetVkDevice(), &allocInfo, commandBuffers.data()) != VK_SUCCESS) {
+		if (vkAllocateCommandBuffers(JoyContext::Graphics->GetVkDevice(), &allocInfo, commandBuffers.data()) !=
+			VK_SUCCESS)
+		{
 			throw std::runtime_error("failed to allocate command buffers!");
 		}
 	}
 
-	void RenderManager::WriteCommandBuffers(uint32_t imageIndex) {
+	void RenderManager::WriteCommandBuffers(uint32_t imageIndex)
+	{
 		VkCommandBufferBeginInfo beginInfo{};
 		beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
 
-		if (vkBeginCommandBuffer(commandBuffers[imageIndex], &beginInfo) != VK_SUCCESS) {
+		if (vkBeginCommandBuffer(commandBuffers[imageIndex], &beginInfo) != VK_SUCCESS)
+		{
 			throw std::runtime_error("failed to begin recording command buffer!");
 		}
 
@@ -263,12 +275,12 @@ namespace JoyEngine {
 		renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
 		renderPassInfo.renderPass = m_renderPass;
 		renderPassInfo.framebuffer = m_swapChainFramebuffers[imageIndex];
-		renderPassInfo.renderArea.offset = { 0, 0 };
+		renderPassInfo.renderArea.offset = {0, 0};
 		renderPassInfo.renderArea.extent = m_swapchain->GetSwapChainExtent();
 
 		VkClearValue clearValues[2];
-		clearValues[0].color = { 0.0f, 0.0f, 0.0f, 1.0f };
-		clearValues[1].depthStencil = { 1.0f, 0 };
+		clearValues[0].color = {0.0f, 0.0f, 0.0f, 1.0f};
+		clearValues[1].depthStencil = {1.0f, 0};
 
 		renderPassInfo.clearValueCount = 2;
 		renderPassInfo.pClearValues = clearValues;
@@ -277,11 +289,12 @@ namespace JoyEngine {
 
 		ASSERT(m_currentCamera != nullptr);
 
-		for (auto const& mr : m_meshRenderers) {
+		for (auto const& mr : m_meshRenderers)
+		{
 			VkBuffer vertexBuffers[] = {
-					JoyContext::Resource->GetResource<Mesh>(mr->GetMeshGuid())->GetVertexBuffer()
+				mr->GetMesh()->GetVertexBuffer()
 			};
-			VkDeviceSize offsets[] = { 0 };
+			VkDeviceSize offsets[] = {0};
 			vkCmdBindVertexBuffers(
 				commandBuffers[imageIndex],
 				0,
@@ -291,7 +304,7 @@ namespace JoyEngine {
 
 			vkCmdBindIndexBuffer(
 				commandBuffers[imageIndex],
-				JoyContext::Resource->GetResource<Mesh>(mr->GetMeshGuid())->GetIndexBuffer(),
+				mr->GetMesh()->GetIndexBuffer(),
 				0,
 				VK_INDEX_TYPE_UINT32);
 
@@ -300,7 +313,8 @@ namespace JoyEngine {
 				VK_PIPELINE_BIND_POINT_GRAPHICS,
 				mr->GetMaterial()->GetSharedMaterial()->GetPipeline());
 
-			for (const auto& item : mr->GetMaterial()->GetDescriptorMap()) {
+			for (const auto& item : mr->GetMaterial()->GetDescriptorMap())
+			{
 				vkCmdBindDescriptorSets(
 					commandBuffers[imageIndex],
 					VK_PIPELINE_BIND_POINT_GRAPHICS,
@@ -326,7 +340,7 @@ namespace JoyEngine {
 
 			vkCmdDrawIndexed(
 				commandBuffers[imageIndex],
-				static_cast<uint32_t>(JoyContext::Resource->GetResource<Mesh>(mr->GetMeshGuid())->GetIndexSize()),
+				static_cast<uint32_t>(mr->GetMesh()->GetIndexSize()),
 				1,
 				0,
 				0,
@@ -335,16 +349,19 @@ namespace JoyEngine {
 
 		vkCmdEndRenderPass(commandBuffers[imageIndex]);
 
-		if (vkEndCommandBuffer(commandBuffers[imageIndex]) != VK_SUCCESS) {
+		if (vkEndCommandBuffer(commandBuffers[imageIndex]) != VK_SUCCESS)
+		{
 			throw std::runtime_error("failed to record command buffer!");
 		}
 	}
 
-	void RenderManager::ResetCommandBuffers(uint32_t imageIndex) {
+	void RenderManager::ResetCommandBuffers(uint32_t imageIndex)
+	{
 		vkResetCommandBuffer(commandBuffers[imageIndex], 0);
 	}
 
-	void RenderManager::CreateSyncObjects() {
+	void RenderManager::CreateSyncObjects()
+	{
 		m_imageAvailableSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
 		m_renderFinishedSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
 		m_inFlightFences.resize(MAX_FRAMES_IN_FLIGHT);
@@ -357,42 +374,52 @@ namespace JoyEngine {
 		fenceInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
 		fenceInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
 
-		for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
-			if (vkCreateSemaphore(JoyContext::Graphics->GetVkDevice(), &semaphoreInfo, JoyContext::Graphics->GetAllocationCallbacks(), &m_imageAvailableSemaphores[i]) != VK_SUCCESS ||
-				vkCreateSemaphore(JoyContext::Graphics->GetVkDevice(), &semaphoreInfo, JoyContext::Graphics->GetAllocationCallbacks(), &m_renderFinishedSemaphores[i]) != VK_SUCCESS ||
-				vkCreateFence(JoyContext::Graphics->GetVkDevice(), &fenceInfo, JoyContext::Graphics->GetAllocationCallbacks(), &m_inFlightFences[i]) != VK_SUCCESS) {
-
+		for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
+		{
+			if (vkCreateSemaphore(JoyContext::Graphics->GetVkDevice(), &semaphoreInfo,
+			                      JoyContext::Graphics->GetAllocationCallbacks(),
+			                      &m_imageAvailableSemaphores[i]) != VK_SUCCESS ||
+				vkCreateSemaphore(JoyContext::Graphics->GetVkDevice(), &semaphoreInfo,
+				                  JoyContext::Graphics->GetAllocationCallbacks(),
+				                  &m_renderFinishedSemaphores[i]) != VK_SUCCESS ||
+				vkCreateFence(JoyContext::Graphics->GetVkDevice(), &fenceInfo,
+				              JoyContext::Graphics->GetAllocationCallbacks(), &m_inFlightFences[i]) != VK_SUCCESS)
+			{
 				throw std::runtime_error("failed to create synchronization objects for a frame!");
 			}
 		}
 	}
 
-	void RenderManager::Update() {
+	void RenderManager::Update()
+	{
 		DrawFrame();
 	}
 
-	void RenderManager::DrawFrame() {
+	void RenderManager::DrawFrame()
+	{
 		vkWaitForFences(JoyContext::Graphics->GetVkDevice(), 1, &m_inFlightFences[currentFrame], VK_TRUE, UINT64_MAX);
 
 		uint32_t imageIndex;
 		VkResult result = vkAcquireNextImageKHR(JoyContext::Graphics->GetVkDevice(),
-			m_swapchain->GetSwapChain(),
-			UINT64_MAX,
-			m_imageAvailableSemaphores[currentFrame],
-			VK_NULL_HANDLE,
-			&imageIndex);
+		                                        m_swapchain->GetSwapChain(),
+		                                        UINT64_MAX,
+		                                        m_imageAvailableSemaphores[currentFrame],
+		                                        VK_NULL_HANDLE,
+		                                        &imageIndex);
 
-		if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR) {
+		if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR)
+		{
 			throw std::runtime_error("failed to acquire swap chain image!");
 		}
 
-				// Check if a previous frame is using this image (i.e. there is its fence to wait on)
-		if (m_imagesInFlight[imageIndex] != VK_NULL_HANDLE) {
+		// Check if a previous frame is using this image (i.e. there is its fence to wait on)
+		if (m_imagesInFlight[imageIndex] != VK_NULL_HANDLE)
+		{
 			vkWaitForFences(JoyContext::Graphics->GetVkDevice(),
-				1,
-				&m_imagesInFlight[imageIndex],
-				VK_TRUE,
-				UINT64_MAX);
+			                1,
+			                &m_imagesInFlight[imageIndex],
+			                VK_TRUE,
+			                UINT64_MAX);
 			ResetCommandBuffers(imageIndex);
 		}
 		WriteCommandBuffers(imageIndex);
@@ -401,39 +428,42 @@ namespace JoyEngine {
 		m_imagesInFlight[imageIndex] = m_inFlightFences[currentFrame];
 		vkResetFences(JoyContext::Graphics->GetVkDevice(), 1, &m_inFlightFences[currentFrame]);
 
-		VkSemaphore waitSemaphores[] = { m_imageAvailableSemaphores[currentFrame] };
-		VkPipelineStageFlags waitStages[] = { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
-		VkSemaphore signalSemaphores[] = { m_renderFinishedSemaphores[currentFrame] };
+		VkSemaphore waitSemaphores[] = {m_imageAvailableSemaphores[currentFrame]};
+		VkPipelineStageFlags waitStages[] = {VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT};
+		VkSemaphore signalSemaphores[] = {m_renderFinishedSemaphores[currentFrame]};
 
 		VkSubmitInfo submitInfo{
-				VK_STRUCTURE_TYPE_SUBMIT_INFO,
-				nullptr,
-				1,
-				waitSemaphores,
-				waitStages,
-				1,
-				&commandBuffers[imageIndex],
-				1,
-				signalSemaphores
+			VK_STRUCTURE_TYPE_SUBMIT_INFO,
+			nullptr,
+			1,
+			waitSemaphores,
+			waitStages,
+			1,
+			&commandBuffers[imageIndex],
+			1,
+			signalSemaphores
 		};
 
-		if (vkQueueSubmit(JoyContext::Graphics->GetGraphicsVkQueue(), 1, &submitInfo, m_inFlightFences[currentFrame]) != VK_SUCCESS) {
+		if (vkQueueSubmit(JoyContext::Graphics->GetGraphicsVkQueue(), 1, &submitInfo,
+		                  m_inFlightFences[currentFrame]) != VK_SUCCESS)
+		{
 			throw std::runtime_error("failed to submit draw command buffer!");
 		}
 
-		VkSwapchainKHR swapChains[] = { m_swapchain->GetSwapChain() };
+		VkSwapchainKHR swapChains[] = {m_swapchain->GetSwapChain()};
 		VkPresentInfoKHR presentInfo{
-				VK_STRUCTURE_TYPE_PRESENT_INFO_KHR,
-				nullptr,
-				1,
-				signalSemaphores,
-				1,
-				swapChains,
-				&imageIndex,
-				nullptr
+			VK_STRUCTURE_TYPE_PRESENT_INFO_KHR,
+			nullptr,
+			1,
+			signalSemaphores,
+			1,
+			swapChains,
+			&imageIndex,
+			nullptr
 		};
 		result = vkQueuePresentKHR(JoyContext::Graphics->GetPresentVkQueue(), &presentInfo);
-		if (result != VK_SUCCESS) {
+		if (result != VK_SUCCESS)
+		{
 			throw std::runtime_error("failed to present swap chain image!");
 		}
 
@@ -443,6 +473,7 @@ namespace JoyEngine {
 	Swapchain* RenderManager::GetSwapchain() const noexcept { return m_swapchain.get(); }
 
 	VkRenderPass RenderManager::GetMainRenderPass() const noexcept { return m_renderPass; }
+
 	float RenderManager::GetAspect() const noexcept
 	{
 		ASSERT(m_swapchain != nullptr);

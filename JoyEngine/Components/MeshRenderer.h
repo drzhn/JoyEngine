@@ -26,17 +26,16 @@ namespace JoyEngine {
 
         void SetMaterial(GUID materialGuid);
 
-        [[nodiscard]]GUID GetMeshGuid() const noexcept;
-
-        [[nodiscard]]GUID GetMaterialGuid() const noexcept;
 
         [[nodiscard]]Mesh *GetMesh() const noexcept;
 
         [[nodiscard]]Material *GetMaterial() const noexcept;
 
+        [[nodiscard]] bool IsReady() const noexcept;
+
     private:
-        std::optional<GUID> m_meshGuid;
-        std::optional<GUID> m_materialGuid;
+        Mesh* m_mesh;
+        Material* m_material;
     };
 }
 

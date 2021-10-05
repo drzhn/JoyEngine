@@ -12,7 +12,7 @@
 #include "RenderManager/RenderManager.h"
 
 namespace JoyEngine {
-    SharedMaterial::SharedMaterial(GUID guid) {
+    SharedMaterial::SharedMaterial(GUID guid) :Resource(guid) {
         m_guid = guid;
         Initialize();
         CreateGraphicsPipeline();

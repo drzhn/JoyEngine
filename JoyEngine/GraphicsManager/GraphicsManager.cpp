@@ -117,15 +117,15 @@ namespace JoyEngine {
         QueueFamilyIndices indices = findQueueFamilies(m_physicalDevice, m_surface);
 
         std::vector<VkDeviceQueueCreateInfo> queueCreateInfos;
-        std::set<uint32_t> uniqueQueueFamilies = {indices.graphicsFamily.value(), indices.presentFamily.value()};
+        std::set<uint32_t> uniqueQueueFamilies = {indices.graphicsFamily.value(), indices.presentFamily.value(), indices.transferFamily.value() };
 
-        float queuePriority = 1.0f;
+        float queuePriority[] = { 1.0f,1.0f };
         for (uint32_t queueFamily : uniqueQueueFamilies) {
             VkDeviceQueueCreateInfo queueCreateInfo{};
             queueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
             queueCreateInfo.queueFamilyIndex = queueFamily;
-            queueCreateInfo.queueCount = 1;
-            queueCreateInfo.pQueuePriorities = &queuePriority;
+            queueCreateInfo.queueCount = 2;
+            queueCreateInfo.pQueuePriorities = queuePriority;
             queueCreateInfos.push_back(queueCreateInfo);
         }
 
@@ -154,8 +154,10 @@ namespace JoyEngine {
             throw std::runtime_error("failed to create logical device!");
         }
 
+        // graphics and presentation operation will run in a row, but transfer operation are in parallel queue/thread
         vkGetDeviceQueue(m_logicalDevice, indices.graphicsFamily.value(), 0, &m_graphicsQueue);
         vkGetDeviceQueue(m_logicalDevice, indices.presentFamily.value(), 0, &m_presentQueue);
+        vkGetDeviceQueue(m_logicalDevice, indices.presentFamily.value(), 1, &m_transferQueue); 
     }
 
     void GraphicsManager::CreateCommandPool() {

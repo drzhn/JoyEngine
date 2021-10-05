@@ -9,7 +9,7 @@
 
 namespace JoyEngine {
 
-    Shader::Shader(GUID guid) {
+    Shader::Shader(GUID guid) :Resource(guid) {
         std::vector<char> shaderData = JoyContext::Data->GetData<char>(guid);
         JoyContext::Memory->CreateShaderModule(reinterpret_cast<const uint32_t *>(shaderData.data()),
                                                          shaderData.size(),

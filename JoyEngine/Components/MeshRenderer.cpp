@@ -7,7 +7,7 @@
 
 namespace JoyEngine {
     void MeshRenderer::Enable() {
-        ASSERT(m_meshGuid.has_value() && m_materialGuid.has_value());
+        ASSERT(m_mesh != nullptr && m_material != nullptr);
         JoyContext::Render->RegisterMeshRenderer(this);
         m_enabled = true;
     }
@@ -21,41 +21,34 @@ namespace JoyEngine {
         if (m_enabled) {
             Disable();
         }
-        JoyContext::Resource->UnloadResource(m_materialGuid.value());
-        JoyContext::Resource->UnloadResource(m_meshGuid.value());
+        JoyContext::Resource->UnloadResource(m_material->GetGuid());
+        JoyContext::Resource->UnloadResource(m_mesh->GetGuid());
     }
 
     void MeshRenderer::SetMesh(GUID meshGuid) {
-        if (m_meshGuid.has_value()) {
+        if (m_mesh != nullptr) {
             JoyContext::Resource->UnloadResource(meshGuid);
         }
-        m_meshGuid = meshGuid;
-        JoyContext::Resource->LoadResource<Mesh>(meshGuid);
+        m_mesh = JoyContext::Resource->LoadResource<Mesh>(meshGuid);
     }
 
     void MeshRenderer::SetMaterial(GUID materialGuid) {
-        if (m_materialGuid.has_value()) {
+        if (m_material != nullptr) {
             JoyContext::Resource->UnloadResource(materialGuid);
         }
-        m_materialGuid = materialGuid;
-        JoyContext::Resource->LoadResource<Material>(materialGuid);
-    }
-
-    GUID MeshRenderer::GetMeshGuid() const noexcept {
-        ASSERT(m_meshGuid.has_value());
-        return m_meshGuid.value();
-    }
-
-    GUID MeshRenderer::GetMaterialGuid() const noexcept {
-        ASSERT(m_materialGuid.has_value());
-        return m_materialGuid.value();
+        m_material = JoyContext::Resource->LoadResource<Material>(materialGuid);
     }
 
     Mesh *MeshRenderer::GetMesh() const noexcept {
-        return JoyContext::Resource->GetResource<Mesh>(m_meshGuid.value());
+        return m_mesh;
     }
 
     Material *MeshRenderer::GetMaterial() const noexcept {
-        return JoyContext::Resource->GetResource<Material>(m_materialGuid.value());
+        return m_material;
+    }
+
+    bool MeshRenderer::IsReady() const noexcept
+    {
+        return m_mesh->IsLoaded() && m_material->IsLoaded();
     }
 }

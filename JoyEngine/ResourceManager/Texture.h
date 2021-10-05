@@ -6,29 +6,53 @@
 #include "Common/Resource.h"
 #include "Utils/GUID.h"
 
-namespace JoyEngine {
-    class Texture final: public Resource {
-    public :
-        Texture() = default; // just to make creation of empty texture possible (for render manager depth texture)
+namespace JoyEngine
+{
+	class Texture final : public Resource
+	{
+	public :
+		Texture() = delete;
 
-        explicit Texture(GUID);
+		explicit Texture(GUID);
+		explicit Texture(
+			uint32_t width,
+			uint32_t height,
+			VkFormat format,
+			VkImageTiling tiling,
+			VkImageUsageFlags usage,
+			VkMemoryPropertyFlags properties, 
+			VkImageAspectFlags aspectFlags);
 
-        ~Texture() final;
+		~Texture() final;
 
-        [[nodiscard]] VkImage &GetImage() noexcept { return m_textureImage; }
+		[[nodiscard]] VkImage& GetImage() noexcept { return m_textureImage; }
 
-        [[nodiscard]] VkDeviceMemory &GetDeviceMemory() noexcept { return m_textureImageMemory; }
+		[[nodiscard]] VkDeviceMemory& GetDeviceMemory() noexcept { return m_textureImageMemory; }
 
-        [[nodiscard]] VkImageView &GetImageView() noexcept { return m_textureImageView; }
+		[[nodiscard]] VkImageView& GetImageView() noexcept { return m_textureImageView; }
 
-        [[nodiscard]] VkSampler &GetSampler() noexcept { return m_textureSampler; }
+		[[nodiscard]] VkSampler& GetSampler() noexcept { return m_textureSampler; }
 
-    private :
-        VkImage m_textureImage = VK_NULL_HANDLE;
-        VkDeviceMemory m_textureImageMemory = VK_NULL_HANDLE;
-        VkImageView m_textureImageView = VK_NULL_HANDLE;
-        VkSampler m_textureSampler = VK_NULL_HANDLE;
-    };
+	private:
+		void CreateImage();
+		void CreateImageView();
+		void CreateImageSampler();
+
+	private :
+		uint32_t m_width = 0;
+		uint32_t m_height = 0;
+		VkFormat m_format = VK_FORMAT_UNDEFINED;
+		VkImageTiling m_tiling = VK_IMAGE_TILING_MAX_ENUM;
+		VkImageUsageFlags m_usageFlags = 0;
+		VkMemoryPropertyFlags m_propertiesFlags = 0;
+		VkImageAspectFlags m_aspectFlags = 0;
+
+
+		VkDeviceMemory m_textureImageMemory = VK_NULL_HANDLE;
+		VkImage m_textureImage = VK_NULL_HANDLE;
+		VkImageView m_textureImageView = VK_NULL_HANDLE;
+		VkSampler m_textureSampler = VK_NULL_HANDLE;
+	};
 }
 
 
