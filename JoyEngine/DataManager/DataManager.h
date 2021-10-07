@@ -37,13 +37,12 @@ namespace JoyEngine {
 
         void GetDataStream(std::ifstream &, GUID);
 
-        void ParseMaterial(const GUID &materialGuid, GUID &sharedMaterialGuid, std::map<std::string, GUID> &bindings);
-
         rapidjson::Document GetSerializedData(const GUID &, DataType);
 
     private:
         const std::string m_dataPath = R"(D:\CppProjects\JoyEngine\JoyEngineVS\JoyData\)";
-        const std::string m_databaseFilename = R"(data.db)";
+        //const std::string m_databaseFilename = R"(data.db)";
+        const std::string m_databaseFilename = R"(data_old.db)";
         std::map<GUID, std::filesystem::path> m_pathDatabase;
 
     private:

@@ -3,6 +3,7 @@
 
 namespace JoyEngine
 {
+	class InputManager;
 	class GraphicsManager;
 	class MemoryManager;
 	class DataManager;
@@ -15,6 +16,7 @@ namespace JoyEngine
 	{
 	public:
 		static void Init(
+			InputManager* inputManager,
 			GraphicsManager* graphicsContext,
 			MemoryManager* memoryManager,
 			DataManager* dataManager,
@@ -24,6 +26,7 @@ namespace JoyEngine
 			RenderManager* renderManager
 		);
 
+		static InputManager* Input;
 		static GraphicsManager* Graphics;
 		static MemoryManager* Memory;
 		static DataManager* Data;

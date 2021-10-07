@@ -29,6 +29,8 @@
 *.vcxproj.filters
 *.vcxproj.user
 
+*.obj
+
 .idea/
 .vs/
 x64/

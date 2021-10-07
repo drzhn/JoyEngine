@@ -40,7 +40,7 @@ namespace JoyEngine
 		const unsigned char* data,
 		uint32_t width,
 		uint32_t height,
-		VkImage textureImage)
+		VkImage gpuImage)
 	{
 		VkDeviceSize imageSize = width * height * 4;
 
@@ -50,13 +50,13 @@ namespace JoyEngine
 			VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
 		buffer.SetDeviceLocalData(data, imageSize);
 
-		TransitionImageLayout(textureImage,
+		TransitionImageLayout(gpuImage,
 		                      VK_FORMAT_R8G8B8A8_SRGB,
 		                      VK_IMAGE_LAYOUT_UNDEFINED,
 		                      VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL
 		);
-		CopyBufferToImage(buffer.GetBuffer(), textureImage, width, height);
-		TransitionImageLayout(textureImage,
+		CopyBufferToImage(buffer.GetBuffer(), gpuImage, width, height);
+		TransitionImageLayout(gpuImage,
 		                      VK_FORMAT_R8G8B8A8_SRGB,
 		                      VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
 		                      VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
@@ -65,7 +65,7 @@ namespace JoyEngine
 
 	void MemoryManager::LoadDataToBuffer(void* data, VkDeviceSize bufferSize, VkBuffer gpuBuffer)
 	{
-		Buffer stagingBuffer = Buffer(
+		const Buffer stagingBuffer = Buffer(
 			bufferSize,
 			VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
 			VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);

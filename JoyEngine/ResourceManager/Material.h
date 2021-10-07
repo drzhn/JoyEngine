@@ -32,6 +32,8 @@ namespace JoyEngine {
         std::map<std::string, GUID> m_bindings;
 
         std::map<uint32_t, std::vector<VkDescriptorSet>> m_descriptorSets;
+
+        
     };
 }
 

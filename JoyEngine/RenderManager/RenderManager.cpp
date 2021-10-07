@@ -291,6 +291,8 @@ namespace JoyEngine
 
 		for (auto const& mr : m_meshRenderers)
 		{
+			//if (!mr->IsReady()) continue;
+
 			VkBuffer vertexBuffers[] = {
 				mr->GetMesh()->GetVertexBuffer()
 			};

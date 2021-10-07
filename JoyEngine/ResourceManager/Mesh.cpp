@@ -10,6 +10,10 @@
 
 namespace JoyEngine
 {
+	static uint32_t objCount = 0;
+	static uint64_t vertexCount = 0;
+	static uint32_t trianglesCount = 0;
+
 	Mesh::Mesh(GUID guid) : Resource(guid)
 	{
 		std::vector<Vertex> vertices;
@@ -19,6 +23,11 @@ namespace JoyEngine
 		ModelLoader::LoadModel(vertices, indices, modelStream);
 		m_vertexSize = vertices.size();
 		m_indexSize = indices.size();
+
+		objCount++;
+		vertexCount += m_vertexSize;
+		trianglesCount += m_indexSize / 3;
+
 		m_vertexBuffer = std::make_unique<Buffer>(
 			vertices.size() * sizeof(Vertex),
 			VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
@@ -43,6 +52,8 @@ namespace JoyEngine
 		{
 			modelStream.close();
 		}
+		std::string s = std::to_string(objCount) + " " + std::to_string(vertexCount) + " " + std::to_string(trianglesCount) + "\n";
+		OutputDebugStringA(s.c_str());
 	}
 
 	Mesh::~Mesh()

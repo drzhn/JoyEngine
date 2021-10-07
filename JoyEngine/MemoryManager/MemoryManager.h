@@ -35,7 +35,7 @@ namespace JoyEngine
 			const unsigned char* data,
 			uint32_t width,
 			uint32_t height,
-			VkImage textureImage);
+			VkImage gpuImage);
 
 	private:
 		void CopyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size);

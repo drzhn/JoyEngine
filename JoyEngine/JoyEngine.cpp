@@ -10,11 +10,13 @@
 #include "ResourceManager/DescriptorSetManager.h"
 #include "GraphicsManager/GraphicsManager.h"
 #include "Common/Time.h"
+#include "InputManager/InputManager.h"
 
 namespace JoyEngine
 {
 	JoyEngine::JoyEngine(HINSTANCE instance, HWND windowHandle) :
 		m_windowHandle(windowHandle),
+		m_inputManager(new InputManager()),
 		m_graphicsContext(new GraphicsManager(instance, windowHandle)),
 		m_memoryManager(new MemoryManager()),
 		m_dataManager(new DataManager()),
@@ -23,6 +25,7 @@ namespace JoyEngine
 		m_sceneManager(new SceneManager()),
 		m_renderManager(new RenderManager())
 	{
+		ASSERT(m_inputManager != nullptr);
 		ASSERT(m_graphicsContext != nullptr);
 		ASSERT(m_memoryManager != nullptr);
 		ASSERT(m_dataManager != nullptr);
@@ -32,6 +35,7 @@ namespace JoyEngine
 		ASSERT(m_renderManager != nullptr);
 
 		JoyContext::Init(
+			m_inputManager,
 			m_graphicsContext,
 			m_memoryManager,
 			m_dataManager,
@@ -49,6 +53,7 @@ namespace JoyEngine
 		Time::Init();
 
 		m_memoryManager->Init();
+		m_descriptorSetManager->Init();
 		m_renderManager->Init();
 		m_sceneManager->Init();
 	}
@@ -76,6 +81,7 @@ namespace JoyEngine
 	JoyEngine::~JoyEngine()
 	{
 		Stop();
+		delete m_inputManager;
 		delete m_sceneManager; // unregister mesh renderers, remove descriptor set, pipelines, pipeline layouts
 		delete m_resourceManager; //delete all scene render data (buffers, textures)
 		delete m_renderManager; //delete swapchain, synchronisation, framebuffers
@@ -86,10 +92,6 @@ namespace JoyEngine
 
 	void JoyEngine::HandleMessage(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	{
-		InternalHandleMessage(uMsg, wParam, lParam);
-	}
-
-	void JoyEngine::InternalHandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
-	{
+		m_inputManager->HandleWinMessage(hwnd, uMsg, wParam, lParam);
 	}
 }

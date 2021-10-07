@@ -16,10 +16,10 @@ namespace JoyEngine {
             std::vector<tinyobj::material_t> materials;
             std::string warn, err;
 
-            if (!tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, &err, &stream)) {
-                throw std::runtime_error(warn + err);
-            }
-            for (const auto &shape: shapes) {
+            bool res = tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, &err, &stream);
+            ASSERT(res)
+
+        	for (const auto &shape: shapes) {
                 for (const auto &index: shape.mesh.indices) {
                     Vertex vertex{};
 

@@ -11,19 +11,22 @@ namespace JoyEngine
 	class Texture final : public Resource
 	{
 	public :
-		Texture() = delete;
+		explicit Texture();
 
 		explicit Texture(GUID);
+
 		explicit Texture(
 			uint32_t width,
 			uint32_t height,
 			VkFormat format,
 			VkImageTiling tiling,
 			VkImageUsageFlags usage,
-			VkMemoryPropertyFlags properties, 
+			VkMemoryPropertyFlags properties,
 			VkImageAspectFlags aspectFlags);
 
 		~Texture() final;
+
+		void InitializeTexture(const unsigned char* data);
 
 		[[nodiscard]] VkImage& GetImage() noexcept { return m_textureImage; }
 

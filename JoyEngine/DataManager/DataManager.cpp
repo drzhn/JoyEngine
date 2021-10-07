@@ -41,22 +41,6 @@ namespace JoyEngine {
         }
     }
 
-    void DataManager::ParseMaterial(const GUID &materialGuid, GUID &sharedMaterialGuid, std::map<std::string, GUID> &bindings) {
-        std::vector<char> data = GetData<char>(materialGuid);
-        rapidjson::Document json;
-        json.Parse<rapidjson::kParseStopWhenDoneFlag>(data.data());
-        ASSERT(json["type"].GetString() == std::string("material"));
-        sharedMaterialGuid = GUID::StringToGuid(json["sharedMaterial"].GetString());
-
-        for (auto &binding: json["bindings"].GetArray()) {
-            bindings.insert({
-                                    binding["name"].GetString(),
-                                    GUID::StringToGuid(binding["data"].GetString())
-                                    // TODO What about another types of bindings? int, float, color, array, etc...
-                            });
-        }
-    }
-
     rapidjson::Document DataManager::GetSerializedData(const GUID &sharedMaterialGuid, DataType type) {
         std::vector<char> data = GetData<char>(sharedMaterialGuid);
         rapidjson::Document json;

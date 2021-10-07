@@ -5,6 +5,8 @@
 
 namespace JoyEngine {
 
+    class InputManager;
+
     class GraphicsManager;
 
     class MemoryManager;
@@ -43,11 +45,9 @@ namespace JoyEngine {
         void HandleMessage(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) override;
 
     private:
-        void InternalHandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam);
-
-    private:
         HWND m_windowHandle;
 
+        InputManager* const m_inputManager = nullptr;
         GraphicsManager *const m_graphicsContext = nullptr;
         MemoryManager *const m_memoryManager = nullptr;
         DataManager *const m_dataManager = nullptr;

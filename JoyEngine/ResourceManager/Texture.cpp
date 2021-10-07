@@ -18,6 +18,20 @@ namespace JoyEngine
 {
 	std::string ParseVkResult(VkResult res);
 
+	Texture::Texture()
+	{
+		stbi_uc pixels[] = {255, 255, 255, 255};
+		m_width = 1;
+		m_height = 1;
+		m_format = VK_FORMAT_R8G8B8A8_SRGB;
+		m_tiling = VK_IMAGE_TILING_OPTIMAL;
+		m_usageFlags = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
+		m_propertiesFlags = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
+		m_aspectFlags = VK_IMAGE_ASPECT_COLOR_BIT;
+
+		InitializeTexture(pixels);
+	}
+
 	Texture::Texture(GUID guid) : Resource(guid)
 	{
 		const std::vector<unsigned char> imageData = JoyContext::Data->GetData<unsigned char>(guid);
@@ -31,8 +45,6 @@ namespace JoyEngine
 
 		ASSERT(pixels != nullptr);
 
-		VkDeviceSize imageSize = texWidth * texHeight * 4;
-
 		m_width = texWidth;
 		m_height = texHeight;
 		m_format = VK_FORMAT_R8G8B8A8_SRGB;
@@ -41,14 +53,18 @@ namespace JoyEngine
 		m_propertiesFlags = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
 		m_aspectFlags = VK_IMAGE_ASPECT_COLOR_BIT;
 
+		InitializeTexture(pixels);
+
+		stbi_image_free(pixels);
+	}
+
+	void Texture::InitializeTexture(const unsigned char* data)
+	{
 		CreateImage();
 		CreateImageView();
 		CreateImageSampler();
 
-		JoyContext::Memory->LoadDataToImage(pixels, texWidth, texHeight, m_textureImage);
-
-		stbi_image_free(pixels);
-
+		JoyContext::Memory->LoadDataToImage(data, m_width, m_height, m_textureImage);
 	}
 
 	Texture::Texture(
