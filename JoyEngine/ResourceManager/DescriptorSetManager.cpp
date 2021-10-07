@@ -66,6 +66,11 @@ namespace JoyEngine
 		return m_fallbackTexture.get();
 	}
 
+	DescriptorSetManager::~DescriptorSetManager()
+	{
+		m_fallbackTexture = nullptr;
+	}
+
 	// =========== Descriptor Pool  =============
 
 	DescriptorPool::DescriptorPool(VkDescriptorSetLayout setLayout, std::vector<VkDescriptorType> types)

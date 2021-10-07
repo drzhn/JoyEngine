@@ -83,6 +83,8 @@ namespace JoyEngine
 
 		[[nodiscard]] Texture* GetTexture() const;
 
+		~DescriptorSetManager();
+
 	private:
 		std::map<uint64_t, std::unique_ptr<DescriptorPoolList>> m_pools;
 		std::map<VkDescriptorSet, uint64_t> m_usedDescriptorSets;

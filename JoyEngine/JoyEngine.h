@@ -1,61 +1,65 @@
 #ifndef JOY_ENGINE_H
 #define JOY_ENGINE_H
 
+#include <memory>
+
 #include "windows.h"
 
-namespace JoyEngine {
+namespace JoyEngine
+{
+	class InputManager;
 
-    class InputManager;
+	class GraphicsManager;
 
-    class GraphicsManager;
+	class MemoryManager;
 
-    class MemoryManager;
+	class DataManager;
 
-    class DataManager;
+	class DescriptorSetManager;
 
-    class DescriptorSetManager;
+	class ResourceManager;
 
-    class ResourceManager;
+	class SceneManager;
 
-    class SceneManager;
+	class RenderManager;
 
-    class RenderManager;
+	class IWindowMessageHandler
+	{
+	public:
+		virtual void HandleMessage(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) = 0;
+	};
 
-    class IWindowMessageHandler {
-    public:
-        virtual void HandleMessage(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) = 0;
-    };
+	class JoyEngine final : public IWindowMessageHandler
+	{
+	public:
+		JoyEngine() = delete;
 
-    class JoyEngine final: public IWindowMessageHandler {
-    public:
-        JoyEngine() = delete;
+		JoyEngine(HINSTANCE instance, HWND windowHandle);
 
-        JoyEngine(HINSTANCE instance, HWND windowHandle);
+		void Init() const noexcept;
 
-        void Init() const noexcept;
+		void Start() const noexcept;
 
-        void Start() const noexcept;
+		void Update() const noexcept;
 
-        void Update() const noexcept;
+		void Stop() const noexcept;
 
-        void Stop() const noexcept;
+		~JoyEngine();
 
-        ~JoyEngine();
+		void HandleMessage(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) override;
 
-        void HandleMessage(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) override;
+	private:
+		HWND m_windowHandle;
 
-    private:
-        HWND m_windowHandle;
-
-        InputManager* const m_inputManager = nullptr;
-        GraphicsManager *const m_graphicsContext = nullptr;
-        MemoryManager *const m_memoryManager = nullptr;
-        DataManager *const m_dataManager = nullptr;
-        DescriptorSetManager *const m_descriptorSetManager = nullptr;
-        ResourceManager *const m_resourceManager = nullptr;
-        SceneManager *const m_sceneManager = nullptr;
-        RenderManager *const m_renderManager = nullptr;
-    };
+		std::unique_ptr<InputManager> m_inputManager;
+		std::unique_ptr<GraphicsManager> m_graphicsContext;
+		std::unique_ptr<MemoryManager> m_memoryManager;
+		std::unique_ptr<DataManager> m_dataManager;
+		std::unique_ptr<DescriptorSetManager> m_descriptorSetManager;
+		std::unique_ptr<ResourceManager> m_resourceManager;
+		std::unique_ptr<SceneManager> m_sceneManager;
+		std::unique_ptr<RenderManager> m_renderManager;
+	};
 }
 
 

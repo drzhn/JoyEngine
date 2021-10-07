@@ -35,14 +35,14 @@ namespace JoyEngine
 		ASSERT(m_renderManager != nullptr);
 
 		JoyContext::Init(
-			m_inputManager,
-			m_graphicsContext,
-			m_memoryManager,
-			m_dataManager,
-			m_descriptorSetManager,
-			m_resourceManager,
-			m_sceneManager,
-			m_renderManager
+			m_inputManager.get(),
+			m_graphicsContext.get(),
+			m_memoryManager.get(),
+			m_dataManager.get(),
+			m_descriptorSetManager.get(),
+			m_resourceManager.get(),
+			m_sceneManager.get(),
+			m_renderManager.get()
 		);
 
 		std::cout << "Context created" << std::endl;
@@ -74,19 +74,22 @@ namespace JoyEngine
 
 	void JoyEngine::Stop() const noexcept
 	{
-		m_renderManager->Stop(); // will destroy managers in reverse order
+		m_renderManager->Stop(); 
 		m_memoryManager->Stop();
 	}
 
 	JoyEngine::~JoyEngine()
 	{
 		Stop();
-		delete m_inputManager;
-		delete m_sceneManager; // unregister mesh renderers, remove descriptor set, pipelines, pipeline layouts
-		delete m_resourceManager; //delete all scene render data (buffers, textures)
-		delete m_renderManager; //delete swapchain, synchronisation, framebuffers
-		delete m_memoryManager; //free gpu memory
-		delete m_graphicsContext; //delete surface, device, instance
+		// will destroy managers in certain order
+		m_inputManager = nullptr;
+		m_sceneManager = nullptr; // unregister mesh renderers, remove descriptor set, pipelines, pipeline layouts
+		m_resourceManager = nullptr; //delete all scene render data (buffers, textures)
+		m_renderManager = nullptr; //delete swapchain, synchronisation, framebuffers
+		m_descriptorSetManager = nullptr;
+		m_dataManager = nullptr;
+		m_memoryManager = nullptr; //free gpu memory
+		m_graphicsContext = nullptr; //delete surface, device, instance
 		std::cout << "Context destroyed" << std::endl;
 	}
 
