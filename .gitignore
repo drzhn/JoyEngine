@@ -30,9 +30,12 @@
 *.vcxproj.user
 
 *.obj
+*.bin
 
 .idea/
 .vs/
 x64/
-JoyEngine/Bin/
-JoyEngine/Bin_release/
+JoyEngine/x64
+JoyData/
+Libs/
+MitsubaXmlParser/data
