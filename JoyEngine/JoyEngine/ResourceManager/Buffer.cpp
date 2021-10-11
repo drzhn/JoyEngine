@@ -10,6 +10,22 @@ namespace JoyEngine
 	std::string ParseVkResult(VkResult res);
 	uint32_t findMemoryType(VkPhysicalDevice device, uint32_t typeFilter, VkMemoryPropertyFlags properties);
 
+	BufferMappedPtr::BufferMappedPtr(VkDeviceMemory bufferMemory, VkDeviceSize offset, VkDeviceSize size):
+		m_bufferMemory(bufferMemory)
+	{
+		vkMapMemory(JoyContext::Graphics->GetDevice(), m_bufferMemory, offset, size, 0, &m_bufferPtr);
+	}
+
+	BufferMappedPtr::~BufferMappedPtr()
+	{
+		vkUnmapMemory(JoyContext::Graphics->GetDevice(), m_bufferMemory);
+	}
+
+	void* BufferMappedPtr::GetMappedPtr() const noexcept
+	{
+		return m_bufferPtr;
+	}
+
 	Buffer::Buffer(VkDeviceSize size, VkBufferUsageFlags usage,
 	               VkMemoryPropertyFlags properties):
 		m_size(size),
@@ -42,15 +58,13 @@ namespace JoyEngine
 		ASSERT_DESC(res == VK_SUCCESS, ParseVkResult(res));
 	}
 
-	void Buffer::SetDeviceLocalData(void const* data, VkDeviceSize size) const
+	std::unique_ptr<BufferMappedPtr> Buffer::GetMappedPtr(VkDeviceSize offset, VkDeviceSize size) const
 	{
 		ASSERT(m_properties & VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT);
 		ASSERT(size <= m_size);
 
-		void* bufferPtr;
-		vkMapMemory(JoyContext::Graphics->GetDevice(), m_bufferMemory, 0, size, 0, &bufferPtr);
-		memcpy(bufferPtr, data, size);
-		vkUnmapMemory(JoyContext::Graphics->GetDevice(), m_bufferMemory);
+		std::unique_ptr<BufferMappedPtr> ptr = std::make_unique<BufferMappedPtr>(m_bufferMemory, offset, size);
+		return std::move(ptr);
 	}
 
 	Buffer::~Buffer()

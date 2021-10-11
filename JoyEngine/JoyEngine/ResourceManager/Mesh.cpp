@@ -6,7 +6,6 @@
 #include "RenderManager/VulkanTypes.h"
 #include "DataManager/DataManager.h"
 #include "MemoryManager/MemoryManager.h"
-#include "Utils/ModelLoader.h"
 
 namespace JoyEngine
 {
@@ -16,43 +15,49 @@ namespace JoyEngine
 
 	Mesh::Mesh(GUID guid) : Resource(guid)
 	{
-		std::vector<Vertex> vertices;
-		std::vector<uint32_t> indices;
 		std::ifstream modelStream;
-		JoyContext::Data->GetDataStream(modelStream, guid);
-		ModelLoader::LoadModel(vertices, indices, modelStream);
-		m_vertexSize = vertices.size();
-		m_indexSize = indices.size();
+		modelStream = JoyContext::Data->GetFileStream(guid, true);
+
+		uint32_t verticesDataSize;
+		uint32_t indicesDataSize;
+		modelStream.read(reinterpret_cast<char*>(&verticesDataSize), sizeof(uint32_t));
+		modelStream.read(reinterpret_cast<char*>(&indicesDataSize), sizeof(uint32_t));
+
+		m_vertexSize = verticesDataSize / sizeof(Vertex);
+		m_indexSize = indicesDataSize / sizeof(uint32_t);
 
 		objCount++;
 		vertexCount += m_vertexSize;
 		trianglesCount += m_indexSize / 3;
 
 		m_vertexBuffer = std::make_unique<Buffer>(
-			vertices.size() * sizeof(Vertex),
+			verticesDataSize,
 			VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
 			VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
 
 		m_indexBuffer = std::make_unique<Buffer>(
-			vertices.size() * sizeof(Vertex),
+			indicesDataSize,
 			VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
 			VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
 
 		JoyContext::Memory->LoadDataToBuffer(
-			vertices.data(),
-			sizeof(Vertex) * vertices.size(),
+			modelStream,
+			sizeof(uint32_t) + sizeof(uint32_t),
+			verticesDataSize,
 			m_vertexBuffer->GetBuffer());
 
 		JoyContext::Memory->LoadDataToBuffer(
-			indices.data(),
-			sizeof(uint32_t) * indices.size(),
+			modelStream,
+			sizeof(uint32_t) + sizeof(uint32_t) + verticesDataSize,
+			indicesDataSize,
 			m_indexBuffer->GetBuffer());
 
 		if (modelStream.is_open())
 		{
 			modelStream.close();
 		}
-		std::string s = std::to_string(objCount) + " " + std::to_string(vertexCount) + " " + std::to_string(trianglesCount) + "\n";
+		std::string s = std::to_string(objCount) + " " + std::to_string(vertexCount) + " " +
+			std::to_string(trianglesCount) + "\n";
 		OutputDebugStringA(s.c_str());
 	}
 

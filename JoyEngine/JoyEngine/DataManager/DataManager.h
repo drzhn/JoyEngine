@@ -11,45 +11,60 @@
 #include "Utils/GUID.h"
 
 
-namespace JoyEngine {
-    enum DataType {
-        mesh,
-        texture,
-        shader,
-        material,
-        sharedMaterial,
-        scene
-    };
+namespace JoyEngine
+{
+	enum DataType
+	{
+		mesh,
+		texture,
+		shader,
+		material,
+		sharedMaterial,
+		scene
+	};
 
-    class DataManager {
-    public:
-        DataManager();
+	class DataManager
+	{
+	public:
+		DataManager();
 
-        ~DataManager();
+		~DataManager();
 
-        template<typename T>
-        std::vector<T> GetData(GUID guid) {
-            if (m_pathDatabase.find(guid) == m_pathDatabase.end()) {
-                ASSERT(false);
-            }
-            return readFile<T>(m_dataPath + m_pathDatabase[guid].string());
-        }
+		std::vector<char> GetData(GUID guid, bool shouldReadRawData = false)
+		{
+			ASSERT(m_pathDatabase.find(guid) != m_pathDatabase.end());
+			std::string filename = m_dataPath + m_pathDatabase[guid].string();
+			if (shouldReadRawData)
+			{
+				filename += ".data";
+			}
+			return ReadFile(filename);
+		}
 
-        void GetDataStream(std::ifstream &, GUID);
+		std::ifstream GetFileStream(GUID guid, bool shouldReadRawData = false)
+		{
+			ASSERT(m_pathDatabase.find(guid) != m_pathDatabase.end());
+			std::string filename = m_dataPath + m_pathDatabase[guid].string();
+			if (shouldReadRawData)
+			{
+				filename += ".data";
+			}
+			return GetStream(filename);
+		}
 
-        rapidjson::Document GetSerializedData(const GUID &, DataType);
+		rapidjson::Document GetSerializedData(const GUID&, DataType);
 
-    private:
-        const std::string m_dataPath = R"(D:\CppProjects\JoyEngine\JoyEngineVS\JoyData\)";
-        const std::string m_databaseFilename = R"(data.db)";
-        //const std::string m_databaseFilename = R"(data_old.db)";
-        std::map<GUID, std::filesystem::path> m_pathDatabase;
+	private:
+		const std::string m_dataPath = R"(D:\CppProjects\JoyEngine\JoyData\)";
+		//const std::string m_databaseFilename = R"(data.db)";
+		const std::string m_databaseFilename;// = R"(data_old.db)";
+		std::map<GUID, std::filesystem::path> m_pathDatabase;
 
-    private:
-        void ParseDatabase(std::map<GUID, std::filesystem::path> &pathDatabase, const char *data);
+	private:
+		void ParseDatabase(std::map<GUID, std::filesystem::path>& pathDatabase, const char* data);
 
-        const std::filesystem::path &GetPath(GUID);
-    };
+		const std::filesystem::path& GetPath(GUID);
+	};
 }
 
 #endif //DATA_MANAGER_H

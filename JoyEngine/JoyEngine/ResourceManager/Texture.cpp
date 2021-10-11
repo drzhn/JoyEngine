@@ -10,9 +10,6 @@
 #include "MemoryManager/MemoryManager.h"
 #include "GraphicsManager/GraphicsManager.h"
 
-#define STB_IMAGE_IMPLEMENTATION
-
-#include "stb_image.h"
 
 namespace JoyEngine
 {
@@ -20,7 +17,7 @@ namespace JoyEngine
 
 	Texture::Texture()
 	{
-		stbi_uc pixels[] = {255, 255, 255, 255};
+		constexpr unsigned char pixels[] = {255, 255, 255, 255};
 		m_width = 1;
 		m_height = 1;
 		m_format = VK_FORMAT_R8G8B8A8_SRGB;
@@ -34,28 +31,27 @@ namespace JoyEngine
 
 	Texture::Texture(GUID guid) : Resource(guid)
 	{
-		const std::vector<unsigned char> imageData = JoyContext::Data->GetData<unsigned char>(guid);
-		int texWidth, texHeight, texChannels;
+		std::ifstream filestream = JoyContext::Data->GetFileStream(guid, true);
+		uint32_t width, height;
 
-		stbi_uc* pixels = stbi_load_from_memory(
-			imageData.data(),
-			static_cast<int>(imageData.size()),
-			&texWidth,
-			&texHeight, &texChannels, STBI_rgb_alpha);
+		filestream.seekg(0);
+		filestream.read(reinterpret_cast<char*>(&width), sizeof(uint32_t));
+		filestream.read(reinterpret_cast<char*>(&height), sizeof(uint32_t));
 
-		ASSERT(pixels != nullptr);
 
-		m_width = texWidth;
-		m_height = texHeight;
+		m_width = width;
+		m_height = height;
 		m_format = VK_FORMAT_R8G8B8A8_SRGB;
 		m_tiling = VK_IMAGE_TILING_OPTIMAL;
 		m_usageFlags = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
 		m_propertiesFlags = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
 		m_aspectFlags = VK_IMAGE_ASPECT_COLOR_BIT;
 
-		InitializeTexture(pixels);
-
-		stbi_image_free(pixels);
+		InitializeTexture(filestream, sizeof(uint32_t) + sizeof(uint32_t));
+		if (filestream.is_open())
+		{
+			filestream.close();
+		}
 	}
 
 	void Texture::InitializeTexture(const unsigned char* data)
@@ -65,6 +61,15 @@ namespace JoyEngine
 		CreateImageSampler();
 
 		JoyContext::Memory->LoadDataToImage(data, m_width, m_height, m_textureImage);
+	}
+
+	void Texture::InitializeTexture(std::ifstream &stream, uint64_t offset)
+	{
+		CreateImage();
+		CreateImageView();
+		CreateImageSampler();
+
+		JoyContext::Memory->LoadDataToImage(stream, offset, m_width, m_height, m_textureImage);
 	}
 
 	Texture::Texture(

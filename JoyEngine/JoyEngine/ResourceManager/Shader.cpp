@@ -13,7 +13,7 @@ namespace JoyEngine
 
 	Shader::Shader(GUID guid) : Resource(guid)
 	{
-		const std::vector<char> shaderData = JoyContext::Data->GetData<char>(guid);
+		const std::vector<char> shaderData = JoyContext::Data->GetData(guid);
 
 		VkShaderModuleCreateInfo createInfo{
 			VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO,

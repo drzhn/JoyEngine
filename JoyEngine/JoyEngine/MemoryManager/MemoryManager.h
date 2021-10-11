@@ -1,6 +1,7 @@
 #ifndef MEMORY_MANAGER_H
 #define MEMORY_MANAGER_H
 
+#include <fstream>
 #include <vulkan/vulkan.h>
 
 namespace JoyEngine
@@ -27,12 +28,17 @@ namespace JoyEngine
 		void AllocateMemory(VkMemoryRequirements requirements, VkMemoryPropertyFlags properties,
 		                    VkDeviceMemory& out_imageMemory);
 
-		void LoadDataToBuffer(
-			void* data,
-			size_t bufferSize, VkBuffer gpuBuffer);
+		void LoadDataToBuffer(std::ifstream &stream, uint64_t offset, uint64_t bufferSize, VkBuffer gpuBuffer);
 
 		void LoadDataToImage(
 			const unsigned char* data,
+			uint32_t width,
+			uint32_t height,
+			VkImage gpuImage);
+
+		void LoadDataToImage(
+			std::ifstream& stream,
+			uint64_t offset,
 			uint32_t width,
 			uint32_t height,
 			VkImage gpuImage);
@@ -49,6 +55,8 @@ namespace JoyEngine
 
 		void CopyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height);
 	};
+
+
 }
 
 #endif

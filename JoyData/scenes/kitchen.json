@@ -24,6 +24,13 @@
             "components": [
                 {
                     "type": "camera"
+                },
+				{
+                    "type": "component",
+                    "component": "CameraBehaviour",
+                    "fields": {
+                        "m_speed": 2
+                    }
                 }
             ]
         },

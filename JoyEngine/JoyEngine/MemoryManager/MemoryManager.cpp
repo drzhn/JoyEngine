@@ -3,6 +3,7 @@
 #include <string>
 #include <iostream>
 #include <stdexcept>
+#include <fstream>
 
 #include "JoyContext.h"
 
@@ -37,6 +38,39 @@ namespace JoyEngine
 	}
 
 	void MemoryManager::LoadDataToImage(
+		std::ifstream& stream,
+		uint64_t offset,
+		uint32_t width,
+		uint32_t height,
+		VkImage gpuImage)
+	{
+		VkDeviceSize imageSize = width * height * 4;
+
+		Buffer stagingBuffer = Buffer(
+			imageSize,
+			VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+			VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+		std::unique_ptr<BufferMappedPtr> ptr = stagingBuffer.GetMappedPtr(0, imageSize);
+		stream.seekg(offset);
+		stream.read(static_cast<char*>(ptr->GetMappedPtr()), imageSize);
+
+		TransitionImageLayout(
+			gpuImage,
+			VK_FORMAT_R8G8B8A8_SRGB,
+			VK_IMAGE_LAYOUT_UNDEFINED,
+			VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL
+		);
+		CopyBufferToImage(stagingBuffer.GetBuffer(), gpuImage, width, height);
+		TransitionImageLayout(
+			gpuImage,
+			VK_FORMAT_R8G8B8A8_SRGB,
+			VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+			VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
+		);
+	}
+
+
+	void MemoryManager::LoadDataToImage(
 		const unsigned char* data,
 		uint32_t width,
 		uint32_t height,
@@ -44,33 +78,38 @@ namespace JoyEngine
 	{
 		VkDeviceSize imageSize = width * height * 4;
 
-		Buffer buffer = Buffer(
+		Buffer stagingBuffer = Buffer(
 			imageSize,
 			VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
 			VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
-		buffer.SetDeviceLocalData(data, imageSize);
+		std::unique_ptr<BufferMappedPtr> ptr = stagingBuffer.GetMappedPtr(0, imageSize);
+		memcpy(ptr->GetMappedPtr(), data, imageSize);
 
-		TransitionImageLayout(gpuImage,
-		                      VK_FORMAT_R8G8B8A8_SRGB,
-		                      VK_IMAGE_LAYOUT_UNDEFINED,
-		                      VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL
+		TransitionImageLayout(
+			gpuImage,
+			VK_FORMAT_R8G8B8A8_SRGB,
+			VK_IMAGE_LAYOUT_UNDEFINED,
+			VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL
 		);
-		CopyBufferToImage(buffer.GetBuffer(), gpuImage, width, height);
-		TransitionImageLayout(gpuImage,
-		                      VK_FORMAT_R8G8B8A8_SRGB,
-		                      VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-		                      VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
+		CopyBufferToImage(stagingBuffer.GetBuffer(), gpuImage, width, height);
+		TransitionImageLayout(
+			gpuImage,
+			VK_FORMAT_R8G8B8A8_SRGB,
+			VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+			VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
 		);
 	}
 
-	void MemoryManager::LoadDataToBuffer(void* data, VkDeviceSize bufferSize, VkBuffer gpuBuffer)
+	void MemoryManager::LoadDataToBuffer(std::ifstream& stream, uint64_t offset, uint64_t bufferSize,
+	                                     VkBuffer gpuBuffer)
 	{
 		const Buffer stagingBuffer = Buffer(
 			bufferSize,
 			VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
 			VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
-		stagingBuffer.SetDeviceLocalData(data, bufferSize);
-
+		std::unique_ptr<BufferMappedPtr> ptr = stagingBuffer.GetMappedPtr(0, bufferSize);
+		stream.seekg(offset);
+		stream.read(static_cast<char*>(ptr->GetMappedPtr()), bufferSize);
 		CopyBuffer(stagingBuffer.GetBuffer(), gpuBuffer, bufferSize);
 	}
 
@@ -199,6 +238,4 @@ namespace JoyEngine
 		vkFreeCommandBuffers(JoyContext::Graphics->GetDevice(), JoyContext::Graphics->GetCommandPool(), 1,
 		                     &commandBuffer);
 	}
-
-
 }

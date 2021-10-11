@@ -6,8 +6,6 @@
 
 namespace JoyEngine {
 
-    class RoomBehaviour;
-
     class RoomBehaviour : public Component {
 
         DECLARE_CLASS_NAME(RoomBehaviour)

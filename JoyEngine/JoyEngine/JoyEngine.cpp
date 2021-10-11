@@ -14,6 +14,8 @@
 
 namespace JoyEngine
 {
+	static auto startTime = std::chrono::high_resolution_clock::now();
+
 	JoyEngine::JoyEngine(HINSTANCE instance, HWND windowHandle) :
 		m_windowHandle(windowHandle),
 		m_inputManager(new InputManager()),
@@ -45,7 +47,7 @@ namespace JoyEngine
 			m_renderManager.get()
 		);
 
-		std::cout << "Context created" << std::endl;
+		OutputDebugStringA("Context created\n");
 	}
 
 	void JoyEngine::Init() const noexcept
@@ -56,6 +58,12 @@ namespace JoyEngine
 		m_descriptorSetManager->Init();
 		m_renderManager->Init();
 		m_sceneManager->Init();
+
+		const auto currentTime = std::chrono::high_resolution_clock::now();
+		const float time = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - startTime).count();
+		std::string s = "Context initialized in " + std::to_string(time) + " seconds\n";
+		OutputDebugStringA(s.c_str());
+
 	}
 
 	void JoyEngine::Start() const noexcept

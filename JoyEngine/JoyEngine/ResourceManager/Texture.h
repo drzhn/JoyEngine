@@ -27,6 +27,7 @@ namespace JoyEngine
 		~Texture() final;
 
 		void InitializeTexture(const unsigned char* data);
+		void InitializeTexture(std::ifstream& stream, uint64_t offset);
 
 		[[nodiscard]] VkImage& GetImage() noexcept { return m_textureImage; }
 

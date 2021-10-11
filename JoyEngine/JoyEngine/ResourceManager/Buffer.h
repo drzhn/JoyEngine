@@ -1,12 +1,25 @@
 ﻿#ifndef BUFFER_H
 #define BUFFER_H
 
+#include <memory>
 #include <vulkan/vulkan.h>
 
 #include "Common/Resource.h"
 
 namespace JoyEngine
 {
+	class BufferMappedPtr
+	{
+	public:
+		BufferMappedPtr() = delete;
+		BufferMappedPtr(VkDeviceMemory bufferMemory, VkDeviceSize offset, VkDeviceSize size);
+		~BufferMappedPtr();
+		[[nodiscard]] void* GetMappedPtr() const noexcept;
+	private:
+		void* m_bufferPtr = nullptr;
+		VkDeviceMemory m_bufferMemory = VK_NULL_HANDLE;
+	};
+
 	class Buffer : public Resource
 	{
 	public:
@@ -17,7 +30,7 @@ namespace JoyEngine
 
 		~Buffer() final;
 
-		void SetDeviceLocalData(void const* data, VkDeviceSize size) const;
+		[[nodiscard]] std::unique_ptr<BufferMappedPtr> GetMappedPtr(VkDeviceSize offset, VkDeviceSize size) const;
 
 		[[nodiscard]] VkBuffer GetBuffer() const noexcept;
 	private:

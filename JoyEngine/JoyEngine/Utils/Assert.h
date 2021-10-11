@@ -16,6 +16,7 @@
 
 #else
 #define ASSERT(expr)
+#define ASSERT_DESC(expr, message)
 #endif //DEBUG
 
 #endif //ASSERT_H
