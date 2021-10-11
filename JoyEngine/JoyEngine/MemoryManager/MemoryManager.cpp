@@ -18,6 +18,16 @@
 
 namespace JoyEngine
 {
+	void MemoryManager::Init()
+	{
+		m_dataLoader = std::make_unique<AsyncLoader>(JoyContext::Graphics->GetTransferQueue());
+	}
+
+	void MemoryManager::Update()
+	{
+		m_dataLoader->Update();
+	}
+
 	void MemoryManager::AllocateMemory(VkMemoryRequirements requirements, VkMemoryPropertyFlags properties,
 	                                   VkDeviceMemory& out_imageMemory)
 	{
@@ -100,8 +110,11 @@ namespace JoyEngine
 		);
 	}
 
-	void MemoryManager::LoadDataToBuffer(std::ifstream& stream, uint64_t offset, uint64_t bufferSize,
-	                                     VkBuffer gpuBuffer)
+	void MemoryManager::LoadDataToBuffer(
+		std::ifstream& stream,
+		uint64_t offset,
+		uint64_t bufferSize,
+		VkBuffer gpuBuffer)
 	{
 		const Buffer stagingBuffer = Buffer(
 			bufferSize,
@@ -111,6 +124,20 @@ namespace JoyEngine
 		stream.seekg(offset);
 		stream.read(static_cast<char*>(ptr->GetMappedPtr()), bufferSize);
 		CopyBuffer(stagingBuffer.GetBuffer(), gpuBuffer, bufferSize);
+	}
+
+	void MemoryManager::LoadDataToBufferAsync(std::ifstream& stream, uint64_t offset, uint64_t bufferSize,
+	                                          VkBuffer gpuBuffer, const std::function<void()>& callback) const
+	{
+		m_dataLoader->LoadDataToBuffer(stream, offset, bufferSize, gpuBuffer, callback);
+	}
+
+	void MemoryManager::LoadDataToImageAsync(std::ifstream& stream, uint64_t offset,
+	                                         uint32_t width,
+	                                         uint32_t height,
+	                                         VkImage gpuImage, const std::function<void()>& callback) const
+	{
+		m_dataLoader->LoadDataToImage(stream, offset, width, height, gpuImage, callback);
 	}
 
 	void MemoryManager::CopyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size)

@@ -10,8 +10,8 @@
 namespace JoyEngine
 {
 	DataManager::DataManager() :
-	//m_databaseFilename(R"(data_old.db)")
-	m_databaseFilename(R"(data.db)")
+	m_databaseFilename(R"(data_old.db)")
+	//m_databaseFilename(R"(data.db)")
 	{
 		ParseDatabase(m_pathDatabase, ReadFile(m_dataPath + m_databaseFilename).data());
 	}

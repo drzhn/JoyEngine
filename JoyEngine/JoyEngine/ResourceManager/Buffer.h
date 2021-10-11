@@ -1,6 +1,7 @@
 ﻿#ifndef BUFFER_H
 #define BUFFER_H
 
+#include <functional>
 #include <memory>
 #include <vulkan/vulkan.h>
 
@@ -20,7 +21,7 @@ namespace JoyEngine
 		VkDeviceMemory m_bufferMemory = VK_NULL_HANDLE;
 	};
 
-	class Buffer : public Resource
+	class Buffer final : public Resource
 	{
 	public:
 		Buffer() = delete;
@@ -30,10 +31,21 @@ namespace JoyEngine
 
 		~Buffer() final;
 
+		void LoadDataAsync(
+			std::ifstream& stream,
+			uint64_t offset);
+
 		[[nodiscard]] std::unique_ptr<BufferMappedPtr> GetMappedPtr(VkDeviceSize offset, VkDeviceSize size) const;
 
 		[[nodiscard]] VkBuffer GetBuffer() const noexcept;
+
+		[[nodiscard]] bool IsLoaded() const noexcept override { return m_isLoaded; }
 	private:
+		bool m_isLoaded = false;
+		std::function<void()> m_onLoadedCallback = [this]()
+		{
+			m_isLoaded = true;
+		};
 		VkDeviceSize m_size = 0;
 		VkBufferUsageFlags m_usage = 0;
 		VkMemoryPropertyFlags m_properties = 0;

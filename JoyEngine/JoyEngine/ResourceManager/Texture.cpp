@@ -61,6 +61,7 @@ namespace JoyEngine
 		CreateImageSampler();
 
 		JoyContext::Memory->LoadDataToImage(data, m_width, m_height, m_textureImage);
+		m_isLoaded = true;
 	}
 
 	void Texture::InitializeTexture(std::ifstream &stream, uint64_t offset)
@@ -69,7 +70,12 @@ namespace JoyEngine
 		CreateImageView();
 		CreateImageSampler();
 
-		JoyContext::Memory->LoadDataToImage(stream, offset, m_width, m_height, m_textureImage);
+		JoyContext::Memory->LoadDataToImageAsync(stream, offset, m_width, m_height, m_textureImage, m_onLoadedCallback);
+	}
+
+	void Texture::LoadDataAsync(std::ifstream& stream, uint64_t offset) const
+	{
+		JoyContext::Memory->LoadDataToImageAsync(stream, offset, m_width, m_height, m_textureImage, m_onLoadedCallback);
 	}
 
 	Texture::Texture(

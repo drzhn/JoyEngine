@@ -68,7 +68,6 @@ namespace JoyEngine
 
 	void JoyEngine::Start() const noexcept
 	{
-		m_memoryManager->Start();
 		m_renderManager->Start();
 	}
 
@@ -76,6 +75,7 @@ namespace JoyEngine
 	{
 		Time::Update();
 
+		m_memoryManager->Update();
 		m_sceneManager->Update();
 		m_renderManager->Update();
 	}
@@ -83,7 +83,6 @@ namespace JoyEngine
 	void JoyEngine::Stop() const noexcept
 	{
 		m_renderManager->Stop(); 
-		m_memoryManager->Stop();
 	}
 
 	JoyEngine::~JoyEngine()

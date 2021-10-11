@@ -21,11 +21,12 @@ namespace JoyEngine {
 
         [[nodiscard]] std::map<uint32_t, std::vector<VkDescriptorSet>> GetDescriptorMap() const noexcept;
 
+    	[[nodiscard]] bool IsLoaded() const noexcept override;
     private:
         void CreateDescriptorSets();
 
         void LoadResources();
-
+    
     private :
         GUID m_sharedMaterialGuid;
         SharedMaterial *m_sharedMaterial;

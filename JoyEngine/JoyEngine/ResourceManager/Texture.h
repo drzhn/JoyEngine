@@ -1,6 +1,7 @@
 #ifndef TEXTURE_H
 #define TEXTURE_H
 
+#include <functional>
 #include <vulkan/vulkan.h>
 
 #include "Common/Resource.h"
@@ -29,6 +30,10 @@ namespace JoyEngine
 		void InitializeTexture(const unsigned char* data);
 		void InitializeTexture(std::ifstream& stream, uint64_t offset);
 
+		void LoadDataAsync(
+			std::ifstream& stream,
+			uint64_t offset) const;
+
 		[[nodiscard]] VkImage& GetImage() noexcept { return m_textureImage; }
 
 		[[nodiscard]] VkDeviceMemory& GetDeviceMemory() noexcept { return m_textureImageMemory; }
@@ -37,12 +42,19 @@ namespace JoyEngine
 
 		[[nodiscard]] VkSampler& GetSampler() noexcept { return m_textureSampler; }
 
+		[[nodiscard]] bool IsLoaded() const noexcept override { return m_isLoaded; }
 	private:
 		void CreateImage();
 		void CreateImageView();
 		void CreateImageSampler();
 
 	private :
+		bool m_isLoaded = false;
+		std::function<void()> m_onLoadedCallback = [this]()
+		{
+			m_isLoaded = true;
+		};
+
 		uint32_t m_width = 0;
 		uint32_t m_height = 0;
 		VkFormat m_format = VK_FORMAT_UNDEFINED;

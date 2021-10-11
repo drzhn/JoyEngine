@@ -18,15 +18,12 @@ namespace JoyEngine {
 
         void DecreaseRefCount() { m_refCount--; }
 
-        [[nodiscard]] bool IsLoaded() const noexcept { return m_isLoaded; }
+        [[nodiscard]] virtual bool IsLoaded() const noexcept = 0;
         [[nodiscard]] GUID GetGuid() const noexcept { return m_guid; }
 
     private:
         uint32_t m_refCount = 0;
         GUID m_guid;
-
-    protected:
-        bool m_isLoaded = false;
     };
 }
 

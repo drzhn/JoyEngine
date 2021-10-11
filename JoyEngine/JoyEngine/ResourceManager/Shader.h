@@ -16,6 +16,7 @@ namespace JoyEngine {
         ~Shader() final;
 
         [[nodiscard]] VkShaderModule &GetShadeModule() noexcept { return m_shaderModule; }
+        [[nodiscard]] bool IsLoaded() const noexcept override { return true; }
 
     private :
         VkShaderModule m_shaderModule = VK_NULL_HANDLE;

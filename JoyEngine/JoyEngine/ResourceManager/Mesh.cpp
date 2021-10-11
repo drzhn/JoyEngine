@@ -40,17 +40,8 @@ namespace JoyEngine
 			VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
 			VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
 
-		JoyContext::Memory->LoadDataToBuffer(
-			modelStream,
-			sizeof(uint32_t) + sizeof(uint32_t),
-			verticesDataSize,
-			m_vertexBuffer->GetBuffer());
-
-		JoyContext::Memory->LoadDataToBuffer(
-			modelStream,
-			sizeof(uint32_t) + sizeof(uint32_t) + verticesDataSize,
-			indicesDataSize,
-			m_indexBuffer->GetBuffer());
+		m_vertexBuffer->LoadDataAsync(modelStream, sizeof(uint32_t) + sizeof(uint32_t));
+		m_indexBuffer->LoadDataAsync(modelStream, sizeof(uint32_t) + sizeof(uint32_t) + verticesDataSize);
 
 		if (modelStream.is_open())
 		{

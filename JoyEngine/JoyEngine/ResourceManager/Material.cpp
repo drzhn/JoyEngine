@@ -163,4 +163,21 @@ namespace JoyEngine
 	{
 		return m_descriptorSets;
 	}
+
+	bool Material::IsLoaded() const noexcept
+	{
+		if (!m_sharedMaterial->IsLoaded()) return false;
+
+		for (const auto& item : m_bindings)
+		{
+			if (!item.second.IsNull())
+			{
+				if (!JoyContext::Resource->GetResource<Resource>(item.second)->IsLoaded())
+				{
+					return false;
+				}
+			}
+		}
+		return true;
+	}
 }

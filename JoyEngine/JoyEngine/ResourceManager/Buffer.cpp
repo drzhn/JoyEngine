@@ -67,6 +67,12 @@ namespace JoyEngine
 		return std::move(ptr);
 	}
 
+	void Buffer::LoadDataAsync(std::ifstream& stream, uint64_t offset)
+	{
+		ASSERT(m_properties & VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+		JoyContext::Memory->LoadDataToBufferAsync(stream, offset, m_size, m_buffer, m_onLoadedCallback);
+	}
+
 	Buffer::~Buffer()
 	{
 		vkDestroyBuffer(JoyContext::Graphics->GetDevice(), m_buffer, JoyContext::Graphics->GetAllocationCallbacks());

@@ -28,6 +28,8 @@ namespace JoyEngine
 
 		[[nodiscard]] VkBuffer GetVertexBuffer() const noexcept { return m_vertexBuffer->GetBuffer(); }
 
+		[[nodiscard]] bool IsLoaded() const noexcept override { return m_vertexBuffer->IsLoaded() && m_indexBuffer->IsLoaded(); }
+
 
 	private:
 		size_t m_indexSize;

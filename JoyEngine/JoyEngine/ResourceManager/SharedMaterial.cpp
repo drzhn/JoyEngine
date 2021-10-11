@@ -277,6 +277,11 @@ namespace JoyEngine {
         return VK_DESCRIPTOR_TYPE_MAX_ENUM;
     }
 
+    bool SharedMaterial::IsLoaded() const noexcept
+    {
+        return GetVertexShader()->IsLoaded() && GetFragmentShader()->IsLoaded();
+    }
+
     BindingInfo SharedMaterial::GetBindingInfoByName(const std::string &name) noexcept {
         return m_bindings[name];
     }

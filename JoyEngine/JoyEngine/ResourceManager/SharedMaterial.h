@@ -48,6 +48,7 @@ namespace JoyEngine {
 
         static VkDescriptorType GetTypeFromStr(const std::string &type) noexcept;
 
+    	[[nodiscard]] bool IsLoaded() const noexcept override;
     private :
         GUID m_vertexShader;
         GUID m_fragmentShader;
@@ -71,6 +72,7 @@ namespace JoyEngine {
         void Initialize();
 
         void CreateGraphicsPipeline();
+    
     };
 }
 
