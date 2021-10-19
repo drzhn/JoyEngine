@@ -31,12 +31,12 @@ namespace JoyEngine
 
 	Texture::Texture(GUID guid) : Resource(guid)
 	{
-		std::ifstream filestream = JoyContext::Data->GetFileStream(guid, true);
+		m_textureStream = JoyContext::Data->GetFileStream(guid, true);
 		uint32_t width, height;
 
-		filestream.seekg(0);
-		filestream.read(reinterpret_cast<char*>(&width), sizeof(uint32_t));
-		filestream.read(reinterpret_cast<char*>(&height), sizeof(uint32_t));
+		m_textureStream.seekg(0);
+		m_textureStream.read(reinterpret_cast<char*>(&width), sizeof(uint32_t));
+		m_textureStream.read(reinterpret_cast<char*>(&height), sizeof(uint32_t));
 
 
 		m_width = width;
@@ -47,11 +47,11 @@ namespace JoyEngine
 		m_propertiesFlags = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
 		m_aspectFlags = VK_IMAGE_ASPECT_COLOR_BIT;
 
-		InitializeTexture(filestream, sizeof(uint32_t) + sizeof(uint32_t));
-		if (filestream.is_open())
-		{
-			filestream.close();
-		}
+		InitializeTexture(m_textureStream, sizeof(uint32_t) + sizeof(uint32_t));
+		//if (filestream.is_open())
+		//{
+		//	filestream.close();
+		//}
 	}
 
 	void Texture::InitializeTexture(const unsigned char* data)
@@ -70,11 +70,6 @@ namespace JoyEngine
 		CreateImageView();
 		CreateImageSampler();
 
-		JoyContext::Memory->LoadDataToImageAsync(stream, offset, m_width, m_height, m_textureImage, m_onLoadedCallback);
-	}
-
-	void Texture::LoadDataAsync(std::ifstream& stream, uint64_t offset) const
-	{
 		JoyContext::Memory->LoadDataToImageAsync(stream, offset, m_width, m_height, m_textureImage, m_onLoadedCallback);
 	}
 

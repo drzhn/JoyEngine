@@ -17,6 +17,8 @@ public :
 	{
 		switch (uMsg)
 		{
+		case WM_CREATE:
+			break;
 		case WM_DESTROY:
 			{
 				m_windowDestroyed = true;

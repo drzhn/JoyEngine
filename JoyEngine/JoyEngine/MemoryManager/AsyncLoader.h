@@ -24,6 +24,7 @@ namespace JoyEngine
 			const std::function<void()>& onLoadedCallback);
 
 		virtual ~LoadCommand() = default;
+		void CreateStagingBuffer();
 		virtual void WriteCommandBuffer(VkCommandBuffer& commandBuffer) = 0;
 		void OnCompleted() const { m_onLoadedCallback(); }
 	protected:

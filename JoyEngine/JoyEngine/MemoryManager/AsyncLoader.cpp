@@ -2,7 +2,7 @@
 
 #include "JoyContext.h"
 #include "GraphicsManager/GraphicsManager.h"
-
+#include "Utils/Assert.h"
 namespace JoyEngine
 {
 	LoadCommand::LoadCommand(std::ifstream& binaryStream, uint32_t streamOffset,
@@ -13,13 +13,10 @@ namespace JoyEngine
 	{
 	}
 
-	BufferLoadCommand::BufferLoadCommand(VkBuffer gpuBuffer, std::ifstream& binaryStream, uint32_t streamOffset,
-	                                     VkDeviceSize loadSize,
-	                                     const std::function<void()>& onLoadedCallback) :
-		LoadCommand(binaryStream, streamOffset, onLoadedCallback),
-		m_gpuBuffer(gpuBuffer)
+	void LoadCommand::CreateStagingBuffer()
 	{
-		m_loadSize = loadSize;
+		ASSERT(m_loadSize != 0);
+		ASSERT(m_binaryStream.is_open());
 
 		m_stagingBuffer = std::make_unique<Buffer>(
 			m_loadSize,
@@ -27,8 +24,17 @@ namespace JoyEngine
 			VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
 		const std::unique_ptr<BufferMappedPtr> ptr = m_stagingBuffer->GetMappedPtr(0, m_loadSize);
 
-		binaryStream.seekg(m_streamOffset);
-		binaryStream.read(static_cast<char*>(ptr->GetMappedPtr()), m_loadSize);
+		m_binaryStream.seekg(m_streamOffset);
+		m_binaryStream.read(static_cast<char*>(ptr->GetMappedPtr()), m_loadSize);
+	}
+
+	BufferLoadCommand::BufferLoadCommand(VkBuffer gpuBuffer, std::ifstream& binaryStream, uint32_t streamOffset,
+	                                     VkDeviceSize loadSize,
+	                                     const std::function<void()>& onLoadedCallback) :
+		LoadCommand(binaryStream, streamOffset, onLoadedCallback),
+		m_gpuBuffer(gpuBuffer)
+	{
+		m_loadSize = loadSize;
 	}
 
 	void BufferLoadCommand::WriteCommandBuffer(VkCommandBuffer& commandBuffer)
@@ -50,15 +56,6 @@ namespace JoyEngine
 		m_height(height)
 	{
 		m_loadSize = width * height * 4;
-
-		m_stagingBuffer = std::make_unique<Buffer>(
-			m_loadSize,
-			VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
-			VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
-		const std::unique_ptr<BufferMappedPtr> ptr = m_stagingBuffer->GetMappedPtr(0, m_loadSize);
-
-		binaryStream.seekg(m_streamOffset);
-		binaryStream.read(static_cast<char*>(ptr->GetMappedPtr()), m_loadSize);
 	}
 
 	void ImageLoadCommand::WriteCommandBuffer(VkCommandBuffer& commandBuffer)
@@ -220,6 +217,7 @@ namespace JoyEngine
 		{
 			std::unique_ptr<LoadCommand> loadCommand = std::move(m_commandsQueue.front());
 			m_commandsQueue.pop_front();
+			loadCommand->CreateStagingBuffer();
 			loadCommand->WriteCommandBuffer(m_commandBuffer);
 			m_processingCommands.push_back(std::move(loadCommand));
 		}

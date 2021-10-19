@@ -2,6 +2,7 @@
 #define MESH_H
 
 #include <memory>
+#include <fstream>
 
 #include <vulkan/vulkan.h>
 
@@ -37,6 +38,8 @@ namespace JoyEngine
 
 		std::unique_ptr<Buffer> m_vertexBuffer;
 		std::unique_ptr<Buffer> m_indexBuffer;
+
+		std::ifstream m_modelStream;
 	};
 }
 

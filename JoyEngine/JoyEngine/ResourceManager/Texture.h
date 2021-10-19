@@ -2,6 +2,7 @@
 #define TEXTURE_H
 
 #include <functional>
+#include <fstream>
 #include <vulkan/vulkan.h>
 
 #include "Common/Resource.h"
@@ -50,8 +51,13 @@ namespace JoyEngine
 
 	private :
 		bool m_isLoaded = false;
+		std::ifstream m_textureStream;
 		std::function<void()> m_onLoadedCallback = [this]()
 		{
+			if (m_textureStream.is_open())
+			{
+				m_textureStream.close();
+			}
 			m_isLoaded = true;
 		};
 

@@ -67,10 +67,11 @@ namespace JoyEngine
 		return std::move(ptr);
 	}
 
-	void Buffer::LoadDataAsync(std::ifstream& stream, uint64_t offset)
+	void Buffer::LoadDataAsync(std::ifstream& stream, uint64_t offset, const std::function<void()>& callback)
 	{
 		ASSERT(m_properties & VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
-		JoyContext::Memory->LoadDataToBufferAsync(stream, offset, m_size, m_buffer, m_onLoadedCallback);
+		m_onLoadedExternalCallback = callback;
+		JoyContext::Memory->LoadDataToBufferAsync(stream, offset, m_size, m_buffer, m_onLoadedInternalCallback);
 	}
 
 	Buffer::~Buffer()

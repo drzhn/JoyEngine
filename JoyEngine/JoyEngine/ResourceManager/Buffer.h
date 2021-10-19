@@ -33,7 +33,8 @@ namespace JoyEngine
 
 		void LoadDataAsync(
 			std::ifstream& stream,
-			uint64_t offset);
+			uint64_t offset, 
+			const std::function<void()>& callback);
 
 		[[nodiscard]] std::unique_ptr<BufferMappedPtr> GetMappedPtr(VkDeviceSize offset, VkDeviceSize size) const;
 
@@ -42,9 +43,14 @@ namespace JoyEngine
 		[[nodiscard]] bool IsLoaded() const noexcept override { return m_isLoaded; }
 	private:
 		bool m_isLoaded = false;
-		std::function<void()> m_onLoadedCallback = [this]()
+		std::function<void()> m_onLoadedExternalCallback;
+		std::function<void()> m_onLoadedInternalCallback = [this]()
 		{
 			m_isLoaded = true;
+			if (m_onLoadedExternalCallback)
+			{
+				m_onLoadedExternalCallback();
+			}
 		};
 		VkDeviceSize m_size = 0;
 		VkBufferUsageFlags m_usage = 0;
