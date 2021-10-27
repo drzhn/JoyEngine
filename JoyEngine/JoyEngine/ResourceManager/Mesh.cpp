@@ -9,10 +9,6 @@
 
 namespace JoyEngine
 {
-	static uint32_t objCount = 0;
-	static uint64_t vertexCount = 0;
-	static uint32_t trianglesCount = 0;
-
 	Mesh::Mesh(GUID guid) : Resource(guid)
 	{
 		m_modelStream = JoyContext::Data->GetFileStream(guid, true);
@@ -24,10 +20,6 @@ namespace JoyEngine
 
 		m_vertexSize = verticesDataSize / sizeof(Vertex);
 		m_indexSize = indicesDataSize / sizeof(uint32_t);
-
-		objCount++;
-		vertexCount += m_vertexSize;
-		trianglesCount += m_indexSize / 3;
 
 		m_vertexBuffer = std::make_unique<Buffer>(
 			verticesDataSize,
@@ -59,10 +51,6 @@ namespace JoyEngine
 				}
 			}
 		});
-
-		std::string s = std::to_string(objCount) + " " + std::to_string(vertexCount) + " " +
-			std::to_string(trianglesCount) + "\n";
-		OutputDebugStringA(s.c_str());
 	}
 
 	Mesh::~Mesh()

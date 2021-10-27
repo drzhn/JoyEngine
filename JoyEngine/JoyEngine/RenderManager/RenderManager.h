@@ -12,26 +12,19 @@
 
 #include <vulkan/vulkan.h>
 
-#include "GraphicsManager/GraphicsManager.h"
-
-#include "ResourceManager/ResourceManager.h"
 #include "ResourceManager/Texture.h"
 
 #include "Components/MeshRenderer.h"
 #include "Components/Camera.h"
-#include "RenderManager/VulkanAllocator.h"
-#include "RenderManager/VulkanTypes.h"
-
-
 #include "Swapchain.h"
+#include "RenderPass.h"
 
-#include "Utils/FileUtils.h"
-
-namespace JoyEngine {
+namespace JoyEngine
+{
 	class RenderObject;
 
-	class RenderManager {
-
+	class RenderManager
+	{
 	public:
 		RenderManager();
 
@@ -39,7 +32,9 @@ namespace JoyEngine {
 
 		void Init();
 
-		void Start() {}
+		void Start()
+		{
+		}
 
 		void Stop();
 
@@ -62,7 +57,6 @@ namespace JoyEngine {
 		[[nodiscard]] float GetAspect() const noexcept;
 
 	private:
-
 		void CreateRenderPass();
 
 		void CreateGBufferResources();
@@ -71,7 +65,7 @@ namespace JoyEngine {
 
 		void CreateCommandBuffers();
 
-		void WriteCommandBuffers(uint32_t imageIndex);
+		void WriteCommandBuffers(uint32_t imageIndex) const;
 
 		void ResetCommandBuffers(uint32_t imageIndex);
 
@@ -81,7 +75,7 @@ namespace JoyEngine {
 		const int MAX_FRAMES_IN_FLIGHT = 2;
 
 		std::unique_ptr<Swapchain> m_swapchain;
-		VkRenderPass m_renderPass;
+		std::unique_ptr<RenderPass> m_renderPass;
 
 		std::set<MeshRenderer*> m_meshRenderers;
 		Camera* m_currentCamera;
@@ -98,8 +92,6 @@ namespace JoyEngine {
 		std::vector<VkFence> m_imagesInFlight;
 		size_t currentFrame = 0;
 	};
-
-
 }
 
 #endif //RENDER_MANAGER_H

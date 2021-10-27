@@ -7,6 +7,8 @@ layout(push_constant) uniform MVP {
     mat4 proj;
 } mvp;
 
+layout(binding = 0) uniform sampler2D texSampler;
+
 layout(location = 0) in vec3 inPosition;
 layout(location = 1) in vec3 inColor;
 layout(location = 2) in vec3 inNormal;

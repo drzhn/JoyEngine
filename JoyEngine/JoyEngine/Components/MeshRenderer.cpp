@@ -2,6 +2,7 @@
 
 #include "JoyContext.h"
 
+#include "ResourceManager/ResourceManager.h"
 #include "RenderManager/RenderManager.h"
 #include "Common/Resource.h"
 

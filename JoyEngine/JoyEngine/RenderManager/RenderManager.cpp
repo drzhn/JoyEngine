@@ -42,8 +42,7 @@ namespace JoyEngine
 		                     static_cast<uint32_t>(commandBuffers.size()),
 		                     commandBuffers.data());
 
-		vkDestroyRenderPass(JoyContext::Graphics->GetDevice(), m_renderPass,
-		                    JoyContext::Graphics->GetAllocationCallbacks());
+		m_renderPass = nullptr;
 
 		m_swapchain = nullptr;
 
@@ -81,7 +80,7 @@ namespace JoyEngine
 		depthAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 		depthAttachment.finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 
-		VkAttachmentReference depthAttachmentRef{};
+		VkAttachmentReference depthAttachmentRef;
 		depthAttachmentRef.attachment = 1;
 		depthAttachmentRef.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 
@@ -95,7 +94,7 @@ namespace JoyEngine
 		colorAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 		colorAttachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
 
-		VkAttachmentReference colorAttachmentRef{};
+		VkAttachmentReference colorAttachmentRef;
 		colorAttachmentRef.attachment = 0;
 		colorAttachmentRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 
@@ -116,20 +115,13 @@ namespace JoyEngine
 		dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
 
 		VkAttachmentDescription attachments[] = {colorAttachment, depthAttachment};
-		VkRenderPassCreateInfo renderPassInfo{};
-		renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
-		renderPassInfo.attachmentCount = 2;
-		renderPassInfo.pAttachments = attachments;
-		renderPassInfo.subpassCount = 1;
-		renderPassInfo.pSubpasses = &subpass;
-		renderPassInfo.dependencyCount = 1;
-		renderPassInfo.pDependencies = &dependency;
-
-		if (vkCreateRenderPass(JoyContext::Graphics->GetDevice(), &renderPassInfo,
-		                       JoyContext::Graphics->GetAllocationCallbacks(), &m_renderPass) != VK_SUCCESS)
-		{
-			throw std::runtime_error("failed to create render pass!");
-		}
+		m_renderPass = std::make_unique<RenderPass>(
+			2,
+			attachments,
+			1,
+			&subpass,
+			1,
+			&dependency);
 	}
 
 	void RenderManager::RegisterMeshRenderer(MeshRenderer* meshRenderer)
@@ -227,7 +219,7 @@ namespace JoyEngine
 
 			VkFramebufferCreateInfo framebufferInfo{};
 			framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-			framebufferInfo.renderPass = m_renderPass;
+			framebufferInfo.renderPass = m_renderPass->GetRenderPass();
 			framebufferInfo.attachmentCount = 2;
 			framebufferInfo.pAttachments = attachments;
 			framebufferInfo.width = m_swapchain->GetSwapChainExtent().width;
@@ -261,7 +253,7 @@ namespace JoyEngine
 		}
 	}
 
-	void RenderManager::WriteCommandBuffers(uint32_t imageIndex)
+	void RenderManager::WriteCommandBuffers(uint32_t imageIndex) const
 	{
 		VkCommandBufferBeginInfo beginInfo{};
 		beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
@@ -273,7 +265,7 @@ namespace JoyEngine
 
 		VkRenderPassBeginInfo renderPassInfo{};
 		renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-		renderPassInfo.renderPass = m_renderPass;
+		renderPassInfo.renderPass = m_renderPass->GetRenderPass();
 		renderPassInfo.framebuffer = m_swapChainFramebuffers[imageIndex];
 		renderPassInfo.renderArea.offset = {0, 0};
 		renderPassInfo.renderArea.extent = m_swapchain->GetSwapChainExtent();
@@ -474,11 +466,11 @@ namespace JoyEngine
 
 	Swapchain* RenderManager::GetSwapchain() const noexcept { return m_swapchain.get(); }
 
-	VkRenderPass RenderManager::GetMainRenderPass() const noexcept { return m_renderPass; }
+	VkRenderPass RenderManager::GetMainRenderPass() const noexcept { return m_renderPass->GetRenderPass(); }
 
 	float RenderManager::GetAspect() const noexcept
 	{
 		ASSERT(m_swapchain != nullptr);
-		return (float)m_swapchain->GetSwapChainExtent().width / (float)m_swapchain->GetSwapChainExtent().height;
+		return static_cast<float>(m_swapchain->GetSwapChainExtent().width) / static_cast<float>(m_swapchain->GetSwapChainExtent().height);
 	}
 }
