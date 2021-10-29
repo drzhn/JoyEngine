@@ -1,4 +1,7 @@
 ﻿using System.Text;
+using System.Collections.Generic;
+using System.Runtime.InteropServices;
+
 
 namespace ConsoleApplication1
 {
@@ -30,6 +33,12 @@ namespace ConsoleApplication1
         }
     }
 
+    enum ShaderType
+    {
+        Vertex = 0,
+        Fragment = 1
+    };
+
     public enum ReadingState
     {
         None,
@@ -44,10 +53,15 @@ namespace ConsoleApplication1
 
     class Program
     {
+        const string dllPath =
+            @"D:\CppProjects\JoyEngine\JoyAssetBuilder\JoyAssetBuilder\x64\Release\JoyShaderBuilderLib.dll";
+
+        static readonly HashSet<string> namesToReplace = new HashSet<string>() { "vert", "frag" };
+
         static void ReadHeader(int currentPos, string shader, out string header, out int headerEndPos)
         {
             headerEndPos = shader.IndexOf('\n', currentPos);
-            header = shader.Substring(currentPos, headerEndPos - currentPos);
+            header = shader.Substring(currentPos, headerEndPos - currentPos).Trim('	', ' ', '\r', '\n');
         }
 
         static void ReadPushConstant(int currentPos, string shader, out string pushConstant, out int headerEndPos)
@@ -57,7 +71,9 @@ namespace ConsoleApplication1
             int semicolonPos = shader.IndexOf(';', closeBracesPos);
 
             headerEndPos = semicolonPos;
-            pushConstant = shader.Substring(currentPos, semicolonPos - currentPos + 1);
+            pushConstant = shader
+                .Substring(currentPos, semicolonPos - currentPos + 1)
+                .Trim('	', ' ', '\r', '\n');
         }
 
         static void ReadBindingSet(int currentPos, string shader, ref List<BindingSet> bindings, out int bindingsEndPos)
@@ -100,7 +116,7 @@ namespace ConsoleApplication1
                 .Split(';'))
             {
                 if (string.IsNullOrWhiteSpace(bindingStr)) continue;
-                set.bindings.Add(new Binding() { attribute = "", binding = bindingStr.Trim() });
+                set.bindings.Add(new Binding() { attribute = "", binding = bindingStr.Trim('	', ' ', '\r', '\n') });
             }
 
             bindings.Add(set);
@@ -117,16 +133,28 @@ namespace ConsoleApplication1
                 .Split(';'))
             {
                 if (string.IsNullOrWhiteSpace(varStr)) continue;
-                vars.Add(varStr.Trim());
+                vars.Add(varStr.Trim('	', ' ', '\r', '\n'));
             }
 
             endPos = closedBracketPos;
         }
 
-        static void ReadFunction(int currentPos, string shader, out string function, out int endPos)
+        static void ReadFunction(int currentPos, string shader, ref Dictionary<string, string> functions,
+            out int endPos)
         {
             int closedBracketPos = shader.IndexOf('}', currentPos);
-            function = shader.Substring(currentPos, closedBracketPos - currentPos+1);
+            string name = shader
+                .Substring(currentPos, shader.IndexOf('(', currentPos) - currentPos)
+                .Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)[1];
+            string function = shader.Substring(currentPos, closedBracketPos - currentPos + 1);
+            functions[name] = function.Trim('	', ' ', '\r', '\n');
+
+            if (namesToReplace.Contains(name)) // glsl only allows entry point to be called "main"
+            {
+                int place = functions[name].IndexOf(name);
+                functions[name] = functions[name].Remove(place, name.Length).Insert(place, "main");
+            }
+
             endPos = closedBracketPos;
         }
 
@@ -157,9 +185,8 @@ namespace ConsoleApplication1
 
         static bool CheckFunction(ref string shader, ref int pos)
         {
-            int openedBrackedPos = shader.IndexOf('{', pos);
+            int openedBrackedPos = shader.IndexOf('{', pos + 5); // T n(){ 
             if (openedBrackedPos < 0) return false;
-            if (shader[pos] == '{') return false;
             string functionHeader = shader.Substring(pos, openedBrackedPos - pos - 1);
             if (functionHeader.IndexOf(')') < 0 || functionHeader.IndexOf('(') < 0) return false;
 
@@ -180,11 +207,31 @@ namespace ConsoleApplication1
             return true;
         }
 
+        [DllImport(dllPath, CallingConvention = CallingConvention.Cdecl)]
+        static extern void InitializeCompiler();
+
+        [DllImport(dllPath, CallingConvention = CallingConvention.Cdecl)]
+        static extern unsafe void CompileGLSL(string s, int len, ShaderType type, IntPtr* dataPtr, UInt64* dataSize);
+
+        static unsafe void CompileGLSL(string shader, ShaderType type, out byte[] buffer)
+        {
+            IntPtr outData = IntPtr.Zero;
+            UInt64 len;
+            CompileGLSL(shader, shader.Length, type, & outData, &len);
+            buffer = new byte[len];
+            Marshal.Copy(outData, buffer, 0, (int)len);
+        }
+
+        [DllImport(dllPath, CallingConvention = CallingConvention.Cdecl)]
+        static extern void ReleaseInternalData();
+
+        [DllImport(dllPath, CallingConvention = CallingConvention.Cdecl)]
+        static extern void ReleaseCompiler();
+
         static void Main(string[] args)
         {
-            string sss = "void vert(int a; float b) {";
-            string[] ss = sss.Split(new char[] { ',', '(', ')', ';', ' ' },
-                StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+            string a = "sdfsdf";
+
             const string shaderPath = @"D:\CppProjects\JoyEngine\JoyData\shaders\shader.shader";
             const string pushConstantAttr = "[push_constant]";
             const string setAttr = "[set";
@@ -200,6 +247,7 @@ namespace ConsoleApplication1
             List<string> verInputs = new List<string>();
             List<string> vertToFragInputs = new List<string>();
             List<string> fragOutputs = new List<string>();
+            Dictionary<string, string> functions = new Dictionary<string, string>();
 
             ReadingState state = ReadingState.None;
 
@@ -278,35 +326,76 @@ namespace ConsoleApplication1
                     }
                     case ReadingState.Function:
                     {
-                        ReadFunction(i, shader, out var function, out i);
+                        ReadFunction(i, shader, ref functions, out i);
                         state = ReadingState.None;
-                        Console.WriteLine(function);
                         break;
                     }
                 }
             }
 
-            Console.Write(headers);
-            Console.Write(pushConstant);
-            foreach (var bindingSet in bindingSets)
+            //Console.Write(headers);
+            //Console.Write(pushConstant);
+            //foreach (var bindingSet in bindingSets)
+            //{
+            //    Console.WriteLine(bindingSet);
+            //}
+            //foreach (var s in verInputs)
+            //{
+            //    Console.WriteLine(s);
+            //}
+            //foreach (var s in vertToFragInputs)
+            //{
+            //    Console.WriteLine(s);
+            //}
+            //foreach (var s in fragOutputs)
+            //{
+            //    Console.WriteLine(s);
+            //}
+
+            //foreach (KeyValuePair<string, string> pair in functions)
+            //{
+            //    Console.WriteLine(pair.Key);
+            //    Console.WriteLine(pair.Value);
+            //}
+
+            //Console.WriteLine(functions["vert"]);
+            //Console.WriteLine(functions["frag"]);
+
+
+            StringBuilder vertexShader = headers;
+            vertexShader.AppendFormat("layout(push_constant) {0}\n", pushConstant);
+            for (int i = 0; i < bindingSets.Count; i++)
             {
-                Console.WriteLine(bindingSet);
+                for (int j = 0; j < bindingSets[i].bindings.Count; j++)
+                {
+                    vertexShader.AppendFormat("layout(set = {0}, binding = {1}) {2};\n",
+                        i,
+                        j,
+                        bindingSets[i].bindings[j]);
+                }
             }
 
-            foreach (var s in verInputs)
+            for (int i = 0; i < verInputs.Count; i++)
             {
-                Console.WriteLine(s);
+                vertexShader.AppendFormat("layout(location = {0}) in {1};\n", i, verInputs[i]);
             }
 
-            foreach (var s in vertToFragInputs)
+            vertexShader.Append('\n');
+            for (int i = 0; i < vertToFragInputs.Count; i++)
             {
-                Console.WriteLine(s);
+                vertexShader.AppendFormat("layout(location = {0}) out {1};\n", i, vertToFragInputs[i]);
             }
 
-            foreach (var s in fragOutputs)
-            {
-                Console.WriteLine(s);
-            }
+            vertexShader.Append('\n');
+            vertexShader.Append(functions["vert"]);
+
+            Console.WriteLine(vertexShader);
+
+            InitializeCompiler();
+            CompileGLSL(vertexShader.ToString(), ShaderType.Vertex, out var data);
+            ReleaseInternalData();
+            ReleaseCompiler();
+            File.WriteAllBytes(@"D:\CppProjects\JoyEngine\JoyData\shaders\shader.vert.spv", data);
         }
     }
 }
