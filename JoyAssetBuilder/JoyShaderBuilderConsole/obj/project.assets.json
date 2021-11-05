@@ -13,11 +13,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "D:\\CppProjects\\JoyEngine\\JoyAssetBuilder\\JoyAssetBuilder\\JoyShaderBuilderConsole\\JoyShaderBuilderConsole.csproj",
+      "projectUniqueName": "D:\\CppProjects\\JoyEngine\\JoyAssetBuilder\\JoyShaderBuilderConsole\\JoyShaderBuilderConsole.csproj",
       "projectName": "JoyShaderBuilderConsole",
-      "projectPath": "D:\\CppProjects\\JoyEngine\\JoyAssetBuilder\\JoyAssetBuilder\\JoyShaderBuilderConsole\\JoyShaderBuilderConsole.csproj",
+      "projectPath": "D:\\CppProjects\\JoyEngine\\JoyAssetBuilder\\JoyShaderBuilderConsole\\JoyShaderBuilderConsole.csproj",
       "packagesPath": "C:\\Users\\kleve\\.nuget\\packages\\",
-      "outputPath": "D:\\CppProjects\\JoyEngine\\JoyAssetBuilder\\JoyAssetBuilder\\JoyShaderBuilderConsole\\obj\\",
+      "outputPath": "D:\\CppProjects\\JoyEngine\\JoyAssetBuilder\\JoyShaderBuilderConsole\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "C:\\Users\\kleve\\AppData\\Roaming\\NuGet\\NuGet.Config",

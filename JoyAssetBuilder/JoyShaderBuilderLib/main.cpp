@@ -4,6 +4,7 @@
 #include <vector>
 
 #include <shaderc/shaderc.hpp>
+#include <JoyAssetHeaders.h>
 
 //// Returns GLSL shader source text after preprocessing.
 //std::string preprocess_shader(const std::string& source_name, shaderc_shader_kind kind, const std::string& source)
@@ -166,14 +167,15 @@
 //	a = new A();
 //}
 //
-//int* m_ptr;
-//
-//extern "C" __declspec(dllexport) void __cdecl IsInitialized(char* s, int** ptr, int* len)
-//{
-//	printf(s);
-//	*ptr = new int[5]{1, 2, 3, 4, 5};
-//	*len = 5;
-//}
+
+
+const char* s = "Hello from c++";
+
+extern "C" __declspec(dllexport) void __cdecl GetString(char** string)
+{
+	Header a = Header();
+	*string = const_cast<char*>(s);
+}
 
 shaderc_compiler_t compiler;
 shaderc_compilation_result_t result;
@@ -214,7 +216,7 @@ extern "C" __declspec(dllexport) void __cdecl CompileGLSL(
 		s,
 		len,
 		kind,
-		"main.vert",
+		"",
 		"main",
 		nullptr);
 	shaderc_compilation_status status = shaderc_result_get_compilation_status(result);
