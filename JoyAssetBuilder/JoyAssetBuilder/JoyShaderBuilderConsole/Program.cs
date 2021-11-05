@@ -207,6 +207,8 @@ namespace ConsoleApplication1
             return true;
         }
 
+        #region Compiler
+
         [DllImport(dllPath, CallingConvention = CallingConvention.Cdecl)]
         static extern void InitializeCompiler();
 
@@ -217,7 +219,7 @@ namespace ConsoleApplication1
         {
             IntPtr outData = IntPtr.Zero;
             UInt64 len;
-            CompileGLSL(shader, shader.Length, type, & outData, &len);
+            CompileGLSL(shader, shader.Length, type, &outData, &len);
             buffer = new byte[len];
             Marshal.Copy(outData, buffer, 0, (int)len);
         }
@@ -228,10 +230,10 @@ namespace ConsoleApplication1
         [DllImport(dllPath, CallingConvention = CallingConvention.Cdecl)]
         static extern void ReleaseCompiler();
 
+        #endregion
+
         static void Main(string[] args)
         {
-            string a = "sdfsdf";
-
             const string shaderPath = @"D:\CppProjects\JoyEngine\JoyData\shaders\shader.shader";
             const string pushConstantAttr = "[push_constant]";
             const string setAttr = "[set";
