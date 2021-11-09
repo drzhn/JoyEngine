@@ -13,27 +13,54 @@ namespace JoyEngine
 
 	Shader::Shader(GUID guid) : Resource(guid)
 	{
-		const std::vector<char> shaderData = JoyContext::Data->GetData(guid);
+		const std::vector<char> shaderData = JoyContext::Data->GetData(guid, true);
+		uint32_t vertexDataLength = 0;
+		memcpy(&vertexDataLength, shaderData.data(), sizeof(uint32_t));
+		uint32_t fragmentDataLength = 0;
+		memcpy(&fragmentDataLength, shaderData.data() + sizeof(uint32_t), sizeof(uint32_t));
 
-		VkShaderModuleCreateInfo createInfo{
+		VkShaderModuleCreateInfo createInfo;
+		VkResult res;
+
+		createInfo = {
 			VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO,
 			nullptr,
 			0,
-			shaderData.size(),
-			reinterpret_cast<const uint32_t*>(shaderData.data())
+			vertexDataLength,
+			reinterpret_cast<const uint32_t*>(shaderData.data() + sizeof(uint32_t) * 2)
 		};
-		const VkResult res = vkCreateShaderModule(
+		res = vkCreateShaderModule(
 			JoyContext::Graphics->GetDevice(),
 			&createInfo,
 			JoyContext::Graphics->GetAllocationCallbacks(),
-			&m_shaderModule);
+			&m_vertexModule);
+		ASSERT_DESC(res == VK_SUCCESS, ParseVkResult(res));
+
+		createInfo = {
+			VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO,
+			nullptr,
+			0,
+			fragmentDataLength,
+			reinterpret_cast<const uint32_t*>(shaderData.data() + sizeof(uint32_t) * 2 + vertexDataLength)
+		};
+		res = vkCreateShaderModule(
+			JoyContext::Graphics->GetDevice(),
+			&createInfo,
+			JoyContext::Graphics->GetAllocationCallbacks(),
+			&m_fragmentModule);
 		ASSERT_DESC(res == VK_SUCCESS, ParseVkResult(res));
 	}
 
 	Shader::~Shader()
 	{
 		vkDestroyShaderModule(
-			JoyContext::Graphics->GetDevice(), m_shaderModule,
+			JoyContext::Graphics->GetDevice(), 
+			m_vertexModule,
+			JoyContext::Graphics->GetAllocationCallbacks());
+
+		vkDestroyShaderModule(
+			JoyContext::Graphics->GetDevice(),
+			m_fragmentModule,
 			JoyContext::Graphics->GetAllocationCallbacks());
 	}
 }

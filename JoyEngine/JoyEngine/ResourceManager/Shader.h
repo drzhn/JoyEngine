@@ -15,11 +15,13 @@ namespace JoyEngine {
 
         ~Shader() final;
 
-        [[nodiscard]] VkShaderModule &GetShadeModule() noexcept { return m_shaderModule; }
+        [[nodiscard]] VkShaderModule &GetVertexShadeModule() noexcept { return m_vertexModule; }
+        [[nodiscard]] VkShaderModule &GetFragmentShadeModule() noexcept { return m_fragmentModule; }
         [[nodiscard]] bool IsLoaded() const noexcept override { return true; }
 
     private :
-        VkShaderModule m_shaderModule = VK_NULL_HANDLE;
+        VkShaderModule m_vertexModule = VK_NULL_HANDLE;
+        VkShaderModule m_fragmentModule = VK_NULL_HANDLE;
     };
 }
 

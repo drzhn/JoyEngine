@@ -5,7 +5,6 @@ using System.Runtime.InteropServices;
 
 namespace ConsoleApplication1
 {
-
     public enum Qualifier
     {
         Uniform = 0
@@ -19,6 +18,7 @@ namespace ConsoleApplication1
         Vec3 = 3,
         Mat4 = 4,
     }
+
     public struct Binding
     {
         public string attribute;
@@ -56,62 +56,13 @@ namespace ConsoleApplication1
         Vertex = 0,
         Fragment = 1
     };
+
     class Program
     {
         private const StringSplitOptions trimgAndNoEmpty =
             StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries;
 
         const string dllPath = @"D:\CppProjects\JoyEngine\JoyAssetBuilder\x64\Release\JoyShaderBuilderLib.dll";
-
-        static void ReadBindingSet(string header, string body, ref HashSet<BindingSet> bindings)
-        {
-            BindingSet set = new BindingSet();
-
-            foreach (string arg in header.Split(',', trimgAndNoEmpty))
-            {
-                string[] prms = arg.Split('=', trimgAndNoEmpty);
-                if (prms[0] == "set")
-                {
-                    int.TryParse(prms[1], out set.index);
-                }
-
-                if (prms[0] == "static")
-                {
-                    if (prms[1] == "true")
-                    {
-                        set.isStatic = 1;
-                    }
-                    else if (prms[1] == "false")
-                    {
-                        set.isStatic = 0;
-                    }
-                    else
-                    {
-                        throw new Exception();
-                    }
-                }
-            }
-
-            string[] bindingStrArr = body.Split(';', trimgAndNoEmpty);
-            set.bindings = new Binding[bindingStrArr.Length];
-            set.bindingsCount = bindingStrArr.Length;
-
-            for (var i = 0; i < bindingStrArr.Length; i++)
-            {
-                string[] bindingDeclaration = bindingStrArr[i].Split(' ', trimgAndNoEmpty);
-                // TODO add additional binding attributes such as input_attachment_index 
-                set.bindings[i] = new Binding()
-                {
-                    attribute = "",
-                    name = bindingDeclaration[^1],
-                    type = bindingDeclaration[^2],
-                    qualifier = bindingDeclaration.Length == 3 ? bindingDeclaration[^3] : ""
-                };
-
-            }
-
-            bindings.Add(set);
-        }
 
         static void ReadInputOrOutput(string body, ref List<string> vars)
         {
@@ -165,9 +116,6 @@ namespace ConsoleApplication1
         {
             const string shaderPath = @"D:\CppProjects\JoyEngine\JoyData\shaders\shader.shader";
 
-            const string pushConstantAttr = "push_constant";
-            const string setAttr = "set";
-
             const string vertInputAttr = "vert_input";
             const string vertToFragInputAttr = "vert_to_frag";
             const string fragOutputAttr = "frag_output";
@@ -178,12 +126,9 @@ namespace ConsoleApplication1
             string shader = File.ReadAllText(shaderPath);
 
             List<string> directives = new List<string>();
-            string pushConstant = "";
-            HashSet<BindingSet> bindingSets = new HashSet<BindingSet>();
             List<string> verInputs = new List<string>();
             List<string> vertToFragInputs = new List<string>();
             List<string> fragOutputs = new List<string>();
-            //Dictionary<string, string> functions = new Dictionary<string, string>(); // I'm too lazy to parse all functions and build function tree sorry
             string vertexShader = "";
             string fragmentShader = "";
 
@@ -238,16 +183,6 @@ namespace ConsoleApplication1
                         .Trim('\t', ' ', '\r', '\n');
                     i = posBracket - 1;
 
-
-                    if (header == pushConstantAttr)
-                    {
-                        pushConstant = body;
-                    }
-
-                    if (header.StartsWith(setAttr))
-                    {
-                        ReadBindingSet(header, body, ref bindingSets);
-                    }
 
                     if (header == vertInputAttr)
                     {
@@ -305,31 +240,12 @@ namespace ConsoleApplication1
                 vertexShaderStr.AppendFormat("{0}\n", d);
             }
 
-            if (!string.IsNullOrWhiteSpace(pushConstant))
-            {
-                vertexShaderStr.AppendFormat("layout(push_constant) {0}\n", pushConstant);
-            }
-
-            foreach (BindingSet bindingSet in bindingSets)
-            {
-
-                for (int j = 0; j < bindingSet.bindings.Length; j++)
-                {
-                    vertexShaderStr.AppendFormat("layout(set = {0}, binding = {1}) {2};\n",
-                        bindingSet.index,
-                        j,
-                        bindingSet.bindings[j]);
-                }
-            }
-
-            BindingSet[] b = bindingSets.ToArray();
-
             for (int i = 0; i < verInputs.Count; i++)
             {
                 vertexShaderStr.AppendFormat("layout(location = {0}) in {1};\n", i, verInputs[i]);
             }
 
-            vertexShader.Append('\n');
+            vertexShaderStr.Append('\n');
             for (int i = 0; i < vertToFragInputs.Count; i++)
             {
                 vertexShaderStr.AppendFormat("layout(location = {0}) out {1};\n", i, vertToFragInputs[i]);
@@ -338,13 +254,53 @@ namespace ConsoleApplication1
             vertexShaderStr.Append('\n');
             vertexShaderStr.Append(vertexShader);
 
-            //Console.WriteLine(vertexShaderStr);
+            Console.WriteLine(vertexShaderStr);
 
-            //InitializeCompiler();
-            //CompileGLSL(vertexShaderStr.ToString(), ShaderType.Vertex, out var data);
-            //ReleaseInternalData();
-            //ReleaseCompiler();
-            //File.WriteAllBytes(@"D:\CppProjects\JoyEngine\JoyData\shaders\shader.vert.spv", data);
+
+            StringBuilder fragmentShaderStr = new StringBuilder();
+            foreach (var d in directives)
+            {
+                fragmentShaderStr.AppendFormat("{0}\n", d);
+            }
+
+            for (int i = 0; i < vertToFragInputs.Count; i++)
+            {
+                fragmentShaderStr.AppendFormat("layout(location = {0}) in {1};\n", i, vertToFragInputs[i]);
+            }
+
+            fragmentShaderStr.Append('\n');
+
+            for (int i = 0; i < fragOutputs.Count; i++)
+            {
+                fragmentShaderStr.AppendFormat("layout(location = {0}) out {1};\n", i, fragOutputs[i]);
+            }
+
+            fragmentShaderStr.Append('\n');
+            fragmentShaderStr.Append(fragmentShader);
+
+            Console.WriteLine(fragmentShaderStr);
+
+            InitializeCompiler();
+
+            CompileGLSL(vertexShaderStr.ToString(), ShaderType.Vertex, out var vertexData);
+            ReleaseInternalData();
+
+            CompileGLSL(fragmentShaderStr.ToString(), ShaderType.Fragment, out var fragmentData);
+            ReleaseInternalData();
+
+            ReleaseCompiler();
+
+            if (vertexData.Length == 0 || fragmentData.Length == 0)
+            {
+                Console.WriteLine("Cannot write data to file because of compilation errors");
+            }
+
+            FileStream fileStream = new FileStream(shaderPath + ".data", FileMode.Create);
+            fileStream.Write(BitConverter.GetBytes(vertexData.Length));
+            fileStream.Write(BitConverter.GetBytes(fragmentData.Length));
+            fileStream.Write(vertexData);
+            fileStream.Write(fragmentData);
+            fileStream.Close();
         }
     }
 }

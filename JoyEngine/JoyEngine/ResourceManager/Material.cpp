@@ -17,8 +17,7 @@ namespace JoyEngine
 		rapidjson::Document json = JoyContext::Data->GetSerializedData(guid, material);
 
 		m_sharedMaterialGuid = GUID::StringToGuid(json["sharedMaterial"].GetString());
-		JoyContext::Resource->LoadResource<SharedMaterial>(m_sharedMaterialGuid);
-		m_sharedMaterial = JoyContext::Resource->GetResource<SharedMaterial>(m_sharedMaterialGuid);
+		m_sharedMaterial = JoyContext::Resource->LoadResource<SharedMaterial>(m_sharedMaterialGuid);
 
 		for (auto& binding : json["bindings"].GetArray())
 		{
@@ -57,7 +56,7 @@ namespace JoyEngine
 		}
 	}
 
-	void Material::LoadResources()
+	void Material::LoadResources() const
 	{
 		for (const auto& binding : m_bindings)
 		{
@@ -122,10 +121,10 @@ namespace JoyEngine
 			case VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER:
 				ASSERT(false);
 				break;
-				//                    VkDescriptorBufferInfo bufferInfo{};
-				//                    bufferInfo.buffer = m_uniformBuffers[i];
-				//                    bufferInfo.offset = 0;
-				//                    bufferInfo.range = sizeof(MVP);
+			//                    VkDescriptorBufferInfo bufferInfo{};
+			//                    bufferInfo.buffer = m_uniformBuffers[i];
+			//                    bufferInfo.offset = 0;
+			//                    bufferInfo.range = sizeof(MVP);
 			default:
 				ASSERT(false);
 			}

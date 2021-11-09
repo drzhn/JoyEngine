@@ -1,7 +1,6 @@
 {
   "type": "sharedMaterial",
-  "vertexShader": "183d6cfe-ca85-4e0b-ab36-7b1ca0f99d34",
-  "fragmentShader": "b05cf5b9-9916-4b5a-bc84-82368d84143e",
+  "shader": "183d6cfe-ca85-4e0b-ab36-7b1ca0f99d34",
   "hasVertexInput": true,
   "hasMVP": true,
   "depthTest": true,

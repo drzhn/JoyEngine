@@ -32,9 +32,9 @@ namespace JoyEngine {
 
         ~SharedMaterial() final;
 
-        [[nodiscard]] Shader *GetVertexShader() const noexcept;
+        //[[nodiscard]] Shader *GetVertexShader() const noexcept;
 
-        [[nodiscard]] Shader *GetFragmentShader() const noexcept;
+        //[[nodiscard]] Shader *GetFragmentShader() const noexcept;
 
         [[nodiscard]] VkPipeline GetPipeline() const noexcept;
 
@@ -50,8 +50,7 @@ namespace JoyEngine {
 
     	[[nodiscard]] bool IsLoaded() const noexcept override;
     private :
-        GUID m_vertexShader;
-        GUID m_fragmentShader;
+        GUID m_shaderGuid;
         bool m_hasVertexInput = false;
         bool m_hasMVP = false;
         bool m_depthTest = false;
@@ -60,6 +59,7 @@ namespace JoyEngine {
         std::vector<SetLayoutInfo> m_setLayoutInfos;
         std::vector<VkDescriptorSetLayout> m_setLayouts;
         std::map<std::string, BindingInfo> m_bindings;
+        Shader* m_shader;
 
         VkPipelineLayout m_pipelineLayout = VK_NULL_HANDLE;
         VkPipeline m_graphicsPipeline = VK_NULL_HANDLE;

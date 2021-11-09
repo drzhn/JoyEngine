@@ -28,6 +28,7 @@
 *.vcxproj
 *.vcxproj.filters
 *.vcxproj.user
+*.cache
 
 *.obj
 *.bin
@@ -39,3 +40,5 @@ JoyEngine/x64
 JoyData/
 Libs/
 MitsubaXmlParser/data
+JoyAssetBuilder/x64
+JoyAssetBuilder/JoyShaderBuilderConsole

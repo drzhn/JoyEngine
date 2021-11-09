@@ -12,20 +12,18 @@
 #include "RenderManager/RenderManager.h"
 
 namespace JoyEngine {
-    SharedMaterial::SharedMaterial(GUID guid) :Resource(guid) {
-        m_guid = guid;
-        Initialize();
+    SharedMaterial::SharedMaterial(GUID guid) :Resource(guid), m_guid(guid)
+    {
+	    Initialize();
         CreateGraphicsPipeline();
     }
 
     void SharedMaterial::Initialize() {
         rapidjson::Document json = JoyContext::Data->GetSerializedData(m_guid, sharedMaterial);
 
-        m_vertexShader = GUID::StringToGuid(json["vertexShader"].GetString());
-        m_fragmentShader = GUID::StringToGuid(json["fragmentShader"].GetString());
+        m_shaderGuid = GUID::StringToGuid(json["shader"].GetString());
 
-        JoyContext::Resource->LoadResource<Shader>(m_vertexShader);
-        JoyContext::Resource->LoadResource<Shader>(m_fragmentShader);
+        m_shader = JoyContext::Resource->LoadResource<Shader>(m_shaderGuid);
 
         m_hasVertexInput = json["hasVertexInput"].GetBool();
         m_hasMVP = json["hasMVP"].GetBool();
@@ -88,13 +86,13 @@ namespace JoyEngine {
         VkPipelineShaderStageCreateInfo vertShaderStageInfo{};
         vertShaderStageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
         vertShaderStageInfo.stage = VK_SHADER_STAGE_VERTEX_BIT;
-        vertShaderStageInfo.module = GetVertexShader()->GetShadeModule();
+        vertShaderStageInfo.module = m_shader->GetVertexShadeModule();
         vertShaderStageInfo.pName = "main";
 
         VkPipelineShaderStageCreateInfo fragShaderStageInfo{};
         fragShaderStageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
         fragShaderStageInfo.stage = VK_SHADER_STAGE_FRAGMENT_BIT;
-        fragShaderStageInfo.module = GetFragmentShader()->GetShadeModule();
+        fragShaderStageInfo.module = m_shader->GetFragmentShadeModule();
         fragShaderStageInfo.pName = "main";
 
         auto bindingDescription = Vertex::getBindingDescription();
@@ -241,8 +239,7 @@ namespace JoyEngine {
                                 m_pipelineLayout,
                                 JoyContext::Graphics->GetAllocationCallbacks());
 
-        JoyContext::Resource->UnloadResource(m_vertexShader);
-        JoyContext::Resource->UnloadResource(m_fragmentShader);
+        JoyContext::Resource->UnloadResource(m_shaderGuid);
 
         for (uint32_t i = 0; i < m_setLayouts.size(); i++) {
             vkDestroyDescriptorSetLayout(JoyContext::Graphics->GetDevice(),
@@ -252,13 +249,13 @@ namespace JoyEngine {
         }
     }
 
-    Shader *SharedMaterial::GetVertexShader() const noexcept {
-        return JoyContext::Resource->GetResource<Shader>(m_vertexShader);
-    }
+    //Shader *SharedMaterial::GetVertexShader() const noexcept {
+    //    return JoyContext::Resource->GetResource<Shader>(m_shaderGuid)->GetVertexShadeModule();
+    //}
 
-    Shader *SharedMaterial::GetFragmentShader() const noexcept {
-        return JoyContext::Resource->GetResource<Shader>(m_fragmentShader);
-    }
+    //Shader *SharedMaterial::GetFragmentShader() const noexcept {
+    //    return JoyContext::Resource->GetResource<Shader>(m_fragmentShader);
+    //}
 
     VkPipeline SharedMaterial::GetPipeline() const noexcept {
         return m_graphicsPipeline;
@@ -279,7 +276,7 @@ namespace JoyEngine {
 
     bool SharedMaterial::IsLoaded() const noexcept
     {
-        return GetVertexShader()->IsLoaded() && GetFragmentShader()->IsLoaded();
+        return m_shader->IsLoaded();
     }
 
     BindingInfo SharedMaterial::GetBindingInfoByName(const std::string &name) noexcept {

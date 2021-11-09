@@ -25,11 +25,11 @@ namespace JoyEngine {
     private:
         void CreateDescriptorSets();
 
-        void LoadResources();
+        void LoadResources() const;
     
     private :
         GUID m_sharedMaterialGuid;
-        SharedMaterial *m_sharedMaterial;
+        SharedMaterial *m_sharedMaterial = nullptr;
         std::map<std::string, GUID> m_bindings;
 
         std::map<uint32_t, std::vector<VkDescriptorSet>> m_descriptorSets;

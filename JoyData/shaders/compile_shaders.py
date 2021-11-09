@@ -18,4 +18,6 @@ for filename in listdir(getcwd()):
         if err is None:
             print(filename + ": OK")
 
+print()
+print("Done. Press ENTER to continue")
 input()

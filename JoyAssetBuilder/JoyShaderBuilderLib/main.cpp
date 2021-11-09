@@ -176,34 +176,6 @@ extern "C" __declspec(dllexport) void __cdecl GetString(char** string)
 	*string = const_cast<char*>(s);
 }
 
-struct Binding
-{
-	char* attribute;
-	char* qualifier;
-	char* type;
-	char* name;
-};
-
-struct BindingSet
-{
-	int isStatic;
-	int index;
-	int bindingsCount;
-	Binding* bindings;
-};
-
-extern "C" __declspec(dllexport) void __cdecl PrintBindingList(BindingSet * bindingSets, int len)
-{
-	for (int i =0; i < len; i++)
-	{
-		std::cout << bindingSets[i].index << " " << bindingSets[i].isStatic << std::endl;
-		for (int j = 0; j < bindingSets[i].bindingsCount; j++)
-		{
-			std::cout << "    " << bindingSets[i].bindings[j].type << " " << bindingSets[i].bindings[j].name << std::endl;
-		}
-	}
-}
-
 shaderc_compiler_t compiler;
 shaderc_compilation_result_t result;
 
@@ -218,10 +190,9 @@ extern "C" __declspec(dllexport) void __cdecl InitializeCompiler()
 	compiler = shaderc_compiler_initialize();
 }
 
-
 extern "C" __declspec(dllexport) void __cdecl CompileGLSL(
-	char* s,
-	int len,
+	char* shaderText,
+	int shaderTextSize,
 	ShaderType type,
 	const char** dataPtr,
 	unsigned long long* dataSize)
@@ -240,8 +211,8 @@ extern "C" __declspec(dllexport) void __cdecl CompileGLSL(
 	}
 	result = shaderc_compile_into_spv(
 		compiler,
-		s,
-		len,
+		shaderText,
+		shaderTextSize,
 		kind,
 		"",
 		"main",
@@ -254,9 +225,9 @@ extern "C" __declspec(dllexport) void __cdecl CompileGLSL(
 	else
 	{
 		std::cout << "EVERYTHING IS ALRIGHT" << std::endl;
+		*dataPtr = shaderc_result_get_bytes(result);
+		*dataSize = shaderc_result_get_length(result);
 	}
-	*dataPtr = shaderc_result_get_bytes(result);
-	*dataSize = shaderc_result_get_length(result);
 }
 
 extern "C" __declspec(dllexport) void __cdecl ReleaseInternalData()
