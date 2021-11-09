@@ -120,33 +120,8 @@ namespace JoyEngine
 			attachments,
 			1,
 			&subpass,
-			1,
-			&dependency);
-	}
-
-	void RenderManager::RegisterMeshRenderer(MeshRenderer* meshRenderer)
-	{
-		m_meshRenderers.insert(meshRenderer);
-	}
-
-	void RenderManager::UnregisterMeshRenderer(MeshRenderer* meshRenderer)
-	{
-		if (m_meshRenderers.find(meshRenderer) == m_meshRenderers.end())
-		{
-			ASSERT(false);
-		}
-		m_meshRenderers.erase(meshRenderer);
-	}
-
-	void RenderManager::RegisterCamera(Camera* camera)
-	{
-		m_currentCamera = camera;
-	}
-
-	void RenderManager::UnregisterCamera(Camera* camera)
-	{
-		ASSERT(m_currentCamera == camera);
-		m_currentCamera = nullptr;
+			0,
+			nullptr);
 	}
 
 	void RenderManager::CreateGBufferResources()
@@ -234,6 +209,31 @@ namespace JoyEngine
 				throw std::runtime_error("failed to create framebuffer!");
 			}
 		}
+	}
+
+	void RenderManager::RegisterMeshRenderer(MeshRenderer* meshRenderer)
+	{
+		m_meshRenderers.insert(meshRenderer);
+	}
+
+	void RenderManager::UnregisterMeshRenderer(MeshRenderer* meshRenderer)
+	{
+		if (m_meshRenderers.find(meshRenderer) == m_meshRenderers.end())
+		{
+			ASSERT(false);
+		}
+		m_meshRenderers.erase(meshRenderer);
+	}
+
+	void RenderManager::RegisterCamera(Camera* camera)
+	{
+		m_currentCamera = camera;
+	}
+
+	void RenderManager::UnregisterCamera(Camera* camera)
+	{
+		ASSERT(m_currentCamera == camera);
+		m_currentCamera = nullptr;
 	}
 
 	void RenderManager::CreateCommandBuffers()
@@ -471,6 +471,7 @@ namespace JoyEngine
 	float RenderManager::GetAspect() const noexcept
 	{
 		ASSERT(m_swapchain != nullptr);
-		return static_cast<float>(m_swapchain->GetSwapChainExtent().width) / static_cast<float>(m_swapchain->GetSwapChainExtent().height);
+		return static_cast<float>(m_swapchain->GetSwapChainExtent().width) / static_cast<float>(m_swapchain->
+			GetSwapChainExtent().height);
 	}
 }

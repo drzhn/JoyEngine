@@ -12,44 +12,8 @@
 
 namespace JoyEngine
 {
-	double findMedianSortedArrays(std::vector<int>& nums1, std::vector<int>& nums2)
-	{
-		const size_t size1 = nums1.size();
-		const size_t size2 = nums2.size();
-
-		const size_t commonLength = size1 + size2;
-		const size_t middleIndex = commonLength / 2;
-		double middleElement = 0;
-		double prevElement = 0;
-		const bool needNeighbor = (commonLength % 2) == 0;
-
-		size_t cur1 = 0;
-		size_t cur2 = 0;
-		for (int i = 0; i <= middleIndex; i++)
-		{
-			prevElement = middleElement;
-			if (cur1 < size1 && (cur2 >= size2 || nums1[cur1] < nums2[cur2]))
-			{
-				middleElement = nums1[cur1];
-				cur1++;
-			}
-			else if (cur2 < size2 && (cur1 >= size1 || nums1[cur1] >= nums2[cur2]))
-			{
-				middleElement = nums2[cur2];
-				cur2++;
-			}
-		}
-		return needNeighbor ? (middleElement + prevElement) / 2 : middleElement;
-	}
-
 	Material::Material(GUID guid) : Resource(guid)
 	{
-		std::vector a{2};
-		std::vector<int> b;// = std::vector();
-		double m = findMedianSortedArrays(
-			a,
-			b
-		);
 		rapidjson::Document json = JoyContext::Data->GetSerializedData(guid, material);
 
 		m_sharedMaterialGuid = GUID::StringToGuid(json["sharedMaterial"].GetString());

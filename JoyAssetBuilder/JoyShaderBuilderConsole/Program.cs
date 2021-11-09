@@ -5,22 +5,39 @@ using System.Runtime.InteropServices;
 
 namespace ConsoleApplication1
 {
+
+    public enum Qualifier
+    {
+        Uniform = 0
+    }
+
+    public enum VariableType
+    {
+        Sampler2D = 0,
+        Float = 1,
+        Vec2 = 2,
+        Vec3 = 3,
+        Mat4 = 4,
+    }
     public struct Binding
     {
         public string attribute;
-        public string binding;
+        public string qualifier;
+        public string type;
+        public string name;
 
         public override string ToString()
         {
-            return attribute + "\n" + binding + "\n";
+            return attribute + "\n" + qualifier + " " + type + " " + name;
         }
     }
 
     public struct BindingSet
     {
-        public bool isStatic;
+        public int isStatic;
         public int index;
-        public List<Binding> bindings;
+        public int bindingsCount;
+        public Binding[] bindings;
 
         public override string ToString()
         {
@@ -39,31 +56,16 @@ namespace ConsoleApplication1
         Vertex = 0,
         Fragment = 1
     };
-
-    public enum ReadingState
-    {
-        None,
-        Header,
-        PushConstant,
-        Bindings,
-        VertInput,
-        VertToFrag,
-        FragOutput,
-        Function
-    };
-
     class Program
     {
         private const StringSplitOptions trimgAndNoEmpty =
             StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries;
 
-        const string dllPath =
-            @"D:\CppProjects\JoyEngine\JoyAssetBuilder\JoyAssetBuilder\x64\Release\JoyShaderBuilderLib.dll";
+        const string dllPath = @"D:\CppProjects\JoyEngine\JoyAssetBuilder\x64\Release\JoyShaderBuilderLib.dll";
 
         static void ReadBindingSet(string header, string body, ref HashSet<BindingSet> bindings)
         {
             BindingSet set = new BindingSet();
-            set.bindings = new List<Binding>();
 
             foreach (string arg in header.Split(',', trimgAndNoEmpty))
             {
@@ -77,11 +79,11 @@ namespace ConsoleApplication1
                 {
                     if (prms[1] == "true")
                     {
-                        set.isStatic = true;
+                        set.isStatic = 1;
                     }
                     else if (prms[1] == "false")
                     {
-                        set.isStatic = false;
+                        set.isStatic = 0;
                     }
                     else
                     {
@@ -90,10 +92,22 @@ namespace ConsoleApplication1
                 }
             }
 
-            foreach (string bindingStr in body.Split(';', trimgAndNoEmpty))
+            string[] bindingStrArr = body.Split(';', trimgAndNoEmpty);
+            set.bindings = new Binding[bindingStrArr.Length];
+            set.bindingsCount = bindingStrArr.Length;
+
+            for (var i = 0; i < bindingStrArr.Length; i++)
             {
-                if (string.IsNullOrWhiteSpace(bindingStr)) continue;
-                set.bindings.Add(new Binding() { attribute = "", binding = bindingStr.Trim('\t', ' ', '\r', '\n') });
+                string[] bindingDeclaration = bindingStrArr[i].Split(' ', trimgAndNoEmpty);
+                // TODO add additional binding attributes such as input_attachment_index 
+                set.bindings[i] = new Binding()
+                {
+                    attribute = "",
+                    name = bindingDeclaration[^1],
+                    type = bindingDeclaration[^2],
+                    qualifier = bindingDeclaration.Length == 3 ? bindingDeclaration[^3] : ""
+                };
+
             }
 
             bindings.Add(set);
@@ -114,9 +128,6 @@ namespace ConsoleApplication1
         static extern void InitializeCompiler();
 
         [DllImport(dllPath, CallingConvention = CallingConvention.Cdecl)]
-        static extern unsafe void GetString(IntPtr* stringPtr);
-
-        [DllImport(dllPath, CallingConvention = CallingConvention.Cdecl)]
         static extern unsafe void CompileGLSL(string s, int len, ShaderType type, IntPtr* dataPtr, UInt64* dataSize);
 
         static unsafe void CompileGLSL(string shader, ShaderType type, out byte[] buffer)
@@ -128,19 +139,25 @@ namespace ConsoleApplication1
             Marshal.Copy(outData, buffer, 0, (int)len);
         }
 
-        static unsafe void GetString()
-        {
-            IntPtr outString = IntPtr.Zero;
-            GetString(&outString);
-            System.Console.WriteLine(Marshal.PtrToStringAnsi(outString));
-
-        }
-
         [DllImport(dllPath, CallingConvention = CallingConvention.Cdecl)]
         static extern void ReleaseInternalData();
 
         [DllImport(dllPath, CallingConvention = CallingConvention.Cdecl)]
         static extern void ReleaseCompiler();
+
+        #endregion
+
+        #region Test
+
+        [DllImport(dllPath, CallingConvention = CallingConvention.Cdecl)]
+        static extern unsafe void GetString(IntPtr* stringPtr);
+
+        static unsafe void GetString()
+        {
+            IntPtr outString = IntPtr.Zero;
+            GetString(&outString);
+            System.Console.WriteLine(Marshal.PtrToStringAnsi(outString));
+        }
 
         #endregion
 
@@ -292,9 +309,11 @@ namespace ConsoleApplication1
             {
                 vertexShaderStr.AppendFormat("layout(push_constant) {0}\n", pushConstant);
             }
+
             foreach (BindingSet bindingSet in bindingSets)
             {
-                for (int j = 0; j < bindingSet.bindings.Count; j++)
+
+                for (int j = 0; j < bindingSet.bindings.Length; j++)
                 {
                     vertexShaderStr.AppendFormat("layout(set = {0}, binding = {1}) {2};\n",
                         bindingSet.index,
@@ -302,6 +321,8 @@ namespace ConsoleApplication1
                         bindingSet.bindings[j]);
                 }
             }
+
+            BindingSet[] b = bindingSets.ToArray();
 
             for (int i = 0; i < verInputs.Count; i++)
             {
@@ -317,13 +338,13 @@ namespace ConsoleApplication1
             vertexShaderStr.Append('\n');
             vertexShaderStr.Append(vertexShader);
 
-            Console.WriteLine(vertexShaderStr);
+            //Console.WriteLine(vertexShaderStr);
 
-            InitializeCompiler();
-            CompileGLSL(vertexShaderStr.ToString(), ShaderType.Vertex, out var data);
-            ReleaseInternalData();
-            ReleaseCompiler();
-            File.WriteAllBytes(@"D:\CppProjects\JoyEngine\JoyData\shaders\shader.vert.spv", data);
+            //InitializeCompiler();
+            //CompileGLSL(vertexShaderStr.ToString(), ShaderType.Vertex, out var data);
+            //ReleaseInternalData();
+            //ReleaseCompiler();
+            //File.WriteAllBytes(@"D:\CppProjects\JoyEngine\JoyData\shaders\shader.vert.spv", data);
         }
     }
 }

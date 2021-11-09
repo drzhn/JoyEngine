@@ -173,8 +173,35 @@ const char* s = "Hello from c++";
 
 extern "C" __declspec(dllexport) void __cdecl GetString(char** string)
 {
-	Header a = Header();
 	*string = const_cast<char*>(s);
+}
+
+struct Binding
+{
+	char* attribute;
+	char* qualifier;
+	char* type;
+	char* name;
+};
+
+struct BindingSet
+{
+	int isStatic;
+	int index;
+	int bindingsCount;
+	Binding* bindings;
+};
+
+extern "C" __declspec(dllexport) void __cdecl PrintBindingList(BindingSet * bindingSets, int len)
+{
+	for (int i =0; i < len; i++)
+	{
+		std::cout << bindingSets[i].index << " " << bindingSets[i].isStatic << std::endl;
+		for (int j = 0; j < bindingSets[i].bindingsCount; j++)
+		{
+			std::cout << "    " << bindingSets[i].bindings[j].type << " " << bindingSets[i].bindings[j].name << std::endl;
+		}
+	}
 }
 
 shaderc_compiler_t compiler;

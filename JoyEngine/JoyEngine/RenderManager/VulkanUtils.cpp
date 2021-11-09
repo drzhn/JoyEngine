@@ -116,64 +116,6 @@ namespace JoyEngine
 		createInfo.pfnUserCallback = debugCallback;
 	}
 
-	void ParseQueueFamilyProperties(const std::vector<VkQueueFamilyProperties>& props)
-	{
-		for (int i = 0; i < props.size(); i++)
-		{
-			std::string s = "Queue " + std::to_string(i) + ": size = " + std::to_string(props[i].queueCount) + "\n";
-			if (props[i].queueFlags & VK_QUEUE_GRAPHICS_BIT) s += "    VK_QUEUE_GRAPHICS_BIT \n";
-			if (props[i].queueFlags & VK_QUEUE_COMPUTE_BIT) s += "    VK_QUEUE_COMPUTE_BIT \n";
-			if (props[i].queueFlags & VK_QUEUE_TRANSFER_BIT) s += "    VK_QUEUE_TRANSFER_BIT \n";
-			OutputDebugStringA(s.c_str());
-		}
-	}
-
-	QueueFamilyIndices findQueueFamilies(VkPhysicalDevice device, VkSurfaceKHR surfaceKhr)
-	{
-		QueueFamilyIndices indices;
-
-		uint32_t queueFamilyCount = 0;
-		vkGetPhysicalDeviceQueueFamilyProperties(device, &queueFamilyCount, nullptr);
-
-		std::vector<VkQueueFamilyProperties> queueFamilies(queueFamilyCount);
-		vkGetPhysicalDeviceQueueFamilyProperties(device, &queueFamilyCount, queueFamilies.data());
-
-#ifdef DEBUG
-		ParseQueueFamilyProperties(queueFamilies);
-#endif
-
-
-		int i = 0;
-		for (const auto& queueFamily : queueFamilies)
-		{
-			if (queueFamily.queueFlags & VK_QUEUE_GRAPHICS_BIT)
-			{
-				indices.graphicsFamily = i;
-			}
-
-			if (queueFamily.queueFlags & VK_QUEUE_TRANSFER_BIT)
-			{
-				indices.transferFamily = i;
-			}
-
-			VkBool32 presentSupport = false;
-			vkGetPhysicalDeviceSurfaceSupportKHR(device, i, surfaceKhr, &presentSupport);
-
-			if (presentSupport)
-			{
-				indices.presentFamily = i;
-			}
-
-			if (indices.isComplete())
-			{
-				break;
-			}
-
-			i++;
-		}
-
-		return indices;
-	}
 
 	bool checkDeviceExtensionSupport(VkPhysicalDevice device, std::vector<const char*> deviceExtensions)
 	{
@@ -224,8 +166,6 @@ namespace JoyEngine
 	bool isPhysicalDeviceSuitable(VkPhysicalDevice device, VkSurfaceKHR surfaceKhr,
 	                              std::vector<const char*> deviceExtensions)
 	{
-		QueueFamilyIndices indices = findQueueFamilies(device, surfaceKhr);
-
 		bool extensionsSupported = checkDeviceExtensionSupport(device, deviceExtensions);
 
 		bool swapChainAdequate = false;
@@ -238,7 +178,7 @@ namespace JoyEngine
 		VkPhysicalDeviceFeatures supportedFeatures;
 		vkGetPhysicalDeviceFeatures(device, &supportedFeatures);
 
-		return indices.isComplete() && extensionsSupported && swapChainAdequate && supportedFeatures.samplerAnisotropy;
+		return extensionsSupported && swapChainAdequate && supportedFeatures.samplerAnisotropy;
 	}
 
 	VkFormat findSupportedFormat(VkPhysicalDevice physicalDevice, const std::vector<VkFormat>& candidates,

@@ -6,6 +6,7 @@
 #include "windows.h"
 #include <vulkan/vulkan.h>
 #include "RenderManager/VulkanAllocator.h"
+#include "RenderManager/VulkanTypes.h"
 
 namespace JoyEngine
 {
@@ -49,6 +50,8 @@ namespace JoyEngine
 
 		void PickPhysicalDevice();
 
+		void FindQueueFamilies();
+
 		void CreateLogicalDevice();
 
 		void CreateCommandPool();
@@ -73,6 +76,7 @@ namespace JoyEngine
 		VkDebugUtilsMessengerEXT m_debugMessenger;
 		VkSurfaceKHR m_surface;
 
+		std::unique_ptr<QueueFamilyIndices> m_queueFamilyIndices;
 		VkQueue m_graphicsQueue;
 		VkQueue m_presentQueue;
 		VkQueue m_transferQueue;
