@@ -27,9 +27,8 @@ namespace JoyEngine
 
 	RenderManager::~RenderManager()
 	{
-		m_depthTexture = nullptr;
-		m_positionTexture = nullptr;
-		m_normalTexture = nullptr;
+		m_depthAttachment = nullptr;
+		m_colorAttachment = nullptr;
 
 		for (size_t i = 0; i < m_swapChainFramebuffers.size(); i++)
 		{
@@ -70,51 +69,63 @@ namespace JoyEngine
 
 	void RenderManager::CreateRenderPass()
 	{
-		VkAttachmentDescription depthAttachment{};
-		depthAttachment.format = findDepthFormat(JoyContext::Graphics->GetPhysicalDevice());
-		depthAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
-		depthAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-		depthAttachment.storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-		depthAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-		depthAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-		depthAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-		depthAttachment.finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+		m_colorAttachment = std::make_unique<Attachment>(
+			m_swapchain->GetSwapChainImageFormat(),
+			VK_ATTACHMENT_LOAD_OP_CLEAR,
+			VK_ATTACHMENT_STORE_OP_STORE,
+			VK_IMAGE_LAYOUT_UNDEFINED,
+			VK_IMAGE_LAYOUT_PRESENT_SRC_KHR
+		);
 
-		VkAttachmentReference depthAttachmentRef;
-		depthAttachmentRef.attachment = 1;
-		depthAttachmentRef.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+		const VkAttachmentReference colorAttachmentRef = {
+			0,
+			VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL
+		};
 
-		VkAttachmentDescription colorAttachment{};
-		colorAttachment.format = m_swapchain->GetSwapChainImageFormat();
-		colorAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
-		colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-		colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-		colorAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-		colorAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-		colorAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-		colorAttachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+		m_depthAttachment = std::make_unique<Attachment>(
+			findDepthFormat(JoyContext::Graphics->GetPhysicalDevice()),
+			VK_ATTACHMENT_LOAD_OP_CLEAR,
+			VK_ATTACHMENT_STORE_OP_DONT_CARE,
+			VK_IMAGE_LAYOUT_UNDEFINED,
+			VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
+			m_swapchain->GetWidth(),
+			m_swapchain->GetHeight(),
+			VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT,
+			VK_IMAGE_ASPECT_DEPTH_BIT
+		);
 
-		VkAttachmentReference colorAttachmentRef;
-		colorAttachmentRef.attachment = 0;
-		colorAttachmentRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+		const VkAttachmentReference depthAttachmentRef = {
+			1,
+			VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL
+		};
 
-		VkSubpassDescription subpass{};
-		subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
-		subpass.colorAttachmentCount = 1;
-		subpass.pColorAttachments = &colorAttachmentRef;
-		subpass.pDepthStencilAttachment = &depthAttachmentRef;
+		const VkSubpassDescription subpass{
+			0,
+			VK_PIPELINE_BIND_POINT_GRAPHICS,
+			0,
+			nullptr,
+			1,
+			&colorAttachmentRef,
+			nullptr,
+			&depthAttachmentRef,
+			0,
+			nullptr,
+		};
 
-		VkSubpassDependency dependency{};
-		dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
-		dependency.dstSubpass = 0;
-		dependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT |
-			VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
-		dependency.srcAccessMask = 0;
-		dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT |
-			VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
-		dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
+		VkSubpassDependency dependency{
+			VK_SUBPASS_EXTERNAL,
+			0,
+			VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT,
+			VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT,
+			0,
+			VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT,
+			0
+		};
 
-		VkAttachmentDescription attachments[] = {colorAttachment, depthAttachment};
+
+		VkAttachmentDescription attachments[] = {
+			m_colorAttachment->GetAttachmentDesc(), m_depthAttachment->GetAttachmentDesc()
+		};
 		m_renderPass = std::make_unique<RenderPass>(
 			2,
 			attachments,
@@ -126,16 +137,15 @@ namespace JoyEngine
 
 	void RenderManager::CreateGBufferResources()
 	{
-		VkFormat depthFormat = findDepthFormat(JoyContext::Graphics->GetPhysicalDevice());
-
-		m_depthTexture = std::make_unique<Texture>(
-			m_swapchain->GetSwapChainExtent().width,
-			m_swapchain->GetSwapChainExtent().height,
-			depthFormat,
-			VK_IMAGE_TILING_OPTIMAL,
-			VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT,
-			VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
-			VK_IMAGE_ASPECT_DEPTH_BIT);
+		//VkFormat depthFormat = findDepthFormat(JoyContext::Graphics->GetPhysicalDevice());
+		//m_depthTexture = std::make_unique<Texture>(
+		//	m_swapchain->GetSwapChainExtent().width,
+		//	m_swapchain->GetSwapChainExtent().height,
+		//	depthFormat,
+		//	VK_IMAGE_TILING_OPTIMAL,
+		//	VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT,
+		//	VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+		//	VK_IMAGE_ASPECT_DEPTH_BIT);
 
 		//m_normalTexture = std::make_unique<Texture>();
 
@@ -189,7 +199,7 @@ namespace JoyEngine
 		{
 			VkImageView attachments[2] = {
 				m_swapchain->GetSwapChainImageViews()[i],
-				m_depthTexture->GetImageView()
+				m_depthAttachment->GetImageView()
 			};
 
 			VkFramebufferCreateInfo framebufferInfo{};
@@ -197,8 +207,8 @@ namespace JoyEngine
 			framebufferInfo.renderPass = m_renderPass->GetRenderPass();
 			framebufferInfo.attachmentCount = 2;
 			framebufferInfo.pAttachments = attachments;
-			framebufferInfo.width = m_swapchain->GetSwapChainExtent().width;
-			framebufferInfo.height = m_swapchain->GetSwapChainExtent().height;
+			framebufferInfo.width = m_swapchain->GetWidth();
+			framebufferInfo.height = m_swapchain->GetHeight();
 			framebufferInfo.layers = 1;
 
 			if (vkCreateFramebuffer(JoyContext::Graphics->GetDevice(),
@@ -268,7 +278,7 @@ namespace JoyEngine
 		renderPassInfo.renderPass = m_renderPass->GetRenderPass();
 		renderPassInfo.framebuffer = m_swapChainFramebuffers[imageIndex];
 		renderPassInfo.renderArea.offset = {0, 0};
-		renderPassInfo.renderArea.extent = m_swapchain->GetSwapChainExtent();
+		renderPassInfo.renderArea.extent = {m_swapchain->GetWidth(), m_swapchain->GetHeight()};
 
 		VkClearValue clearValues[2];
 		clearValues[0].color = {0.0f, 0.0f, 0.0f, 1.0f};
@@ -471,7 +481,7 @@ namespace JoyEngine
 	float RenderManager::GetAspect() const noexcept
 	{
 		ASSERT(m_swapchain != nullptr);
-		return static_cast<float>(m_swapchain->GetSwapChainExtent().width) / static_cast<float>(m_swapchain->
-			GetSwapChainExtent().height);
+		return static_cast<float>(m_swapchain->GetWidth()) /
+			static_cast<float>(m_swapchain->GetHeight());
 	}
 }

@@ -7,33 +7,38 @@
 
 #include "GraphicsManager/GraphicsManager.h"
 
-namespace JoyEngine {
-    class Swapchain {
-    public:
-        Swapchain();
+namespace JoyEngine
+{
+	class Swapchain
+	{
+	public:
+		Swapchain();
 
-        ~Swapchain();
+		~Swapchain();
 
-        [[nodiscard]] uint32_t GetSwapchainImageCount() const noexcept { return m_swapchainImageCount; }
+		[[nodiscard]] uint32_t GetSwapchainImageCount() const noexcept { return m_swapchainImageCount; }
 
-        [[nodiscard]] VkSwapchainKHR GetSwapChain() const noexcept { return m_swapChain; };
+		[[nodiscard]] VkSwapchainKHR GetSwapChain() const noexcept { return m_swapChain; };
 
-        [[nodiscard]] std::vector<VkImage> GetSwapChainImages() const noexcept { return m_swapChainImages; };
+		[[nodiscard]] std::vector<VkImage> GetSwapChainImages() const noexcept { return m_swapChainImages; };
 
-        [[nodiscard]] VkFormat GetSwapChainImageFormat() const noexcept { return m_swapChainImageFormat; };
+		[[nodiscard]] VkFormat GetSwapChainImageFormat() const noexcept { return m_swapChainImageFormat; };
 
-        [[nodiscard]] VkExtent2D GetSwapChainExtent() const noexcept { return m_swapChainExtent; };
+		[[nodiscard]] uint32_t GetWidth() const noexcept { return m_width; };
+		[[nodiscard]] uint32_t GetHeight() const noexcept { return m_height; };
 
-        [[nodiscard]] std::vector<VkImageView> GetSwapChainImageViews() const noexcept { return m_swapChainImageViews; };
+		[[nodiscard]] std::vector<VkImageView> GetSwapChainImageViews() const noexcept { return m_swapChainImageViews; }
+		;
 
-    private:
-        uint32_t m_swapchainImageCount = 0;
-        VkSwapchainKHR m_swapChain;
-        std::vector<VkImage> m_swapChainImages;
-        VkFormat m_swapChainImageFormat;
-        VkExtent2D m_swapChainExtent;
-        std::vector<VkImageView> m_swapChainImageViews;
-    };
+	private:
+		uint32_t m_swapchainImageCount = 0;
+		uint32_t m_width;
+		uint32_t m_height;
+		VkSwapchainKHR m_swapChain;
+		std::vector<VkImage> m_swapChainImages;
+		VkFormat m_swapChainImageFormat;
+		std::vector<VkImageView> m_swapChainImageViews;
+	};
 }
 
 #endif //SWAPCHAIN_H

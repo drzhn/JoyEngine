@@ -18,6 +18,7 @@
 #include "Components/Camera.h"
 #include "Swapchain.h"
 #include "RenderPass.h"
+#include "RenderManager/Attachment.h"
 
 namespace JoyEngine
 {
@@ -76,13 +77,13 @@ namespace JoyEngine
 
 		std::unique_ptr<Swapchain> m_swapchain;
 		std::unique_ptr<RenderPass> m_renderPass;
+		std::unique_ptr<Attachment> m_depthAttachment;
+		std::unique_ptr<Attachment> m_colorAttachment;
+
 
 		std::set<MeshRenderer*> m_meshRenderers;
 		Camera* m_currentCamera;
 
-		std::unique_ptr<Texture> m_depthTexture;
-		std::unique_ptr<Texture> m_normalTexture;
-		std::unique_ptr<Texture> m_positionTexture;
 		std::vector<VkFramebuffer> m_swapChainFramebuffers;
 		std::vector<VkCommandBuffer> commandBuffers;
 

@@ -59,7 +59,7 @@ namespace JoyEngine {
         std::vector<SetLayoutInfo> m_setLayoutInfos;
         std::vector<VkDescriptorSetLayout> m_setLayouts;
         std::map<std::string, BindingInfo> m_bindings;
-        Shader* m_shader;
+        Shader* m_shader = nullptr;
 
         VkPipelineLayout m_pipelineLayout = VK_NULL_HANDLE;
         VkPipeline m_graphicsPipeline = VK_NULL_HANDLE;

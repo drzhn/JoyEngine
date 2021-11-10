@@ -73,8 +73,8 @@ namespace JoyEngine
 
 		m_swapchainImageCount = m_swapChainImages.size();
 		m_swapChainImageFormat = surfaceFormat.format;
-		m_swapChainExtent = extent;
-
+		m_width = extent.width;
+		m_height = extent.height;
 		m_swapChainImageViews.resize(m_swapchainImageCount);
 
 		for (uint32_t i = 0; i < m_swapchainImageCount; i++)
