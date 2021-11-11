@@ -1,0 +1,247 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>16.0</VCProjectVersion>
+    <Keyword>Win32Proj</Keyword>
+    <ProjectGuid>{0c730bf5-65f8-4a84-9968-9a984488e320}</ProjectGuid>
+    <RootNamespace>JoyEngineVS</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+    <ProjectName>JoyEngine</ProjectName>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <LinkIncremental>true</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <LinkIncremental>false</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <LinkIncremental>true</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <LinkIncremental>false</LinkIncremental>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>VK_PROTOTYPES;VK_USE_PLATFORM_WIN32_KHR;DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>$(SolutionDir)Libs\rapidjson\include;$(SolutionDir)Libs\glm;$(VULKAN_SDK)\Include;$(SolutionDir)$(ProjectName)\JoyEngine;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <DisableSpecificWarnings>26812</DisableSpecificWarnings>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>$(VULKAN_SDK)\Lib\vulkan-1.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <ForceSymbolReferences>
+      </ForceSymbolReferences>
+      <OptimizeReferences>
+      </OptimizeReferences>
+      <AdditionalLibraryDirectories>
+      </AdditionalLibraryDirectories>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>VK_PROTOTYPES;VK_USE_PLATFORM_WIN32_KHR;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>$(SolutionDir)Libs\rapidjson\include;$(SolutionDir)Libs\glm;$(VULKAN_SDK)\Include;$(SolutionDir)$(ProjectName)\JoyEngine;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>$(VULKAN_SDK)\Lib\vulkan-1.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="JoyEngine\GameplayComponents\CameraBehaviour.cpp" />
+    <ClCompile Include="JoyEngine\InputManager\InputManager.cpp" />
+    <ClCompile Include="JoyEngine\Common\Serialization.cpp" />
+    <ClCompile Include="JoyEngine\Components\Camera.cpp" />
+    <ClCompile Include="JoyEngine\Components\Component.cpp" />
+    <ClCompile Include="JoyEngine\Components\MeshRenderer.cpp" />
+    <ClCompile Include="JoyEngine\DataManager\DataManager.cpp" />
+    <ClCompile Include="JoyEngine\GameplayComponents\RoomBehaviour.cpp" />
+    <ClCompile Include="JoyEngine\JoyContext.cpp" />
+    <ClCompile Include="JoyEngine\JoyEngine.cpp" />
+    <ClCompile Include="JoyEngine\GraphicsManager\GraphicsManager.cpp" />
+    <ClCompile Include="JoyEngine\MemoryManager\AsyncLoader.cpp" />
+    <ClCompile Include="JoyEngine\MemoryManager\GPUStackAllocator.cpp" />
+    <ClCompile Include="JoyEngine\MemoryManager\MemoryManager.cpp" />
+    <ClCompile Include="JoyEngine\RenderManager\Framebuffer.cpp" />
+    <ClCompile Include="JoyEngine\RenderManager\RenderManager.cpp" />
+    <ClCompile Include="JoyEngine\RenderManager\RenderPass.cpp" />
+    <ClCompile Include="JoyEngine\RenderManager\Swapchain.cpp" />
+    <ClCompile Include="JoyEngine\RenderManager\VulkanUtils.cpp" />
+    <ClCompile Include="JoyEngine\RenderManager\Attachment.cpp" />
+    <ClCompile Include="JoyEngine\ResourceManager\Buffer.cpp" />
+    <ClCompile Include="JoyEngine\ResourceManager\DescriptorBuffer.cpp" />
+    <ClCompile Include="JoyEngine\ResourceManager\DescriptorSetManager.cpp" />
+    <ClCompile Include="JoyEngine\ResourceManager\Material.cpp" />
+    <ClCompile Include="JoyEngine\ResourceManager\Mesh.cpp" />
+    <ClCompile Include="JoyEngine\ResourceManager\ResourceManager.cpp" />
+    <ClCompile Include="JoyEngine\ResourceManager\Shader.cpp" />
+    <ClCompile Include="JoyEngine\ResourceManager\SharedMaterial.cpp" />
+    <ClCompile Include="JoyEngine\ResourceManager\Texture.cpp" />
+    <ClCompile Include="JoyEngine\SceneManager\GameObject.cpp" />
+    <ClCompile Include="JoyEngine\SceneManager\Scene.cpp" />
+    <ClCompile Include="JoyEngine\SceneManager\SceneManager.cpp" />
+    <ClCompile Include="JoyEngine\SceneManager\Transform.cpp" />
+    <ClCompile Include="JoyEngine\Tests\Test.cpp" />
+    <ClCompile Include="main.cpp" />
+    <ClCompile Include="JoyEngine\Common\Time.cpp" />
+    <ClCompile Include="WindowHandler.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="JoyEngine\GameplayComponents\CameraBehaviour.h" />
+    <ClInclude Include="JoyEngine\InputManager\InputManager.h" />
+    <ClInclude Include="JoyEngine\Common\Color.h" />
+    <ClInclude Include="JoyEngine\Common\Resource.h" />
+    <ClInclude Include="JoyEngine\Common\Serializable.h" />
+    <ClInclude Include="JoyEngine\Common\Serialization.h" />
+    <ClInclude Include="JoyEngine\Common\Thread.h" />
+    <ClInclude Include="JoyEngine\Components\Camera.h" />
+    <ClInclude Include="JoyEngine\Components\Component.h" />
+    <ClInclude Include="JoyEngine\Components\MeshRenderer.h" />
+    <ClInclude Include="JoyEngine\DataManager\DataManager.h" />
+    <ClInclude Include="JoyEngine\GameplayComponents\RoomBehaviour.h" />
+    <ClInclude Include="JoyEngine\JoyContext.h" />
+    <ClInclude Include="JoyEngine\JoyEngine.h" />
+    <ClInclude Include="JoyEngine\GraphicsManager\GraphicsManager.h" />
+    <ClInclude Include="JoyEngine\MemoryManager\AsyncLoader.h" />
+    <ClInclude Include="JoyEngine\MemoryManager\GPUBuddyAllocator.h" />
+    <ClInclude Include="JoyEngine\MemoryManager\GPUDummyAllocator.h" />
+    <ClInclude Include="JoyEngine\MemoryManager\GPUStackAllocator.h" />
+    <ClInclude Include="JoyEngine\MemoryManager\GPUMemoryManager.h" />
+    <ClInclude Include="JoyEngine\MemoryManager\MemoryManager.h" />
+    <ClInclude Include="JoyEngine\RenderManager\Framebuffer.h" />
+    <ClInclude Include="JoyEngine\RenderManager\RenderManager.h" />
+    <ClInclude Include="JoyEngine\RenderManager\RenderPass.h" />
+    <ClInclude Include="JoyEngine\RenderManager\Swapchain.h" />
+    <ClInclude Include="JoyEngine\RenderManager\VulkanAllocator.h" />
+    <ClInclude Include="JoyEngine\RenderManager\VulkanTypes.h" />
+    <ClInclude Include="JoyEngine\RenderManager\VulkanUtils.h" />
+    <ClInclude Include="JoyEngine\RenderManager\Attachment.h" />
+    <ClInclude Include="JoyEngine\ResourceManager\Buffer.h" />
+    <ClInclude Include="JoyEngine\ResourceManager\DescriptorBuffer.h" />
+    <ClInclude Include="JoyEngine\ResourceManager\DescriptorSetManager.h" />
+    <ClInclude Include="JoyEngine\ResourceManager\Material.h" />
+    <ClInclude Include="JoyEngine\ResourceManager\Mesh.h" />
+    <ClInclude Include="JoyEngine\ResourceManager\ResourceManager.h" />
+    <ClInclude Include="JoyEngine\ResourceManager\Shader.h" />
+    <ClInclude Include="JoyEngine\ResourceManager\SharedMaterial.h" />
+    <ClInclude Include="JoyEngine\ResourceManager\Texture.h" />
+    <ClInclude Include="JoyEngine\SceneManager\GameObject.h" />
+    <ClInclude Include="JoyEngine\SceneManager\Scene.h" />
+    <ClInclude Include="JoyEngine\SceneManager\SceneManager.h" />
+    <ClInclude Include="JoyEngine\SceneManager\Transform.h" />
+    <ClInclude Include="JoyEngine\Utils\Assert.h" />
+    <ClInclude Include="JoyEngine\Utils\FileUtils.h" />
+    <ClInclude Include="JoyEngine\Utils\GUID.h" />
+    <ClInclude Include="JoyEngine\Utils\ModelLoader.h" />
+    <ClInclude Include="JoyEngine\Common\Time.h" />
+    <ClInclude Include="WindowHandler.h" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
