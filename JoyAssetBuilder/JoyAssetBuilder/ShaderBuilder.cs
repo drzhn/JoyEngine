@@ -1,26 +1,29 @@
-﻿using System.Text;
+﻿using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using System.Runtime.InteropServices;
+using System.Text;
+using System.Threading.Tasks;
 
-
-namespace ConsoleApplication1
+namespace JoyAssetBuilder
 {
-    enum ShaderType
+    public class ShaderBuilder
     {
-        Vertex = 0,
-        Fragment = 1
-    };
+        enum ShaderType
+        {
+            Vertex = 0,
+            Fragment = 1
+        };
 
-    class Program
-    {
-        private const StringSplitOptions trimgAndNoEmpty =
-            StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries;
+        private const StringSplitOptions noEmpty = StringSplitOptions.RemoveEmptyEntries;
 
         const string dllPath = @"D:\CppProjects\JoyEngine\JoyAssetBuilder\x64\Release\JoyShaderBuilderLib.dll";
 
         static void ReadInputOrOutput(string body, ref List<string> vars)
         {
-            foreach (string varStr in body.Split(';', trimgAndNoEmpty))
+            Char[] separators = new[] { ';' };
+            foreach (string varStr in body.Split(separators, noEmpty))
             {
                 if (string.IsNullOrWhiteSpace(varStr)) continue;
                 vars.Add(varStr.Trim(' ', '\r', '\n', '\t'));
@@ -36,7 +39,7 @@ namespace ConsoleApplication1
         static extern unsafe int CompileGLSL(string shader, int shdaerSize, ShaderType type, IntPtr* dataPtr,
             UInt64* dataSize, IntPtr* errorMessage);
 
-        static unsafe int CompileGLSL(string shader, ShaderType type, out byte[]? buffer, out string? errorMessage)
+        static unsafe int CompileGLSL(string shader, ShaderType type, out byte[] buffer, out string errorMessage)
         {
             IntPtr outData = IntPtr.Zero;
             UInt64 len;
@@ -53,6 +56,7 @@ namespace ConsoleApplication1
                 buffer = null;
                 errorMessage = Marshal.PtrToStringAnsi(errorMessagePtr);
             }
+
             return result;
         }
 
@@ -78,18 +82,16 @@ namespace ConsoleApplication1
 
         #endregion
 
-        static void Main(string[] args)
+        public static bool Compile(string shaderPath, out string message)
         {
-            const string shaderPath = @"D:\CppProjects\JoyEngine\JoyData\shaders\shader.shader";
+            string shader = File.ReadAllText(shaderPath);
 
             const string vertInputAttr = "vert_input";
             const string vertToFragInputAttr = "vert_to_frag";
             const string fragOutputAttr = "frag_output";
-
             const string vertShaderAttr = "vertex_shader";
             const string fragShaderAttr = "fragment_shader";
 
-            string shader = File.ReadAllText(shaderPath);
 
             List<string> directives = new List<string>();
             List<string> verInputs = new List<string>();
@@ -218,7 +220,13 @@ namespace ConsoleApplication1
             }
 
             vertexShaderStr.Append('\n');
-            vertexShaderStr.Append(vertexShader);
+            foreach (var line in vertexShader.Split(
+                         new string[] { Environment.NewLine },
+                         StringSplitOptions.None
+                     ))
+            {
+                vertexShaderStr.AppendFormat("{0}\n", line);
+            }
 
             Console.WriteLine(vertexShaderStr);
 
@@ -242,7 +250,14 @@ namespace ConsoleApplication1
             }
 
             fragmentShaderStr.Append('\n');
-            fragmentShaderStr.Append(fragmentShader);
+
+            foreach (var line in fragmentShader.Split(
+                         new string[] { Environment.NewLine },
+                         StringSplitOptions.None
+                     ))
+            {
+                fragmentShaderStr.AppendFormat("{0}\n", line);
+            }
 
             Console.WriteLine(fragmentShaderStr);
 
@@ -260,20 +275,24 @@ namespace ConsoleApplication1
 
             if (vResult != 0)
             {
-                Console.WriteLine(vErrorMessage);
+                message = Path.GetFileName(shaderPath) + ": Error compiling vertex shader\n" + vErrorMessage + Environment.NewLine;
+                return false;
             }
             else if (fResult != 0)
             {
-                Console.WriteLine(fErrorMessage);
+                message = Path.GetFileName(shaderPath) + ": Error compiling fragment shader\n" + fErrorMessage + Environment.NewLine;
+                return false;
             }
             else
             {
                 FileStream fileStream = new FileStream(shaderPath + ".data", FileMode.Create);
-                fileStream.Write(BitConverter.GetBytes(vertexData.Length));
-                fileStream.Write(BitConverter.GetBytes(fragmentData.Length));
-                fileStream.Write(vertexData);
-                fileStream.Write(fragmentData);
+                fileStream.Write(BitConverter.GetBytes(vertexData.Length), 0, 4);
+                fileStream.Write(BitConverter.GetBytes(fragmentData.Length), 0, 4);
+                fileStream.Write(vertexData, 0, vertexData.Length);
+                fileStream.Write(fragmentData, 0, fragmentData.Length);
                 fileStream.Close();
+                message = Path.GetFileName(shaderPath) + ": OK" + Environment.NewLine;
+                return true;
             }
         }
     }

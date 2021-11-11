@@ -5,16 +5,17 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.IO;
+using System.Drawing;
 
 namespace JoyAssetBuilder
 {
-
     interface IBuildable
     {
-        void Build();
-        bool IsBuilding { get;}
+        void Build(out string resultMessage);
+        bool IsBuilding { get; }
         bool Builded { get; }
     }
+
     public enum AssetType
     {
         Folder,
@@ -22,10 +23,13 @@ namespace JoyAssetBuilder
         Texture,
         Shader
     }
+
     public class AssetTreeNode : TreeNode, IBuildable
     {
-        AssetType m_type;
-        string m_path;
+        private AssetType m_type;
+        private string m_path;
+        private readonly Color okColor = Color.DarkSeaGreen;
+        private readonly Color errorColor = Color.IndianRed;
 
         bool IBuildable.IsBuilding => throw new NotImplementedException();
 
@@ -36,8 +40,9 @@ namespace JoyAssetBuilder
             m_type = type;
             m_path = path;
             Text = Path.GetFileName(path);
-            SetImage();
-            SetColor();
+            ImageKey = m_type.ToString();
+            SelectedImageKey = m_type.ToString();
+            BackColor = File.Exists(m_path + ".data") ? okColor : errorColor;
         }
 
         private void SetImage()
@@ -46,21 +51,26 @@ namespace JoyAssetBuilder
             SelectedImageKey = m_type.ToString();
         }
 
-        private void SetColor()
+        void IBuildable.Build(out string resultMessage)
         {
-            if (File.Exists(m_path + ".data"))
+            resultMessage = ""; // TODO remove later
+            bool result = false;
+            switch (m_type)
             {
-                BackColor = System.Drawing.Color.DarkSeaGreen;
+                case AssetType.Folder:
+                    break;
+                case AssetType.Model:
+                    break;
+                case AssetType.Texture:
+                    break;
+                case AssetType.Shader:
+                    result = ShaderBuilder.Compile(m_path, out resultMessage);
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
             }
-            else
-            {
-                BackColor = System.Drawing.Color.IndianRed; 
-            }
-        }
 
-        void IBuildable.Build()
-        {
-            throw new NotImplementedException();
+            BackColor = result ? okColor : errorColor;
         }
     }
 }

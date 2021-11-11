@@ -11,11 +11,15 @@ namespace JoyAssetBuilder
     public class AssetPanelViewController
     {
         private TreeView m_view;
+        private TextBox m_logBox;
+
         private const string m_dataPath = "D:/CppProjects/JoyEngine/JoyData";
         private List<IBuildable> m_assetToBuilds = new List<IBuildable>();
-        public AssetPanelViewController(TreeView panel)
+        private IBuildable m_currentSelected = null;
+        public AssetPanelViewController(TreeView panel, TextBox box)
         {
             m_view = panel;
+            m_logBox = box;
             ImageList imageList = new ImageList();
             imageList.Images.Add(AssetType.Folder.ToString(), Properties.Resources.FolderClosed_16x);
             imageList.Images.Add(AssetType.Model.ToString(),Properties.Resources.Model3D_outline_16x);
@@ -79,6 +83,18 @@ namespace JoyAssetBuilder
                 dirItem.Nodes.Add(fileItem);
                 m_assetToBuilds.Add(fileItem);
             }
+        }
+
+        public void BuildSelection()
+        {
+            if (m_currentSelected == null) return;
+            m_currentSelected.Build(out string resultMessage);
+            m_logBox.AppendText(resultMessage);
+        }
+
+        public void SetSelection(TreeNode node)
+        {
+            m_currentSelected = node as IBuildable;
         }
     }
 }

@@ -20,7 +20,7 @@ namespace JoyAssetBuilder
 
         private void Form1_Load(object sender, EventArgs e)
         {
-            panelViewController = new AssetPanelViewController(assetTreeView);
+            panelViewController = new AssetPanelViewController(assetTreeView, StatusText);
         }
 
         private void expandAll_Click(object sender, EventArgs e)
@@ -31,6 +31,26 @@ namespace JoyAssetBuilder
         private void collapseAll_Click(object sender, EventArgs e)
         {
             panelViewController.CollapseAll();
+        }
+
+        private void rebuildAllButton_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void buildUnbuilded_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void buildSelectionButton_Click(object sender, EventArgs e)
+        {
+            panelViewController.BuildSelection();
+        }
+
+        private void assetTreeView_AfterSelect(object sender, TreeViewEventArgs e)
+        {
+            panelViewController.SetSelection(e.Node);
         }
     }
 }

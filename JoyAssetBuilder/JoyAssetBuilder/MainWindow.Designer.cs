@@ -69,6 +69,7 @@
             this.rebuildAllButton.Text = "Rebuild All";
             this.rebuildAllButton.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
             this.rebuildAllButton.UseVisualStyleBackColor = true;
+            this.rebuildAllButton.Click += new System.EventHandler(this.rebuildAllButton_Click);
             // 
             // buildSelectionButton
             // 
@@ -81,6 +82,7 @@
             this.buildSelectionButton.Text = "Build Selection";
             this.buildSelectionButton.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
             this.buildSelectionButton.UseVisualStyleBackColor = true;
+            this.buildSelectionButton.Click += new System.EventHandler(this.buildSelectionButton_Click);
             // 
             // assetTreeView
             // 
@@ -90,6 +92,7 @@
             this.assetTreeView.Name = "assetTreeView";
             this.assetTreeView.Size = new System.Drawing.Size(398, 652);
             this.assetTreeView.TabIndex = 5;
+            this.assetTreeView.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.assetTreeView_AfterSelect);
             // 
             // buildUnbuilded
             // 
@@ -102,6 +105,7 @@
             this.buildUnbuilded.Text = "Build Unbuilded";
             this.buildUnbuilded.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
             this.buildUnbuilded.UseVisualStyleBackColor = true;
+            this.buildUnbuilded.Click += new System.EventHandler(this.buildUnbuilded_Click);
             // 
             // StatusText
             // 
