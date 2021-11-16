@@ -4,10 +4,10 @@ import xml.etree.ElementTree as ET
 import os
 import copy
 
-sceneXml = "D:/CppProjects/JoyEngine/MitsubaXmlParser/kitchen/scene.xml"
-materialsPath = "D:/CppProjects/JoyEngine/JoyEngineVS/JoyData/materials/"
-scenePath = "D:/CppProjects/JoyEngine/JoyEngineVS/JoyData/scenes/"
-dataDBPath = "D:/CppProjects/JoyEngine/JoyEngineVS/JoyData/"
+sceneXml = "D:/CppProjects/JoyEngine/MitsubaXmlParser/data/scene.xml"
+materialsPath = "D:/CppProjects/JoyEngine/JoyData/materials/"
+scenePath = "D:/CppProjects/JoyEngine/JoyData/scenes/"
+dataDBPath = "D:/CppProjects/JoyEngine/JoyData/"
 
 materials = {}
 textures = {}
@@ -212,27 +212,7 @@ dataJson = {
         {"guid": "11dcfeba-c2b6-4c2e-a3c7-51054ff06f1d", "path": "scenes/kitchen.json"},
         {
             "guid": "183d6cfe-ca85-4e0b-ab36-7b1ca0f99d34",
-            "path": "shaders/shader.vert.spv"
-        },
-        {
-            "guid": "b05cf5b9-9916-4b5a-bc84-82368d84143e",
-            "path": "shaders/shader.frag.spv"
-        },
-        {
-            "guid": "9bb2800c-8b1c-48a2-9ae8-05d2d7ffcf39",
-            "path": "shaders/attachmentread.frag.spv"
-        },
-        {
-            "guid": "92d865c8-2596-486f-bcfc-51ee67352a03",
-            "path": "shaders/attachmentread.vert.spv"
-        },
-        {
-            "guid": "d769e535-87f3-4c0a-a639-2c560b8a1e03",
-            "path": "shaders/attachmentwrite.frag.spv"
-        },
-        {
-            "guid": "dcb1ccd7-5081-4a3d-ba44-3f64f7c03cda",
-            "path": "shaders/attachmentwrite.vert.spv"
+            "path": "shaders/shader.shader"
         },
         {
             "guid": "74eac505-944d-45af-acdf-51bcb04fee30",
