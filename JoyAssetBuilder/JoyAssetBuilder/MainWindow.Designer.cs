@@ -36,6 +36,7 @@
             this.assetTreeView = new System.Windows.Forms.TreeView();
             this.buildUnbuilded = new System.Windows.Forms.Button();
             this.StatusText = new System.Windows.Forms.TextBox();
+            this.propertiesPanel = new System.Windows.Forms.PropertyGrid();
             this.SuspendLayout();
             // 
             // collapseAll
@@ -90,7 +91,7 @@
             | System.Windows.Forms.AnchorStyles.Left)));
             this.assetTreeView.Location = new System.Drawing.Point(12, 41);
             this.assetTreeView.Name = "assetTreeView";
-            this.assetTreeView.Size = new System.Drawing.Size(398, 652);
+            this.assetTreeView.Size = new System.Drawing.Size(398, 730);
             this.assetTreeView.TabIndex = 5;
             this.assetTreeView.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.assetTreeView_AfterSelect);
             // 
@@ -111,19 +112,32 @@
             // 
             this.StatusText.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.StatusText.Location = new System.Drawing.Point(416, 220);
+            this.StatusText.Location = new System.Drawing.Point(416, 298);
             this.StatusText.Multiline = true;
             this.StatusText.Name = "StatusText";
             this.StatusText.ReadOnly = true;
             this.StatusText.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.StatusText.Size = new System.Drawing.Size(447, 473);
+            this.StatusText.Size = new System.Drawing.Size(545, 473);
             this.StatusText.TabIndex = 7;
+            // 
+            // propertiesPanel
+            // 
+            this.propertiesPanel.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.propertiesPanel.HelpVisible = false;
+            this.propertiesPanel.Location = new System.Drawing.Point(416, 41);
+            this.propertiesPanel.Name = "propertiesPanel";
+            this.propertiesPanel.Size = new System.Drawing.Size(545, 251);
+            this.propertiesPanel.TabIndex = 8;
+            this.propertiesPanel.ToolbarVisible = false;
             // 
             // MainWindow
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(875, 705);
+            this.ClientSize = new System.Drawing.Size(973, 783);
+            this.Controls.Add(this.propertiesPanel);
             this.Controls.Add(this.StatusText);
             this.Controls.Add(this.buildUnbuilded);
             this.Controls.Add(this.assetTreeView);
@@ -147,6 +161,7 @@
         private System.Windows.Forms.TreeView assetTreeView;
         private System.Windows.Forms.Button buildUnbuilded;
         private System.Windows.Forms.TextBox StatusText;
+        private System.Windows.Forms.PropertyGrid propertiesPanel;
     }
 }
 

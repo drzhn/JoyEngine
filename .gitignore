@@ -39,5 +39,6 @@ Libs/
 MitsubaXmlParser/data
 JoyAssetBuilder/x64
 JoyAssetBuilder/JoyShaderBuilderLib/x64
+JoyAssetBuilder/JoyDataBuilderLib/x64
 JoyAssetBuilder/JoyShaderBuilderConsole
 JoyAssetBuilder/JoyAssetBuilder/obj

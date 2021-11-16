@@ -228,7 +228,7 @@ namespace JoyAssetBuilder
                 vertexShaderStr.AppendFormat("{0}\n", line);
             }
 
-            Console.WriteLine(vertexShaderStr);
+            //Console.WriteLine(vertexShaderStr);
 
 
             StringBuilder fragmentShaderStr = new StringBuilder();
@@ -259,7 +259,7 @@ namespace JoyAssetBuilder
                 fragmentShaderStr.AppendFormat("{0}\n", line);
             }
 
-            Console.WriteLine(fragmentShaderStr);
+            //Console.WriteLine(fragmentShaderStr);
 
             InitializeCompiler();
 

@@ -35,12 +35,12 @@ namespace JoyAssetBuilder
 
         private void rebuildAllButton_Click(object sender, EventArgs e)
         {
-
+            panelViewController.BuildAll();
         }
 
         private void buildUnbuilded_Click(object sender, EventArgs e)
         {
-
+            panelViewController.BuildUnbuilded();
         }
 
         private void buildSelectionButton_Click(object sender, EventArgs e)

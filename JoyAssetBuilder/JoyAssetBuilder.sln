@@ -7,7 +7,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JoyAssetBuilder", "JoyAsset
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "JoyShaderBuilderLib", "JoyShaderBuilderLib\JoyShaderBuilderLib.vcxproj", "{E01E4D59-63F8-4833-A479-64F8BCE63AB0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JoyShaderBuilderConsole", "JoyShaderBuilderConsole\JoyShaderBuilderConsole.csproj", "{ECC48237-A7EE-4AC1-83A5-CA693E6DA28E}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "JoyDataBuilderLib", "JoyDataBuilderLib\JoyDataBuilderLib.vcxproj", "{866EEF5F-E461-4B10-B148-9C9DC2815C5B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -43,18 +43,18 @@ Global
 		{E01E4D59-63F8-4833-A479-64F8BCE63AB0}.Release|x64.Build.0 = Release|x64
 		{E01E4D59-63F8-4833-A479-64F8BCE63AB0}.Release|x86.ActiveCfg = Release|Win32
 		{E01E4D59-63F8-4833-A479-64F8BCE63AB0}.Release|x86.Build.0 = Release|Win32
-		{ECC48237-A7EE-4AC1-83A5-CA693E6DA28E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{ECC48237-A7EE-4AC1-83A5-CA693E6DA28E}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{ECC48237-A7EE-4AC1-83A5-CA693E6DA28E}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{ECC48237-A7EE-4AC1-83A5-CA693E6DA28E}.Debug|x64.Build.0 = Debug|Any CPU
-		{ECC48237-A7EE-4AC1-83A5-CA693E6DA28E}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{ECC48237-A7EE-4AC1-83A5-CA693E6DA28E}.Debug|x86.Build.0 = Debug|Any CPU
-		{ECC48237-A7EE-4AC1-83A5-CA693E6DA28E}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{ECC48237-A7EE-4AC1-83A5-CA693E6DA28E}.Release|Any CPU.Build.0 = Release|Any CPU
-		{ECC48237-A7EE-4AC1-83A5-CA693E6DA28E}.Release|x64.ActiveCfg = Release|Any CPU
-		{ECC48237-A7EE-4AC1-83A5-CA693E6DA28E}.Release|x64.Build.0 = Release|Any CPU
-		{ECC48237-A7EE-4AC1-83A5-CA693E6DA28E}.Release|x86.ActiveCfg = Release|Any CPU
-		{ECC48237-A7EE-4AC1-83A5-CA693E6DA28E}.Release|x86.Build.0 = Release|Any CPU
+		{866EEF5F-E461-4B10-B148-9C9DC2815C5B}.Debug|Any CPU.ActiveCfg = Debug|x64
+		{866EEF5F-E461-4B10-B148-9C9DC2815C5B}.Debug|Any CPU.Build.0 = Debug|x64
+		{866EEF5F-E461-4B10-B148-9C9DC2815C5B}.Debug|x64.ActiveCfg = Debug|x64
+		{866EEF5F-E461-4B10-B148-9C9DC2815C5B}.Debug|x64.Build.0 = Debug|x64
+		{866EEF5F-E461-4B10-B148-9C9DC2815C5B}.Debug|x86.ActiveCfg = Debug|Win32
+		{866EEF5F-E461-4B10-B148-9C9DC2815C5B}.Debug|x86.Build.0 = Debug|Win32
+		{866EEF5F-E461-4B10-B148-9C9DC2815C5B}.Release|Any CPU.ActiveCfg = Release|x64
+		{866EEF5F-E461-4B10-B148-9C9DC2815C5B}.Release|Any CPU.Build.0 = Release|x64
+		{866EEF5F-E461-4B10-B148-9C9DC2815C5B}.Release|x64.ActiveCfg = Release|x64
+		{866EEF5F-E461-4B10-B148-9C9DC2815C5B}.Release|x64.Build.0 = Release|x64
+		{866EEF5F-E461-4B10-B148-9C9DC2815C5B}.Release|x86.ActiveCfg = Release|Win32
+		{866EEF5F-E461-4B10-B148-9C9DC2815C5B}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

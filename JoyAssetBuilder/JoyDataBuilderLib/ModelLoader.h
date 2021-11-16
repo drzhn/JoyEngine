@@ -1,47 +1,51 @@
 #ifndef MODEL_LOADER_H
 #define MODEL_LOADER_H
 
+#include "JoyAssetHeaders.h"
 #include "tiny_obj_loader.h"
 #include <stdexcept>
 #include <fstream>
 
-#include <glm/glm.hpp>
-
-struct Vertex
-{
-	glm::vec3 pos;
-	glm::vec3 color;
-	glm::vec3 normal;
-	glm::vec2 texCoord;
-};
-
 class ModelLoader
 {
 public:
-	static void getFileStream(std::ifstream& stream, const std::string& filename)
+	[[nodiscard]]
+	static bool getFileStream(std::ifstream& stream, const std::string& filename, std::string errorMessage)
 	{
 		stream.open(filename);
 		if (!stream.is_open())
 		{
-			throw std::runtime_error("Cannot open stream");
+			errorMessage = "Cannot open stream";
+			return false;
 		}
+		return true;
 	}
 
-	static void LoadModel(std::vector<Vertex>& vertices,
+	[[nodiscard]]
+	static bool LoadModel(std::vector<Vertex>& vertices,
 	                      std::vector<uint32_t>& indices,
-	                      uint32_t& verticesDataSize,
-	                      uint32_t& indicesDataSize,
-	                      const std::string& filename)
+	                      const std::string& filename,
+	                      std::string& errorMessage)
 	{
+		bool res;
 		std::ifstream stream;
-		getFileStream(stream, filename);
+		res = getFileStream(stream, filename, errorMessage);
+		if (!res)
+		{
+			return false;
+		}
 
 		tinyobj::attrib_t attrib;
 		std::vector<tinyobj::shape_t> shapes;
 		std::vector<tinyobj::material_t> materials;
 		std::string warn, err;
 
-		bool res = tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, &err, &stream);
+		res = tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, &err, &stream);
+		if (!res)
+		{
+			errorMessage = err;
+			return false;
+		}
 
 		uint32_t vertSize = 0;
 		for (const auto& shape : shapes)
@@ -50,9 +54,6 @@ public:
 		}
 		vertices.resize(vertSize);
 		indices.resize(vertSize);
-
-		verticesDataSize = vertSize * sizeof(Vertex);
-		indicesDataSize = vertSize * sizeof(uint32_t);
 
 		uint32_t vertIndex = 0;
 		for (const auto& shape : shapes)
@@ -84,6 +85,8 @@ public:
 		{
 			stream.close();
 		}
+
+		return true;
 	}
 };
 

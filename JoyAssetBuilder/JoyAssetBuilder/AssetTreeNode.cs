@@ -12,8 +12,7 @@ namespace JoyAssetBuilder
     interface IBuildable
     {
         void Build(out string resultMessage);
-        bool IsBuilding { get; }
-        bool Builded { get; }
+        bool Built { get; }
     }
 
     public enum AssetType
@@ -31,9 +30,8 @@ namespace JoyAssetBuilder
         private readonly Color okColor = Color.DarkSeaGreen;
         private readonly Color errorColor = Color.IndianRed;
 
-        bool IBuildable.IsBuilding => throw new NotImplementedException();
-
-        bool IBuildable.Builded => throw new NotImplementedException();
+        bool IBuildable.Built => _mBuilt;
+        private bool _mBuilt = false;
 
         public AssetTreeNode(AssetType type, string path)
         {
@@ -42,7 +40,8 @@ namespace JoyAssetBuilder
             Text = Path.GetFileName(path);
             ImageKey = m_type.ToString();
             SelectedImageKey = m_type.ToString();
-            BackColor = File.Exists(m_path + ".data") ? okColor : errorColor;
+            _mBuilt = File.Exists(m_path + ".data");
+            BackColor = _mBuilt ? okColor : errorColor;
         }
 
         private void SetImage()
@@ -54,23 +53,24 @@ namespace JoyAssetBuilder
         void IBuildable.Build(out string resultMessage)
         {
             resultMessage = ""; // TODO remove later
-            bool result = false;
             switch (m_type)
             {
                 case AssetType.Folder:
                     break;
                 case AssetType.Model:
+                    _mBuilt = ModelBuilder.BuildModel(m_path, out resultMessage);
                     break;
                 case AssetType.Texture:
+                    _mBuilt = TextureBuilder.BuildTexture(m_path, out resultMessage);
                     break;
                 case AssetType.Shader:
-                    result = ShaderBuilder.Compile(m_path, out resultMessage);
+                    _mBuilt = ShaderBuilder.Compile(m_path, out resultMessage);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
             }
 
-            BackColor = result ? okColor : errorColor;
+            BackColor = _mBuilt ? okColor : errorColor;
         }
     }
 }

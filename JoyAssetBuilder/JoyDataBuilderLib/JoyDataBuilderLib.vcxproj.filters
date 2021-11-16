@@ -18,7 +18,7 @@
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\Libs\tinyobjloader\tiny_obj_loader.cc">
+    <ClCompile Include="..\..\Libs\tinyobjloader\tiny_obj_loader.cc">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
