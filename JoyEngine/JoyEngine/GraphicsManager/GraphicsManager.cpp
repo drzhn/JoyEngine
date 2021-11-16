@@ -41,21 +41,27 @@ namespace JoyEngine
 			throw std::runtime_error("validation layers requested, but not available!");
 		}
 
-		VkApplicationInfo appInfo{};
-		appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
-		appInfo.pApplicationName = "Joy Instance";
-		appInfo.applicationVersion = VK_MAKE_VERSION(1, 0, 0);
-		appInfo.pEngineName = "Joy Engine";
-		appInfo.engineVersion = VK_MAKE_VERSION(1, 0, 0);
-		appInfo.apiVersion = VK_API_VERSION_1_0;
-
-		VkInstanceCreateInfo createInfo{};
-		createInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
-		createInfo.pApplicationInfo = &appInfo;
-
+		VkApplicationInfo appInfo{
+			VK_STRUCTURE_TYPE_APPLICATION_INFO,
+			nullptr,
+			"Joy Instance",
+			VK_MAKE_VERSION(1, 0, 0),
+			"Joy Engine",
+			VK_MAKE_VERSION(1, 0, 0),
+			VK_API_VERSION_1_0
+		};
 		auto extensions = getRequiredExtensions(enableValidationLayers);
-		createInfo.enabledExtensionCount = static_cast<uint32_t>(extensions.size());
-		createInfo.ppEnabledExtensionNames = extensions.data();
+
+		VkInstanceCreateInfo createInfo{
+			VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO,
+			nullptr,
+			0,
+			&appInfo,
+			0,
+			nullptr,
+			static_cast<uint32_t>(extensions.size()),
+			extensions.data()
+		};
 
 		VkDebugUtilsMessengerCreateInfoEXT debugCreateInfo;
 		if (enableValidationLayers)
@@ -66,17 +72,9 @@ namespace JoyEngine
 			populateDebugMessengerCreateInfo(debugCreateInfo);
 			createInfo.pNext = (VkDebugUtilsMessengerCreateInfoEXT*)&debugCreateInfo;
 		}
-		else
-		{
-			createInfo.enabledLayerCount = 0;
 
-			createInfo.pNext = m_allocator->GetAllocationCallbacks();
-		}
-
-		if (vkCreateInstance(&createInfo, m_allocator->GetAllocationCallbacks(), &m_vkInstance) != VK_SUCCESS)
-		{
-			throw std::runtime_error("failed to create instance!");
-		}
+		VkResult res = vkCreateInstance(&createInfo, m_allocator->GetAllocationCallbacks(), &m_vkInstance);
+		ASSERT(res == VK_SUCCESS);
 	}
 
 	void GraphicsManager::SetupDebugMessenger()
@@ -135,7 +133,7 @@ namespace JoyEngine
 		}
 	}
 
-	void GraphicsManager::FindQueueFamilies() 
+	void GraphicsManager::FindQueueFamilies()
 	{
 		m_queueFamilyIndices = std::make_unique<QueueFamilyIndices>();
 		uint32_t queueFamilyCount = 0;
