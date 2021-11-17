@@ -1,19 +1,30 @@
 {
-  "type": "sharedMaterial",
-  "shader": "183d6cfe-ca85-4e0b-ab36-7b1ca0f99d34",
-  "hasVertexInput": true,
-  "hasMVP": true,
-  "depthTest": true,
-  "depthWrite": true,
-  "bindingSets": [
-    {
-      "isStatic": true,
-      "bindings": [
+    "type": "sharedMaterial",
+    "shader": "183d6cfe-ca85-4e0b-ab36-7b1ca0f99d34",
+    "hasVertexInput": true,
+    "hasMVP": true,
+    "depthTest": true,
+    "depthWrite": true,
+    "bindings": [
         {
-          "type": "texture",
-          "name": "mainTexture"
+            "index": 0,
+            "type": "vec4",
+            "name": "color"
+        },
+        {
+            "index": 0,
+            "type": "int_array",
+            "name": "array"
+        },
+        {
+            "index": 0,
+            "type": "float",
+            "name": "someFloat"
+        },
+        {
+            "index": 1,
+            "type": "texture",
+            "name": "mainTexture"
         }
-      ]
-    }
-  ]
+    ]
 }

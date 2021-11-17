@@ -149,7 +149,7 @@ namespace JoyAssetBuilder
 
                     string body = shader.Substring(openBrace + 1, closeBrace - openBrace - 1)
                         .Trim('\t', ' ', '\r', '\n');
-                    i = posBracket - 1;
+                    i = closeBrace - 1;
 
 
                     if (header == vertInputAttr)
