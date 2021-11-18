@@ -3,39 +3,51 @@
 
 #include <map>
 #include <string>
+#include <memory>
 
 #include "Common/Resource.h"
 #include "SharedMaterial.h"
+#include "ResourceManager/Buffer.h"
+#include "ResourceManager/Texture.h"
 #include "Utils/GUID.h"
 
-namespace JoyEngine {
-    class Material final : public Resource {
-    public :
-        Material() = delete;
+namespace JoyEngine
+{
+	struct Binding
+	{
+		VulkanBindingDescription bindingDescription;
 
-        explicit Material(GUID);
+		// buffers are not shared, who creates them is responsible for destruction
+		std::vector<std::unique_ptr<Buffer>> buffers;
+		// textures are shared resources, so we need to create them through ResourceManagers
+		GUID textureGuid;
+	};
 
-        ~Material() final;
+	class Material final : public Resource
+	{
+	public :
+		Material() = delete;
 
-        [[nodiscard]] SharedMaterial *GetSharedMaterial() const noexcept;
+		explicit Material(GUID);
 
-        [[nodiscard]] std::map<uint32_t, std::vector<VkDescriptorSet>> GetDescriptorMap() const noexcept;
+		~Material() final;
 
-    	[[nodiscard]] bool IsLoaded() const noexcept override;
-    private:
-        void CreateDescriptorSets();
+		[[nodiscard]] SharedMaterial* GetSharedMaterial() const noexcept;
 
-        void LoadResources() const;
-    
-    private :
-        GUID m_sharedMaterialGuid;
-        SharedMaterial *m_sharedMaterial = nullptr;
-        std::map<std::string, GUID> m_bindings;
+		[[nodiscard]] std::vector<VkDescriptorSet>& GetDescriptorSets() noexcept;
 
-        std::map<uint32_t, std::vector<VkDescriptorSet>> m_descriptorSets;
+		[[nodiscard]] bool IsLoaded() const noexcept override;
+	private:
+		void CreateDescriptorSets();
 
-        
-    };
+		void LoadResources() const;
+
+	private :
+		GUID m_sharedMaterialGuid;
+		SharedMaterial* m_sharedMaterial = nullptr;
+		std::vector<Binding> m_bindings;
+		std::vector<VkDescriptorSet> m_descriptorSets;
+	};
 }
 
 #endif //MATERIAL_H

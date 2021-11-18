@@ -56,6 +56,11 @@ namespace JoyEngine
 
 		res = vkBindBufferMemory(logicalDevice, m_buffer, m_bufferMemory, 0);
 		ASSERT_DESC(res == VK_SUCCESS, ParseVkResult(res));
+
+		if (m_properties & VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT)
+		{
+			m_isLoaded = true;
+		}
 	}
 
 	std::unique_ptr<BufferMappedPtr> Buffer::GetMappedPtr(VkDeviceSize offset, VkDeviceSize size) const

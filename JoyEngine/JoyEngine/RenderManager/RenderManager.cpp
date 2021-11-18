@@ -317,17 +317,15 @@ namespace JoyEngine
 				VK_PIPELINE_BIND_POINT_GRAPHICS,
 				mr->GetMaterial()->GetSharedMaterial()->GetPipeline());
 
-			for (const auto& item : mr->GetMaterial()->GetDescriptorMap())
-			{
-				vkCmdBindDescriptorSets(
-					commandBuffers[imageIndex],
-					VK_PIPELINE_BIND_POINT_GRAPHICS,
-					mr->GetMaterial()->GetSharedMaterial()->GetPipelineLayout(),
-					0,
-					1,
-					item.second.size() == 1 ? &item.second[0] : item.second.data(),
-					0, nullptr);
-			}
+			auto sets = mr->GetMaterial()->GetDescriptorSets();
+			vkCmdBindDescriptorSets(
+				commandBuffers[imageIndex],
+				VK_PIPELINE_BIND_POINT_GRAPHICS,
+				mr->GetMaterial()->GetSharedMaterial()->GetPipelineLayout(),
+				0,
+				1,
+				&sets[imageIndex],
+				0, nullptr);
 
 			MVP mvp{};
 			mvp.model = mr->GetTransform()->GetModelMatrix();

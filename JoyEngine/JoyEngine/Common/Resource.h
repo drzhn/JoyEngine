@@ -8,7 +8,7 @@ namespace JoyEngine {
     public:
         Resource() = default;
 
-        Resource(GUID guid) :m_guid(guid) {};
+        Resource(GUID guid) :m_guid(guid) {}
 
         virtual ~Resource() = default;
 
@@ -23,7 +23,7 @@ namespace JoyEngine {
 
     private:
         uint32_t m_refCount = 0;
-        GUID m_guid;
+        const GUID m_guid;
     };
 }
 

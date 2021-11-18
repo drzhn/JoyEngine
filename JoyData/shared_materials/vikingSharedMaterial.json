@@ -8,7 +8,7 @@
     "bindings": [
         {
             "index": 0,
-            "type": "vec4",
+            "type": "color",
             "name": "color",
             "count": 1
         },

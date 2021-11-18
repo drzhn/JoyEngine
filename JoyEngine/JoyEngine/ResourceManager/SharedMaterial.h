@@ -12,59 +12,65 @@
 #include "Utils/GUID.h"
 #include "Common/Serialization.h"
 
-namespace JoyEngine {
+namespace JoyEngine
+{
+	struct BindingInfo
+	{
+		uint32_t bindingIndex;
+		std::string type;
+		uint32_t count;
+		size_t offset;
+	};
 
-    struct BindingInfo {
-        uint32_t bindingIndex;
-        std::string type;
-        uint32_t count;
-        size_t offset;
-    };
+	struct VulkanBindingDescription
+	{
+		VkDescriptorType type;
+		size_t size;
+	};
 
-    class SharedMaterial final : public Resource {
-    public :
-        SharedMaterial() = delete;
+	class SharedMaterial final : public Resource
+	{
+	public :
+		SharedMaterial() = delete;
 
-        explicit SharedMaterial(GUID);
+		explicit SharedMaterial(GUID);
 
-        ~SharedMaterial() final;
+		~SharedMaterial() final;
 
-        [[nodiscard]] VkPipeline GetPipeline() const noexcept;
+		[[nodiscard]] VkPipeline GetPipeline() const noexcept;
 
-        [[nodiscard]] VkPipelineLayout GetPipelineLayout() const noexcept;
+		[[nodiscard]] VkPipelineLayout GetPipelineLayout() const noexcept;
+		[[nodiscard]] BindingInfo GetBindingInfoByName(const std::string& name) const noexcept;
+		[[nodiscard]] uint64_t GetSetLayoutHash() const noexcept;
+		[[nodiscard]] std::vector<VulkanBindingDescription>& GetVulkanBindings();
 
-        BindingInfo GetBindingInfoByName(const std::string &name) noexcept;
+		static VkDescriptorType GetTypeFromStr(const std::string& type) noexcept;
 
-        [[nodiscard]] uint64_t GetSetLayoutHash() const noexcept;
+		[[nodiscard]] bool IsLoaded() const noexcept override;
+	private :
+		GUID m_shaderGuid;
+		bool m_hasVertexInput = false;
+		bool m_hasMVP = false;
+		bool m_depthTest = false;
+		bool m_depthWrite = false;
 
-        static VkDescriptorType GetTypeFromStr(const std::string &type) noexcept;
+		VkDescriptorSetLayout m_setLayout = VK_NULL_HANDLE;
+		uint64_t m_setLayoutHash;
+		std::map<std::string, BindingInfo> m_bindings;
+		std::vector<VulkanBindingDescription> m_vulkanBindings;
+		Shader* m_shader = nullptr;
 
-    	[[nodiscard]] bool IsLoaded() const noexcept override;
-    private :
-        GUID m_shaderGuid;
-        bool m_hasVertexInput = false;
-        bool m_hasMVP = false;
-        bool m_depthTest = false;
-        bool m_depthWrite = false;
+		VkPipelineLayout m_pipelineLayout = VK_NULL_HANDLE;
+		VkPipeline m_graphicsPipeline = VK_NULL_HANDLE;
 
-        VkDescriptorSetLayout m_setLayout = VK_NULL_HANDLE;
-        uint64_t m_setLayoutHash;
-        std::map<std::string, BindingInfo> m_bindings;
-        Shader* m_shader = nullptr;
+	private:
+		GUID m_guid;
 
-        VkPipelineLayout m_pipelineLayout = VK_NULL_HANDLE;
-        VkPipeline m_graphicsPipeline = VK_NULL_HANDLE;
+	private:
+		void Initialize();
 
-    private:
-
-        GUID m_guid;
-
-    private:
-        void Initialize();
-
-        void CreateGraphicsPipeline();
-    
-    };
+		void CreateGraphicsPipeline();
+	};
 }
 
 #endif //SHARED_MATERIAL_H

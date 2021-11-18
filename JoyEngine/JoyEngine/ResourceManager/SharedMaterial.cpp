@@ -64,7 +64,7 @@ namespace JoyEngine
 			const VkDescriptorType type = GetTypeFromStr(typeStr);
 			if (type == VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER)
 			{
-				bindingCurrentOffsets[bindingIndex] += SerializationUtils::GetTypeSize(typeStr);
+				bindingCurrentOffsets[bindingIndex] += SerializationUtils::GetTypeSize(typeStr) * count;
 			}
 
 			types[bindingIndex] = type;
@@ -80,37 +80,41 @@ namespace JoyEngine
 		}
 
 		uint64_t hash = 0;
-		if (maxBindingIndex != -1)
+		int bindingsCount = maxBindingIndex + 1;
+		if (bindingsCount == 0) return;
+
+
+		m_vulkanBindings.resize(bindingsCount);
+		for (uint32_t i = 0; i < bindingsCount; i++)
 		{
-			for (uint32_t i = 0; i <= maxBindingIndex; i++)
-			{
-				uint64_t binding_hash = i
-					| bindings[i].descriptorType << 8
-					| bindings[i].descriptorCount << 16
-					| bindings[i].stageFlags << 24;
-				hash ^= binding_hash;
-			}
+			uint64_t binding_hash = i
+				| bindings[i].descriptorType << 8
+				| bindings[i].descriptorCount << 16
+				| bindings[i].stageFlags << 24;
+			hash ^= binding_hash;
 
-			VkDescriptorSetLayoutCreateInfo layoutInfo{
-				VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO,
-				nullptr,
-				0,
-				static_cast<uint32_t>(maxBindingIndex),
-				bindings.data()
+			m_vulkanBindings[i] = {
+				bindings[i].descriptorType,
+				bindingCurrentOffsets[i]
 			};
-
-			VkResult res = vkCreateDescriptorSetLayout(
-				JoyContext::Graphics->GetDevice(),
-				&layoutInfo,
-				JoyContext::Graphics->GetAllocationCallbacks(),
-				&m_setLayout);
-			ASSERT(res == VK_SUCCESS);
-			JoyContext::DescriptorSet->RegisterPool(hash, m_setLayout, types);
-			m_setLayoutHash = hash;
 		}
 
+		VkDescriptorSetLayoutCreateInfo layoutInfo{
+			VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO,
+			nullptr,
+			0,
+			static_cast<uint32_t>(maxBindingIndex + 1),
+			bindings.data()
+		};
 
-		//ASSERT(m_setLayouts.size() == m_setLayoutInfos.size());
+		VkResult res = vkCreateDescriptorSetLayout(
+			JoyContext::Graphics->GetDevice(),
+			&layoutInfo,
+			JoyContext::Graphics->GetAllocationCallbacks(),
+			&m_setLayout);
+		ASSERT(res == VK_SUCCESS);
+		JoyContext::DescriptorSet->RegisterPool(hash, m_setLayout, types);
+		m_setLayoutHash = hash;
 	}
 
 	void SharedMaterial::CreateGraphicsPipeline()
@@ -285,14 +289,6 @@ namespace JoyEngine
 		JoyContext::DescriptorSet->UnregisterPool(m_setLayoutHash);
 	}
 
-	//Shader *SharedMaterial::GetVertexShader() const noexcept {
-	//    return JoyContext::Resource->GetResource<Shader>(m_shaderGuid)->GetVertexShadeModule();
-	//}
-
-	//Shader *SharedMaterial::GetFragmentShader() const noexcept {
-	//    return JoyContext::Resource->GetResource<Shader>(m_fragmentShader);
-	//}
-
 	VkPipeline SharedMaterial::GetPipeline() const noexcept
 	{
 		return m_graphicsPipeline;
@@ -307,9 +303,9 @@ namespace JoyEngine
 	{
 		switch (strHash(type.c_str()))
 		{
+			//TODO add subpassInput
 		case strHash("texture"):
 			return VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-			break;
 		case strHash("int"):
 		case strHash("uint"):
 		case strHash("float"):
@@ -320,7 +316,6 @@ namespace JoyEngine
 		case strHash("mat4"):
 		case strHash("color"):
 			return VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-			break;
 		default:
 			ASSERT(false);
 			return VK_DESCRIPTOR_TYPE_MAX_ENUM;
@@ -332,13 +327,19 @@ namespace JoyEngine
 		return m_shader->IsLoaded();
 	}
 
-	BindingInfo SharedMaterial::GetBindingInfoByName(const std::string& name) noexcept
+	BindingInfo SharedMaterial::GetBindingInfoByName(const std::string& name) const noexcept
 	{
-		return m_bindings[name];
+		ASSERT_DESC(m_bindings.find(name) != m_bindings.end(), "no binding with this name, check material json");
+		return m_bindings.find(name)->second;
 	}
 
 	uint64_t SharedMaterial::GetSetLayoutHash() const noexcept
 	{
 		return m_setLayoutHash;
+	}
+
+	std::vector<VulkanBindingDescription>& SharedMaterial::GetVulkanBindings()
+	{
+		return m_vulkanBindings;
 	}
 }

@@ -129,7 +129,7 @@ namespace JoyEngine
 	                                          const rapidjson::Value& val, void* ptr,
 	                                          uint32_t count)
 	{
-		ASSERT(count == 1);
+		ASSERT(count > 0);
 
 		switch (typeHash)
 		{
