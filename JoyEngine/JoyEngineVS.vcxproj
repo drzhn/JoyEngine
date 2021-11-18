@@ -189,9 +189,11 @@
     <ClCompile Include="JoyEngine\Tests\Test.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="JoyEngine\Common\Time.cpp" />
+    <ClCompile Include="JoyEngine\Common\SerializationUtils.cpp" />
     <ClCompile Include="WindowHandler.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="JoyEngine\Common\HashDefs.h" />
     <ClInclude Include="JoyEngine\GameplayComponents\CameraBehaviour.h" />
     <ClInclude Include="JoyEngine\InputManager\InputManager.h" />
     <ClInclude Include="JoyEngine\Common\Color.h" />
@@ -239,6 +241,7 @@
     <ClInclude Include="JoyEngine\Utils\GUID.h" />
     <ClInclude Include="JoyEngine\Utils\ModelLoader.h" />
     <ClInclude Include="JoyEngine\Common\Time.h" />
+    <ClInclude Include="JoyEngine\Common\SerializationUtils.h" />
     <ClInclude Include="WindowHandler.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

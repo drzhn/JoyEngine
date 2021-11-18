@@ -9,6 +9,7 @@
 #include "Utils/Assert.h"
 #include "Common/Color.h"
 #include "Serializable.h"
+#include "HashDefs.h"
 
 //    =============== USAGE: ===================
 //    
@@ -28,49 +29,51 @@
 //	  DECLARE_CLASS(SomeClass)
 // 
 
-constexpr uint32_t hashQuickConstexpr(const char* s, uint32_t hash = 5381) noexcept {
-	return !*s ? hash : hashQuickConstexpr(s + 1, uint32_t(hash * uint64_t(33) ^ *s));
-}
 
-#define HASH(T) hashQuickConstexpr(#T)
 
 #define DECLARE_CLASS(className) \
-static SerializedObjectCreator<className> className##_creator = SerializedObjectCreator<className>(#className); \
-
+static SerializedObjectCreator<className> className##_creator = SerializedObjectCreator<className>(#className);
 #define DECLARE_CLASS_NAME(T) static constexpr const char* className = #T;
 
 // TODO correct check for Serializable class !
 #define REFLECT_FIELD(T, v) FieldRegistrator v##_registrator = FieldRegistrator \
 (className, #v, FieldInfo(HASH(T) != HASH(Serializable)? HASH(T) : HASH(Serializable), &(v))); T v;
 
-namespace JoyEngine {
+namespace JoyEngine
+{
 	class SerializableClassFactory;
 
-	class SerializedObjectCreatorBase {
+	class SerializedObjectCreatorBase
+	{
 	public:
 		SerializedObjectCreatorBase() = default;
 
 		virtual std::unique_ptr<Serializable> Create() = 0;
 	};
 
-	template<typename Type>
-	class SerializedObjectCreator final : public SerializedObjectCreatorBase {
+	template <typename Type>
+	class SerializedObjectCreator final : public SerializedObjectCreatorBase
+	{
 	public:
 		explicit SerializedObjectCreator(const std::string& className);
 
 		std::unique_ptr<Serializable> Create() override;
 	};
 
-	struct FieldInfo {
+	struct FieldInfo
+	{
 		FieldInfo() = default;
 
-		FieldInfo(uint32_t typeHash, void* fieldOffset) : typeHash(typeHash), fieldOffset(fieldOffset) {}
+		FieldInfo(uint32_t typeHash, void* fieldOffset) : typeHash(typeHash), fieldOffset(fieldOffset)
+		{
+		}
 
 		uint32_t typeHash;
 		void* fieldOffset;
 	};
 
-	class SerializableClassFactory {
+	class SerializableClassFactory
+	{
 	public:
 		void RegisterClass(const std::string& className, SerializedObjectCreatorBase* creator);
 
@@ -79,8 +82,10 @@ namespace JoyEngine {
 		std::unique_ptr<Serializable> Deserialize(rapidjson::Value& fieldsJson, const std::string& className);
 
 		// don't want to make storages static because of exceptions before main()
-		static SerializableClassFactory* GetInstance() {
-			if (m_instance == nullptr) {
+		static SerializableClassFactory* GetInstance()
+		{
+			if (m_instance == nullptr)
+			{
 				m_instance = new SerializableClassFactory();
 			}
 			return m_instance;
@@ -88,24 +93,28 @@ namespace JoyEngine {
 
 	private:
 		static SerializableClassFactory* m_instance;
-		std::map<std::string, std::map<std::string, FieldInfo >> m_fieldOffsetStorage;
+		std::map<std::string, std::map<std::string, FieldInfo>> m_fieldOffsetStorage;
 		std::map<std::string, SerializedObjectCreatorBase*> m_classCreatorStorage;
 	};
 
-	class FieldRegistrator {
+	class FieldRegistrator
+	{
 	public:
-		FieldRegistrator(const std::string& className, const std::string& filedName, FieldInfo fieldInfo) {
+		FieldRegistrator(const std::string& className, const std::string& filedName, FieldInfo fieldInfo)
+		{
 			SerializableClassFactory::GetInstance()->RegisterClassFieldOffset(className, filedName, fieldInfo);
 		}
 	};
 
-	template<typename Type>
-	SerializedObjectCreator<Type>::SerializedObjectCreator(const std::string& className) {
+	template <typename Type>
+	SerializedObjectCreator<Type>::SerializedObjectCreator(const std::string& className)
+	{
 		SerializableClassFactory::GetInstance()->RegisterClass(className, this);
 	}
 
-	template<typename Type>
-	std::unique_ptr<Serializable> SerializedObjectCreator<Type>::Create() {
+	template <typename Type>
+	std::unique_ptr<Serializable> SerializedObjectCreator<Type>::Create()
+	{
 		std::unique_ptr<Type> asset = std::make_unique<Type>();
 		ASSERT(dynamic_cast<Serializable*>(asset.get()) != nullptr);
 		return std::unique_ptr<Type>(std::move(asset));

@@ -5,21 +5,9 @@
         {
             "name": "room",
             "transform": {
-                "localPosition": {
-                    "x": 0.0,
-                    "y": 0.0,
-                    "z": 0.0
-                },
-                "localRotation": {
-                    "x": 0.0,
-                    "y": 0.0,
-                    "z": 0.0
-                },
-                "localScale": {
-                    "x": 1.0,
-                    "y": 1.0,
-                    "z": 1.0
-                }
+                "localPosition": [0.0, 0.0, 0.0],
+                "localRotation": [0.0, 0.0, 0.0],
+                "localScale": [1.0, 1.0, 1.0]
             },
             "components": [
                 {
@@ -32,12 +20,7 @@
                     "component": "RoomBehaviour",
                     "fields": {
                         "m_speed": 2,
-                        "m_color": {
-                            "r": 0.4,
-                            "g": 0.5,
-                            "b": 0.8,
-                            "a": 1
-                        }
+                        "m_color": [0.4, 0.5, 0.8, 1]
                     }
                 }
             ]
@@ -45,21 +28,9 @@
         {
             "name": "roomCopy",
             "transform": {
-                "localPosition": {
-                    "x": 0.0,
-                    "y": 0.0,
-                    "z": 3.0
-                },
-                "localRotation": {
-                    "x": 0.0,
-                    "y": 0.0,
-                    "z": 0.0
-                },
-                "localScale": {
-                    "x": 0.05,
-                    "y": 0.05,
-                    "z": 0.05
-                }
+                "localPosition": [0.0, 0.0, 3.0],
+                "localRotation": [0.0, 0.0, 0.0],
+                "localScale": [0.05, 0.05, 0.05]
             },
             "components": [
                 {
@@ -72,12 +43,7 @@
                     "component": "RoomBehaviour",
                     "fields": {
                         "m_speed": -4,
-                        "m_color": {
-                            "r": 0.4,
-                            "g": 0.5,
-                            "b": 0.8,
-                            "a": 1
-                        }
+                        "m_color": [0.4, 0.5, 0.8, 1]
                     }
                 }
             ]
@@ -85,21 +51,9 @@
         {
             "name": "camera",
             "transform": {
-                "localPosition": {
-                    "x": 0.0,
-                    "y": 2.0,
-                    "z": -2.0
-                },
-                "localRotation": {
-                    "x": 405.0,
-                    "y": 0.0,
-                    "z": 0.0
-                },
-                "localScale": {
-                    "x": 1.0,
-                    "y": 1.0,
-                    "z": 1.0
-                }
+                "localPosition": [0.0, 2.0, -2.0],
+                "localRotation": [405.0, 0.0, 0.0],
+                "localScale": [1.0, 1.0, 1.0]
             },
             "components": [
                 {

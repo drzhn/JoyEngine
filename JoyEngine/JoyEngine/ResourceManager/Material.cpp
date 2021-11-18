@@ -58,99 +58,99 @@ namespace JoyEngine
 
 	void Material::LoadResources() const
 	{
-		for (const auto& binding : m_bindings)
-		{
-			VkDescriptorType type = m_sharedMaterial->GetBindingInfoByName(binding.first).type;
-			switch (type)
-			{
-			case VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER:
-				if (!binding.second.IsNull())
-				{
-					JoyContext::Resource->LoadResource<Texture>(binding.second);
-				}
-				break;
-			default:
-				ASSERT(false);
-			}
-		}
+		//for (const auto& binding : m_bindings)
+		//{
+		//	VkDescriptorType type = m_sharedMaterial->GetBindingInfoByName(binding.first).type;
+		//	switch (type)
+		//	{
+		//	case VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER:
+		//		if (!binding.second.IsNull())
+		//		{
+		//			JoyContext::Resource->LoadResource<Texture>(binding.second);
+		//		}
+		//		break;
+		//	default:
+		//		ASSERT(false);
+		//	}
+		//}
 	}
 
 	void Material::CreateDescriptorSets()
 	{
-		for (uint32_t i = 0; i < m_sharedMaterial->GetSetLayoutSize(); i++)
-		{
-			SetLayoutInfo setLayoutInfo = m_sharedMaterial->GetSetLayoutInfo(i);
-			std::vector<VkDescriptorSet> set = JoyContext::DescriptorSet->Allocate(
-				setLayoutInfo.hash,
-				setLayoutInfo.isStatic ? 1 : JoyContext::Render->GetSwapchain()->GetSwapchainImageCount());
-			m_descriptorSets.insert({i, set});
-		}
+		//for (uint32_t i = 0; i < m_sharedMaterial->GetSetLayoutSize(); i++)
+		//{
+		//	SetLayoutInfo setLayoutInfo = m_sharedMaterial->GetSetLayoutInfo(i);
+		//	std::vector<VkDescriptorSet> set = JoyContext::DescriptorSet->Allocate(
+		//		setLayoutInfo.hash,
+		//		setLayoutInfo.isStatic ? 1 : JoyContext::Render->GetSwapchain()->GetSwapchainImageCount());
+		//	m_descriptorSets.insert({i, set});
+		//}
 
-		std::vector<VkWriteDescriptorSet> descriptorWrites;
+		//std::vector<VkWriteDescriptorSet> descriptorWrites;
 
-		for (const auto& binding : m_bindings)
-		{
-			std::string bindingName = binding.first;
-			GUID resourceGuid = binding.second;
+		//for (const auto& binding : m_bindings)
+		//{
+		//	std::string bindingName = binding.first;
+		//	GUID resourceGuid = binding.second;
 
-			BindingInfo bindingInfo = m_sharedMaterial->GetBindingInfoByName(bindingName);
-			SetLayoutInfo setLayoutInfo = m_sharedMaterial->GetSetLayoutInfo(bindingInfo.setIndex);
-			VkDescriptorImageInfo* imageInfoPtr = nullptr;
-			VkDescriptorBufferInfo* bufferInfoPtr = nullptr;
-			VkBufferView* texelBufferViewPtr = nullptr;
+		//	BindingInfo bindingInfo = m_sharedMaterial->GetBindingInfoByName(bindingName);
+		//	SetLayoutInfo setLayoutInfo = m_sharedMaterial->GetSetLayoutInfo(bindingInfo.setIndex);
+		//	VkDescriptorImageInfo* imageInfoPtr = nullptr;
+		//	VkDescriptorBufferInfo* bufferInfoPtr = nullptr;
+		//	VkBufferView* texelBufferViewPtr = nullptr;
 
-			VkDescriptorImageInfo imageInfo = {};
-			VkDescriptorBufferInfo bufferInfo = {};
-			VkBufferView texelBufferView = {};
+		//	VkDescriptorImageInfo imageInfo = {};
+		//	VkDescriptorBufferInfo bufferInfo = {};
+		//	VkBufferView texelBufferView = {};
 
-			switch (bindingInfo.type)
-			{
-			case VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER:
-				{
-					Texture* texture = resourceGuid.IsNull()
-						                   ? JoyContext::DescriptorSet->GetTexture()
-						                   : JoyContext::Resource->GetResource<Texture>(resourceGuid);
-					imageInfo = {
-						texture->GetSampler(),
-						texture->GetImageView(),
-						VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
-					};
-					imageInfoPtr = &imageInfo;
-					break;
-				}
-			case VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER:
-				ASSERT(false);
-				break;
-			//                    VkDescriptorBufferInfo bufferInfo{};
-			//                    bufferInfo.buffer = m_uniformBuffers[i];
-			//                    bufferInfo.offset = 0;
-			//                    bufferInfo.range = sizeof(MVP);
-			default:
-				ASSERT(false);
-			}
-			for (const auto& descriptorSet : m_descriptorSets[bindingInfo.setIndex])
-			{
-				descriptorWrites.push_back(
-					{
-						VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
-						nullptr,
-						descriptorSet,
-						bindingInfo.bindingIndex,
-						0,
-						1,
-						bindingInfo.type,
-						imageInfoPtr,
-						bufferInfoPtr,
-						texelBufferViewPtr
-					});
-			}
-		}
-		vkUpdateDescriptorSets(
-			JoyContext::Graphics->GetDevice(),
-			static_cast<uint32_t>(descriptorWrites.size()),
-			descriptorWrites.data(),
-			0,
-			nullptr);
+		//	switch (bindingInfo.type)
+		//	{
+		//	case VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER:
+		//		{
+		//			Texture* texture = resourceGuid.IsNull()
+		//				                   ? JoyContext::DescriptorSet->GetTexture()
+		//				                   : JoyContext::Resource->GetResource<Texture>(resourceGuid);
+		//			imageInfo = {
+		//				texture->GetSampler(),
+		//				texture->GetImageView(),
+		//				VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
+		//			};
+		//			imageInfoPtr = &imageInfo;
+		//			break;
+		//		}
+		//	case VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER:
+		//		ASSERT(false);
+		//		break;
+		//	//                    VkDescriptorBufferInfo bufferInfo{};
+		//	//                    bufferInfo.buffer = m_uniformBuffers[i];
+		//	//                    bufferInfo.offset = 0;
+		//	//                    bufferInfo.range = sizeof(MVP);
+		//	default:
+		//		ASSERT(false);
+		//	}
+		//	for (const auto& descriptorSet : m_descriptorSets[bindingInfo.setIndex])
+		//	{
+		//		descriptorWrites.push_back(
+		//			{
+		//				VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
+		//				nullptr,
+		//				descriptorSet,
+		//				bindingInfo.bindingIndex,
+		//				0,
+		//				1,
+		//				bindingInfo.type,
+		//				imageInfoPtr,
+		//				bufferInfoPtr,
+		//				texelBufferViewPtr
+		//			});
+		//	}
+		//}
+		//vkUpdateDescriptorSets(
+		//	JoyContext::Graphics->GetDevice(),
+		//	static_cast<uint32_t>(descriptorWrites.size()),
+		//	descriptorWrites.data(),
+		//	0,
+		//	nullptr);
 	}
 
 	SharedMaterial* Material::GetSharedMaterial() const noexcept

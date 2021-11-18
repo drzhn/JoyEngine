@@ -9,22 +9,26 @@
         {
             "index": 0,
             "type": "vec4",
-            "name": "color"
+            "name": "color",
+            "count": 1
         },
         {
             "index": 0,
-            "type": "int_array",
-            "name": "array"
+            "type": "int",
+            "name": "array",
+            "count": 3
         },
         {
             "index": 0,
             "type": "float",
-            "name": "someFloat"
+            "name": "someFloat",
+            "count": 1
         },
         {
             "index": 1,
             "type": "texture",
-            "name": "mainTexture"
+            "name": "mainTexture",
+            "count": 1
         }
     ]
 }

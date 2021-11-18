@@ -10,18 +10,15 @@
 #include "Common/Resource.h"
 #include "Shader.h"
 #include "Utils/GUID.h"
+#include "Common/Serialization.h"
 
 namespace JoyEngine {
 
     struct BindingInfo {
-        uint32_t setIndex;
         uint32_t bindingIndex;
-        VkDescriptorType type;
-    };
-
-    struct SetLayoutInfo {
-        bool isStatic;
-        uint64_t hash;
+        std::string type;
+        uint32_t count;
+        size_t offset;
     };
 
     class SharedMaterial final : public Resource {
@@ -32,19 +29,13 @@ namespace JoyEngine {
 
         ~SharedMaterial() final;
 
-        //[[nodiscard]] Shader *GetVertexShader() const noexcept;
-
-        //[[nodiscard]] Shader *GetFragmentShader() const noexcept;
-
         [[nodiscard]] VkPipeline GetPipeline() const noexcept;
 
         [[nodiscard]] VkPipelineLayout GetPipelineLayout() const noexcept;
 
         BindingInfo GetBindingInfoByName(const std::string &name) noexcept;
 
-        SetLayoutInfo GetSetLayoutInfo(uint32_t setIndex) noexcept;
-
-        [[nodiscard]] uint32_t GetSetLayoutSize() const noexcept;
+        [[nodiscard]] uint64_t GetSetLayoutHash() const noexcept;
 
         static VkDescriptorType GetTypeFromStr(const std::string &type) noexcept;
 
@@ -56,8 +47,8 @@ namespace JoyEngine {
         bool m_depthTest = false;
         bool m_depthWrite = false;
 
-        std::vector<SetLayoutInfo> m_setLayoutInfos;
-        std::vector<VkDescriptorSetLayout> m_setLayouts;
+        VkDescriptorSetLayout m_setLayout = VK_NULL_HANDLE;
+        uint64_t m_setLayoutHash;
         std::map<std::string, BindingInfo> m_bindings;
         Shader* m_shader = nullptr;
 
