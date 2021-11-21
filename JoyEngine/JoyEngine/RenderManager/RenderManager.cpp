@@ -11,7 +11,6 @@
 #define GLM_FORCE_RADIANS
 #define STB_IMAGE_IMPLEMENTATION
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
-#define TINYOBJLOADER_IMPLEMENTATION
 
 namespace JoyEngine
 {
@@ -28,7 +27,8 @@ namespace JoyEngine
 	RenderManager::~RenderManager()
 	{
 		m_depthAttachment = nullptr;
-		m_colorAttachment = nullptr;
+		m_normalAttachment = nullptr;
+		m_positionAttachment = nullptr;
 
 		for (size_t i = 0; i < m_swapChainFramebuffers.size(); i++)
 		{
@@ -61,7 +61,6 @@ namespace JoyEngine
 		m_swapchain = std::make_unique<Swapchain>();
 
 		CreateRenderPass();
-		CreateGBufferResources();
 		CreateFramebuffers();
 		CreateCommandBuffers();
 		CreateSyncObjects();
@@ -69,127 +68,212 @@ namespace JoyEngine
 
 	void RenderManager::CreateRenderPass()
 	{
-		m_colorAttachment = std::make_unique<Attachment>(
-			m_swapchain->GetSwapChainImageFormat(),
-			VK_ATTACHMENT_LOAD_OP_CLEAR,
-			VK_ATTACHMENT_STORE_OP_STORE,
-			VK_IMAGE_LAYOUT_UNDEFINED,
-			VK_IMAGE_LAYOUT_PRESENT_SRC_KHR
+		const VkFormat depthFormat = findDepthFormat(JoyContext::Graphics->GetPhysicalDevice());
+		const VkFormat colorFormat = m_swapchain->GetSwapChainImageFormat();
+		const VkFormat positionFormat = VK_FORMAT_R16G16B16A16_SFLOAT;
+		const VkFormat normalFormat = VK_FORMAT_R16G16B16A16_SFLOAT;
+
+		m_depthAttachment = std::make_unique<Texture>(
+			m_swapchain->GetWidth(),
+			m_swapchain->GetHeight(),
+			depthFormat,
+			VK_IMAGE_TILING_OPTIMAL,
+			VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT,
+			VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+			VK_IMAGE_ASPECT_DEPTH_BIT
 		);
 
-		const VkAttachmentReference colorAttachmentRef = {
+		m_positionAttachment = std::make_unique<Texture>(
+			m_swapchain->GetWidth(),
+			m_swapchain->GetHeight(),
+			positionFormat,
+			VK_IMAGE_TILING_OPTIMAL,
+			VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT,
+			VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+			VK_IMAGE_ASPECT_COLOR_BIT
+		);
+
+		m_normalAttachment = std::make_unique<Texture>(
+			m_swapchain->GetWidth(),
+			m_swapchain->GetHeight(),
+			normalFormat,
+			VK_IMAGE_TILING_OPTIMAL,
+			VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT,
+			VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+			VK_IMAGE_ASPECT_COLOR_BIT
+		);
+
+		const VkAttachmentDescription colorAttachmentDescription = {
+			0,
+			colorFormat,
+			VK_SAMPLE_COUNT_1_BIT, // TODO later
+			VK_ATTACHMENT_LOAD_OP_CLEAR,
+			VK_ATTACHMENT_STORE_OP_STORE,
+			VK_ATTACHMENT_LOAD_OP_DONT_CARE,
+			VK_ATTACHMENT_STORE_OP_DONT_CARE,
+			VK_IMAGE_LAYOUT_UNDEFINED,
+			VK_IMAGE_LAYOUT_PRESENT_SRC_KHR
+		};
+
+		const VkAttachmentDescription positionGBufferAttachmentDescription = {
+			0,
+			positionFormat,
+			VK_SAMPLE_COUNT_1_BIT, // TODO later
+			VK_ATTACHMENT_LOAD_OP_CLEAR,
+			VK_ATTACHMENT_STORE_OP_DONT_CARE,
+			VK_ATTACHMENT_LOAD_OP_DONT_CARE,
+			VK_ATTACHMENT_STORE_OP_DONT_CARE,
+			VK_IMAGE_LAYOUT_UNDEFINED,
+			VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL
+		};
+
+		const VkAttachmentDescription normalGBufferAttachmentDescription = {
+			0,
+			normalFormat,
+			VK_SAMPLE_COUNT_1_BIT, // TODO later
+			VK_ATTACHMENT_LOAD_OP_CLEAR,
+			VK_ATTACHMENT_STORE_OP_DONT_CARE,
+			VK_ATTACHMENT_LOAD_OP_DONT_CARE,
+			VK_ATTACHMENT_STORE_OP_DONT_CARE,
+			VK_IMAGE_LAYOUT_UNDEFINED,
+			VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL
+		};
+
+		const VkAttachmentDescription depthAttachmentDescription = {
+			0,
+			depthFormat,
+			VK_SAMPLE_COUNT_1_BIT, // TODO later
+			VK_ATTACHMENT_LOAD_OP_CLEAR,
+			VK_ATTACHMENT_STORE_OP_DONT_CARE,
+			VK_ATTACHMENT_LOAD_OP_DONT_CARE,
+			VK_ATTACHMENT_STORE_OP_DONT_CARE,
+			VK_IMAGE_LAYOUT_UNDEFINED,
+			VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL
+		};
+
+		//const VkAttachmentDescription positionAttachmentDescription = {
+		//	0,
+		//	VK_FORMAT_R16G16B16_SFLOAT,
+		//	VK_SAMPLE_COUNT_1_BIT, // TODO later
+		//	VK_ATTACHMENT_LOAD_OP_CLEAR,
+		//	VK_ATTACHMENT_STORE_OP_STORE,
+		//	VK_ATTACHMENT_LOAD_OP_DONT_CARE,
+		//	VK_ATTACHMENT_STORE_OP_DONT_CARE,
+		//	VK_IMAGE_LAYOUT_UNDEFINED,
+		//	VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL
+		//};
+		//
+		//const VkAttachmentDescription normalAttachmentDescription = {
+		//	0,
+		//	VK_FORMAT_R16G16B16_SFLOAT,
+		//	VK_SAMPLE_COUNT_1_BIT, // TODO later
+		//	VK_ATTACHMENT_LOAD_OP_CLEAR,
+		//	VK_ATTACHMENT_STORE_OP_STORE,
+		//	VK_ATTACHMENT_LOAD_OP_DONT_CARE,
+		//	VK_ATTACHMENT_STORE_OP_DONT_CARE,
+		//	VK_IMAGE_LAYOUT_UNDEFINED,
+		//	VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL
+		//};
+
+		VkAttachmentDescription attachments[] = {
+			colorAttachmentDescription,
+			positionGBufferAttachmentDescription,
+			normalGBufferAttachmentDescription,
+			depthAttachmentDescription
+		};
+
+		constexpr VkAttachmentReference colorAttachmentRef = {
 			0,
 			VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL
 		};
 
-		m_depthAttachment = std::make_unique<Attachment>(
-			findDepthFormat(JoyContext::Graphics->GetPhysicalDevice()),
-			VK_ATTACHMENT_LOAD_OP_CLEAR,
-			VK_ATTACHMENT_STORE_OP_DONT_CARE,
-			VK_IMAGE_LAYOUT_UNDEFINED,
-			VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
-			m_swapchain->GetWidth(),
-			m_swapchain->GetHeight(),
-			VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT,
-			VK_IMAGE_ASPECT_DEPTH_BIT
-		);
-
-		const VkAttachmentReference depthAttachmentRef = {
+		constexpr VkAttachmentReference positionAttachmentRef = {
 			1,
+			VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL
+		};
+		constexpr VkAttachmentReference normalAttachmentRef = {
+			2,
+			VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL
+		};
+		constexpr VkAttachmentReference depthAttachmentRef = {
+			3,
 			VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL
 		};
 
-		const VkSubpassDescription subpass{
-			0,
-			VK_PIPELINE_BIND_POINT_GRAPHICS,
-			0,
-			nullptr,
-			1,
-			&colorAttachmentRef,
-			nullptr,
-			&depthAttachmentRef,
-			0,
-			nullptr,
-		};
-
-		VkSubpassDependency dependency{
-			VK_SUBPASS_EXTERNAL,
-			0,
-			VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT,
-			VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT,
-			0,
-			VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT,
-			0
+		constexpr VkAttachmentReference gbufferColorAttachmentRefs[] = {
+			positionAttachmentRef,
+			normalAttachmentRef
 		};
 
 
-		VkAttachmentDescription attachments[] = {
-			m_colorAttachment->GetAttachmentDesc(), m_depthAttachment->GetAttachmentDesc()
+		const VkSubpassDescription subpasses[] = {
+			{
+				0,
+				VK_PIPELINE_BIND_POINT_GRAPHICS,
+				0,
+				nullptr,
+				2,
+				gbufferColorAttachmentRefs,
+				nullptr,
+				&depthAttachmentRef,
+				0,
+				nullptr,
+			},
+			{
+				0,
+				VK_PIPELINE_BIND_POINT_GRAPHICS,
+				0,
+				nullptr,
+				1,
+				&colorAttachmentRef,
+				nullptr,
+				&depthAttachmentRef,
+				0,
+				nullptr,
+			}
 		};
+
+		VkSubpassDependency dependencies[] =
+		{
+			{
+				VK_SUBPASS_EXTERNAL,
+				0,
+				VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT,
+				VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT,
+				VK_ACCESS_MEMORY_READ_BIT,
+				VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT,
+				0
+			},
+			{
+				0,
+				1,
+				VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+				VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
+				VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
+				VK_ACCESS_SHADER_READ_BIT,
+				0
+			},
+			{
+				1,
+				VK_SUBPASS_EXTERNAL,
+				VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+				VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT,
+				VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
+				VK_ACCESS_MEMORY_READ_BIT,
+				0
+			}
+		};
+
+
 		m_renderPass = std::make_unique<RenderPass>(
-			2,
+			4,
 			attachments,
-			1,
-			&subpass,
+			2,
+			subpasses,
 			0,
 			nullptr);
-	}
 
-	void RenderManager::CreateGBufferResources()
-	{
-		//VkFormat depthFormat = findDepthFormat(JoyContext::Graphics->GetPhysicalDevice());
-		//m_depthTexture = std::make_unique<Texture>(
-		//	m_swapchain->GetSwapChainExtent().width,
-		//	m_swapchain->GetSwapChainExtent().height,
-		//	depthFormat,
-		//	VK_IMAGE_TILING_OPTIMAL,
-		//	VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT,
-		//	VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
-		//	VK_IMAGE_ASPECT_DEPTH_BIT);
-
-		//m_normalTexture = std::make_unique<Texture>();
-
-		//JoyContext::Memory->CreateImage(
-		//	JoyContext::Graphics->GetPhysicalDevice(),
-		//	JoyContext::Graphics->GetDevice(),
-		//	JoyContext::Graphics->GetAllocationCallbacks(),
-		//	m_swapchain->GetSwapChainExtent().width,
-		//	m_swapchain->GetSwapChainExtent().height,
-		//	VK_FORMAT_R8G8B8A8_UNORM,
-		//	VK_IMAGE_TILING_OPTIMAL,
-		//	VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT,
-		//	VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
-		//	m_normalTexture->GetImage(),
-		//	m_normalTexture->GetDeviceMemory());
-		//JoyContext::Memory->CreateImageView(
-		//	JoyContext::Graphics->GetDevice(),
-		//	JoyContext::Graphics->GetAllocationCallbacks(),
-		//	m_normalTexture->GetImage(),
-		//	VK_FORMAT_R8G8B8A8_UNORM,
-		//	VK_IMAGE_ASPECT_COLOR_BIT,
-		//	m_normalTexture->GetImageView());
-
-		//m_positionTexture = std::make_unique<Texture>();
-
-		//JoyContext::Memory->CreateImage(
-		//	JoyContext::Graphics->GetPhysicalDevice(),
-		//	JoyContext::Graphics->GetDevice(),
-		//	JoyContext::Graphics->GetAllocationCallbacks(),
-		//	m_swapchain->GetSwapChainExtent().width,
-		//	m_swapchain->GetSwapChainExtent().height,
-		//	VK_FORMAT_R8G8B8A8_UNORM,
-		//	VK_IMAGE_TILING_OPTIMAL,
-		//	VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT,
-		//	VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
-		//	m_positionTexture->GetImage(),
-		//	m_positionTexture->GetDeviceMemory());
-		//JoyContext::Memory->CreateImageView(
-		//	JoyContext::Graphics->GetDevice(),
-		//	JoyContext::Graphics->GetAllocationCallbacks(),
-		//	m_positionTexture->GetImage(),
-		//	VK_FORMAT_R8G8B8A8_UNORM,
-		//	VK_IMAGE_ASPECT_COLOR_BIT,
-		//	m_positionTexture->GetImageView());
+		//m_gBufferWriteSharedMaterial = std::make_unique<SharedMaterial>(m_gBufferWriteSharedMaterialGuid);
 	}
 
 	void RenderManager::CreateFramebuffers()
@@ -197,27 +281,32 @@ namespace JoyEngine
 		m_swapChainFramebuffers.resize(m_swapchain->GetSwapchainImageCount());
 		for (size_t i = 0; i < m_swapchain->GetSwapchainImageCount(); i++)
 		{
-			VkImageView attachments[2] = {
+			VkImageView attachments[] = {
 				m_swapchain->GetSwapChainImageViews()[i],
+				m_positionAttachment->GetImageView(),
+				m_normalAttachment->GetImageView(),
 				m_depthAttachment->GetImageView()
 			};
 
-			VkFramebufferCreateInfo framebufferInfo{};
-			framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-			framebufferInfo.renderPass = m_renderPass->GetRenderPass();
-			framebufferInfo.attachmentCount = 2;
-			framebufferInfo.pAttachments = attachments;
-			framebufferInfo.width = m_swapchain->GetWidth();
-			framebufferInfo.height = m_swapchain->GetHeight();
-			framebufferInfo.layers = 1;
+			VkFramebufferCreateInfo framebufferInfo{
+				VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO,
+				nullptr,
+				0,
+				m_renderPass->GetRenderPass(),
+				4,
+				attachments,
+				m_swapchain->GetWidth(),
+				m_swapchain->GetHeight(),
+				1
+			};
 
-			if (vkCreateFramebuffer(JoyContext::Graphics->GetDevice(),
-			                        &framebufferInfo,
-			                        JoyContext::Graphics->GetAllocationCallbacks(),
-			                        &m_swapChainFramebuffers[i]) != VK_SUCCESS)
-			{
-				throw std::runtime_error("failed to create framebuffer!");
-			}
+			const VkResult res = vkCreateFramebuffer(
+				JoyContext::Graphics->GetDevice(),
+				&framebufferInfo,
+				JoyContext::Graphics->GetAllocationCallbacks(),
+				&m_swapChainFramebuffers[i]);
+
+			ASSERT_DESC(res == VK_SUCCESS, ParseVkResult(res));
 		}
 	}
 
@@ -481,5 +570,15 @@ namespace JoyEngine
 		ASSERT(m_swapchain != nullptr);
 		return static_cast<float>(m_swapchain->GetWidth()) /
 			static_cast<float>(m_swapchain->GetHeight());
+	}
+
+	Texture* RenderManager::GetGBufferPositionTexture() const noexcept
+	{
+		return m_positionAttachment.get();
+	}
+
+	Texture* RenderManager::GetGBufferNormalTexture() const noexcept
+	{
+		return m_normalAttachment.get();
 	}
 }

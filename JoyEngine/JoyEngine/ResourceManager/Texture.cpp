@@ -15,26 +15,26 @@ namespace JoyEngine
 {
 	std::string ParseVkResult(VkResult res);
 
-	Texture::Texture()
+	Texture::Texture() :
+		m_width(1),
+		m_height(1),
+		m_format(VK_FORMAT_R8G8B8A8_SRGB),
+		m_tiling(VK_IMAGE_TILING_OPTIMAL),
+		m_usageFlags(VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT),
+		m_propertiesFlags(VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT),
+		m_aspectFlags(VK_IMAGE_ASPECT_COLOR_BIT)
 	{
 		constexpr unsigned char pixels[] = {255, 255, 255, 255};
-		m_width = 1;
-		m_height = 1;
-		m_format = VK_FORMAT_R8G8B8A8_SRGB;
-		m_tiling = VK_IMAGE_TILING_OPTIMAL;
-		m_usageFlags = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
-		m_propertiesFlags = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
-		m_aspectFlags = VK_IMAGE_ASPECT_COLOR_BIT;
-
 		InitializeTexture(pixels);
 	}
 
-	Texture::Texture(GUID guid) : Resource(guid),
-	                              m_format(VK_FORMAT_R8G8B8A8_SRGB), // TODO get texture format from texture data
-	                              m_tiling(VK_IMAGE_TILING_OPTIMAL),
-	                              m_usageFlags(VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT),
-	                              m_propertiesFlags(VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT),
-	                              m_aspectFlags(VK_IMAGE_ASPECT_COLOR_BIT)
+	Texture::Texture(GUID guid) :
+		Resource(guid),
+		m_format(VK_FORMAT_R8G8B8A8_SRGB), // TODO get texture format from texture data
+		m_tiling(VK_IMAGE_TILING_OPTIMAL),
+		m_usageFlags(VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT),
+		m_propertiesFlags(VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT),
+		m_aspectFlags(VK_IMAGE_ASPECT_COLOR_BIT)
 	{
 		m_textureStream = JoyContext::Data->GetFileStream(guid, true);
 		uint32_t width, height;
@@ -77,13 +77,14 @@ namespace JoyEngine
 		VkImageTiling tiling,
 		VkImageUsageFlags usage,
 		VkMemoryPropertyFlags properties,
-		VkImageAspectFlags aspectFlags) : m_width(width),
-		                                  m_height(height),
-		                                  m_format(format),
-		                                  m_tiling(tiling),
-		                                  m_usageFlags(usage),
-		                                  m_propertiesFlags(properties),
-		                                  m_aspectFlags(aspectFlags)
+		VkImageAspectFlags aspectFlags) :
+		m_width(width),
+		m_height(height),
+		m_format(format),
+		m_tiling(tiling),
+		m_usageFlags(usage),
+		m_propertiesFlags(properties),
+		m_aspectFlags(aspectFlags)
 
 	{
 		CreateImage();

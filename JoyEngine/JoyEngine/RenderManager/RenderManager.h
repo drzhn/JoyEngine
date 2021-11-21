@@ -56,11 +56,16 @@ namespace JoyEngine
 		[[nodiscard]] VkRenderPass GetMainRenderPass() const noexcept;
 
 		[[nodiscard]] float GetAspect() const noexcept;
+		[[nodiscard]] Texture* GetGBufferPositionTexture() const noexcept;
+		[[nodiscard]] Texture* GetGBufferNormalTexture() const noexcept;
+
+		[[nodiscard]] uint32_t GetMainColorSubpassIndex() const noexcept { return 1; }
+		[[nodiscard]] uint32_t GetGBufferWriteSubpassIndex() const noexcept { return 0; }
+		[[nodiscard]] uint32_t GetMainColorSubpassColorAttachmentsCount() const noexcept { return 1; }
+		[[nodiscard]] uint32_t GetGBufferWriteSubpassColorAttachmentsCount() const noexcept { return 2; }
 
 	private:
 		void CreateRenderPass();
-
-		void CreateGBufferResources();
 
 		void CreateFramebuffers();
 
@@ -74,11 +79,14 @@ namespace JoyEngine
 
 	private:
 		const int MAX_FRAMES_IN_FLIGHT = 2;
+		const GUID m_gBufferWriteSharedMaterialGuid = GUID::StringToGuid("869fa59b-d775-41fb-9650-d3f9e8f72269");
+		std::unique_ptr<SharedMaterial> m_gBufferWriteSharedMaterial;
 
 		std::unique_ptr<Swapchain> m_swapchain;
 		std::unique_ptr<RenderPass> m_renderPass;
-		std::unique_ptr<Attachment> m_depthAttachment;
-		std::unique_ptr<Attachment> m_colorAttachment;
+		std::unique_ptr<Texture> m_depthAttachment;
+		std::unique_ptr<Texture> m_positionAttachment;
+		std::unique_ptr<Texture> m_normalAttachment;
 
 
 		std::set<MeshRenderer*> m_meshRenderers;

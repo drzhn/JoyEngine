@@ -13,7 +13,7 @@
                 {
                     "type": "renderer",
                     "model": "fc972e06-70d9-4271-8615-825003b43f74",
-                    "material": "70cfb3fd-9105-4987-b37a-ad1f74529f9d"
+                    "material": "04c17a20-bdbd-4743-9c8b-b781ec016da5"
                 },
                 {
                     "type": "component",
@@ -36,7 +36,7 @@
                 {
                     "type": "renderer",
                     "model": "13dc6d97-5ced-4b99-b296-bb9e6df2242a",
-                    "material": "5647451b-5e36-4c31-ace8-33952da006a1"
+                    "material": "b20dac6b-ef36-40db-b937-ea62fd89a39f"
                 },
                 {
                     "type": "component",

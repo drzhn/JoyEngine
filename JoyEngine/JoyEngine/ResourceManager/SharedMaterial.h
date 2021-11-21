@@ -14,6 +14,11 @@
 
 namespace JoyEngine
 {
+	enum PipelineType
+	{
+		MainColor,
+		GBufferWrite
+	};
 	struct BindingInfo
 	{
 		uint32_t bindingIndex;
@@ -62,6 +67,8 @@ namespace JoyEngine
 
 		VkPipelineLayout m_pipelineLayout = VK_NULL_HANDLE;
 		VkPipeline m_graphicsPipeline = VK_NULL_HANDLE;
+
+		PipelineType m_pipelineType;
 
 	private:
 		GUID m_guid;

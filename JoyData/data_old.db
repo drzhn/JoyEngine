@@ -1,41 +1,65 @@
 {
-  "type": "database",
-  "database": [
-    {
-      "guid": "fc972e06-70d9-4271-8615-825003b43f74",
-      "path": "models/viking_room.obj"
-    },
-    {
-      "guid": "13dc6d97-5ced-4b99-b296-bb9e6df2242a",
-      "path": "models/male_head.obj"
-    },
-    {
-      "guid": "1d451f58-3f84-4b2b-8c6f-fe8e2821d7f0",
-      "path": "textures/viking_room.png"
-    },
-    {
-      "guid": "7e50aa82-5696-428c-a088-538fb78c0ee6",
-      "path": "textures/Chopping-Board.jpg"
-    },
-    {
-      "guid": "183d6cfe-ca85-4e0b-ab36-7b1ca0f99d34",
-      "path": "shaders/shader.shader"
-    },
-    {
-      "guid": "11dcfeba-c2b6-4c2e-a3c7-51054ff06f1d",
-      "path": "scenes/room.json"
-    },
-    {
-      "guid": "74eac505-944d-45af-acdf-51bcb04fee30",
-      "path": "shared_materials/vikingSharedMaterial.json"
-    },
-    {
-      "guid": "70cfb3fd-9105-4987-b37a-ad1f74529f9d",
-      "path": "materials/vikingMaterial.json"
-    },
-    {
-      "guid": "5647451b-5e36-4c31-ace8-33952da006a1",
-      "path": "materials/vikingMaterialCopy.json"
-    }
-  ]
+    "type": "database",
+    "database": [
+        {
+            "guid": "fc972e06-70d9-4271-8615-825003b43f74",
+            "path": "models/viking_room.obj"
+        },
+        {
+            "guid": "13dc6d97-5ced-4b99-b296-bb9e6df2242a",
+            "path": "models/male_head.obj"
+        },
+        {
+            "guid": "1d451f58-3f84-4b2b-8c6f-fe8e2821d7f0",
+            "path": "textures/viking_room.png"
+        },
+        {
+            "guid": "7e50aa82-5696-428c-a088-538fb78c0ee6",
+            "path": "textures/Chopping-Board.jpg"
+        },
+        {
+            "guid": "183d6cfe-ca85-4e0b-ab36-7b1ca0f99d34",
+            "path": "shaders/shader.shader"
+        },
+        {
+            "guid": "9953ce03-509b-4e28-a5bc-a7756b90fb7f",
+            "path": "shaders/gbufferwrite.shader"
+        },
+        {
+            "guid": "6de06b3f-87f8-486b-af95-03b51c168b4e",
+            "path": "shaders/vikinggbuffer.shader"
+        },
+        {
+            "guid": "11dcfeba-c2b6-4c2e-a3c7-51054ff06f1d",
+            "path": "scenes/room.json"
+        },
+        {
+            "guid": "74eac505-944d-45af-acdf-51bcb04fee30",
+            "path": "shared_materials/vikingSharedMaterial.json"
+        },
+        {
+            "guid": "aed323a6-0075-4388-b7c9-64a89048a7a6",
+            "path": "shared_materials/vikingGbufferShaderMaterial.json"
+        },
+        {
+            "guid": "869fa59b-d775-41fb-9650-d3f9e8f72269",
+            "path": "shared_materials/gBufferShaderMaterial.json"
+        },
+        {
+            "guid": "70cfb3fd-9105-4987-b37a-ad1f74529f9d",
+            "path": "materials/vikingMaterial.json"
+        },
+        {
+            "guid": "5647451b-5e36-4c31-ace8-33952da006a1",
+            "path": "materials/vikingMaterialCopy.json"
+        },
+        {
+            "guid": "04c17a20-bdbd-4743-9c8b-b781ec016da5",
+            "path": "materials/vikingGbufferMaterial1.json"
+        },
+        {
+            "guid": "b20dac6b-ef36-40db-b937-ea62fd89a39f",
+            "path": "materials/vikingGbufferMaterial2.json"
+        }
+    ]
 }

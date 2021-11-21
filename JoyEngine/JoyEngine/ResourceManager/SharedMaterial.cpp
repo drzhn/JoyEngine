@@ -32,6 +32,18 @@ namespace JoyEngine
 		m_hasMVP = json["hasMVP"].GetBool();
 		m_depthTest = json["depthTest"].GetBool();
 		m_depthWrite = json["depthWrite"].GetBool();
+		if (json["pipelineType"].GetString() == std::string("MainColor"))
+		{
+			m_pipelineType = MainColor;
+		}
+		else if (json["pipelineType"].GetString() == std::string("GBufferWrite"))
+		{
+			m_pipelineType = GBufferWrite;
+		}
+		else
+		{
+			ASSERT_DESC(false, "unsopported pipeline type");
+		}
 
 		const auto bindingsArray = json["bindings"].GetArray();
 		const uint32_t bindingsArraySize = bindingsArray.Size();
@@ -68,7 +80,15 @@ namespace JoyEngine
 			}
 
 			types[bindingIndex] = type;
-			const VkShaderStageFlags stageFlagBits = VK_SHADER_STAGE_FRAGMENT_BIT | VK_SHADER_STAGE_VERTEX_BIT;
+			VkShaderStageFlags stageFlagBits = 0;
+			if (type == VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT)
+			{
+				stageFlagBits = VK_SHADER_STAGE_FRAGMENT_BIT;
+			}
+			else
+			{
+				stageFlagBits = VK_SHADER_STAGE_FRAGMENT_BIT | VK_SHADER_STAGE_VERTEX_BIT;
+			}
 			const uint32_t descriptorCount = 1;
 			bindings[bindingIndex] = {
 				static_cast<uint32_t>(bindingIndex),
@@ -81,8 +101,6 @@ namespace JoyEngine
 
 		uint64_t hash = 0;
 		int bindingsCount = maxBindingIndex + 1;
-		if (bindingsCount == 0) return;
-
 
 		m_vulkanBindings.resize(bindingsCount);
 		for (uint32_t i = 0; i < bindingsCount; i++)
@@ -113,7 +131,10 @@ namespace JoyEngine
 			JoyContext::Graphics->GetAllocationCallbacks(),
 			&m_setLayout);
 		ASSERT(res == VK_SUCCESS);
-		JoyContext::DescriptorSet->RegisterPool(hash, m_setLayout, types);
+		if (bindingsCount > 0)
+		{
+			JoyContext::DescriptorSet->RegisterPool(hash, m_setLayout, types);
+		}
 		m_setLayoutHash = hash;
 	}
 
@@ -203,23 +224,48 @@ namespace JoyEngine
 		depthStencil.depthBoundsTestEnable = VK_FALSE;
 		depthStencil.stencilTestEnable = VK_FALSE;
 
-		VkPipelineColorBlendAttachmentState colorBlendAttachment{};
-		colorBlendAttachment.colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT |
-			VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
-		colorBlendAttachment.blendEnable = VK_FALSE;
-		colorBlendAttachment.srcColorBlendFactor = VK_BLEND_FACTOR_ONE; // Optional
-		colorBlendAttachment.dstColorBlendFactor = VK_BLEND_FACTOR_ZERO; // Optional
-		colorBlendAttachment.colorBlendOp = VK_BLEND_OP_ADD; // Optional
-		colorBlendAttachment.srcAlphaBlendFactor = VK_BLEND_FACTOR_ONE; // Optional
-		colorBlendAttachment.dstAlphaBlendFactor = VK_BLEND_FACTOR_ZERO; // Optional
-		colorBlendAttachment.alphaBlendOp = VK_BLEND_OP_ADD; // Optional
+		VkPipelineColorBlendAttachmentState colorBlendAttachments[] = {
+			{
+				VK_FALSE,
+				VK_BLEND_FACTOR_ONE,
+				VK_BLEND_FACTOR_ZERO,
+				VK_BLEND_OP_ADD,
+				VK_BLEND_FACTOR_ONE,
+				VK_BLEND_FACTOR_ZERO,
+				VK_BLEND_OP_ADD,
+				VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT |
+				VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT
+			},
+			{
+				VK_FALSE,
+				VK_BLEND_FACTOR_ONE,
+				VK_BLEND_FACTOR_ZERO,
+				VK_BLEND_OP_ADD,
+				VK_BLEND_FACTOR_ONE,
+				VK_BLEND_FACTOR_ZERO,
+				VK_BLEND_OP_ADD,
+				VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT |
+				VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT
+			}
+		};
+
 
 		VkPipelineColorBlendStateCreateInfo colorBlending{};
 		colorBlending.sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
 		colorBlending.logicOpEnable = VK_FALSE;
 		colorBlending.logicOp = VK_LOGIC_OP_COPY; // Optional
-		colorBlending.attachmentCount = 1;
-		colorBlending.pAttachments = &colorBlendAttachment;
+		switch (m_pipelineType)
+		{
+		case MainColor:
+			colorBlending.attachmentCount = JoyContext::Render->GetMainColorSubpassColorAttachmentsCount();
+			break;
+		case GBufferWrite:
+			colorBlending.attachmentCount = JoyContext::Render->GetGBufferWriteSubpassColorAttachmentsCount();
+			break;
+		default:
+			ASSERT(false);
+		}
+		colorBlending.pAttachments = colorBlendAttachments;
 		colorBlending.blendConstants[0] = 0.0f; // Optional
 		colorBlending.blendConstants[1] = 0.0f; // Optional
 		colorBlending.blendConstants[2] = 0.0f; // Optional
@@ -260,7 +306,17 @@ namespace JoyEngine
 		pipelineInfo.layout = m_pipelineLayout;
 		pipelineInfo.renderPass = JoyContext::Render->GetMainRenderPass();
 		pipelineInfo.pDepthStencilState = &depthStencil;
-		pipelineInfo.subpass = 0;
+		switch (m_pipelineType)
+		{
+		case MainColor:
+			pipelineInfo.subpass = JoyContext::Render->GetMainColorSubpassIndex();
+			break;
+		case GBufferWrite:
+			pipelineInfo.subpass = JoyContext::Render->GetGBufferWriteSubpassIndex();
+			break;
+		default:
+			ASSERT(false);
+		}
 		pipelineInfo.basePipelineHandle = VK_NULL_HANDLE;
 
 		res = vkCreateGraphicsPipelines(JoyContext::Graphics->GetDevice(),
@@ -303,9 +359,11 @@ namespace JoyEngine
 	{
 		switch (strHash(type.c_str()))
 		{
-			//TODO add subpassInput
+		//TODO add subpassInput
 		case strHash("texture"):
 			return VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+		case strHash("attachment"):
+			return VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT;
 		case strHash("int"):
 		case strHash("uint"):
 		case strHash("float"):

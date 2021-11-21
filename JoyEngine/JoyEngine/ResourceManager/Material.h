@@ -13,6 +13,12 @@
 
 namespace JoyEngine
 {
+	enum InputAttachmentType
+	{
+		Position,
+		Normal
+	};
+
 	struct Binding
 	{
 		VulkanBindingDescription bindingDescription;
@@ -21,6 +27,7 @@ namespace JoyEngine
 		std::vector<std::unique_ptr<Buffer>> buffers;
 		// textures are shared resources, so we need to create them through ResourceManagers
 		GUID textureGuid;
+		InputAttachmentType inputAttachmentType;
 	};
 
 	class Material final : public Resource
