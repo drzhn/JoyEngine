@@ -97,7 +97,7 @@ namespace JoyEngine
 		m_dataManager = nullptr;
 		m_memoryManager = nullptr; //free gpu memory
 		m_graphicsContext = nullptr; //delete surface, device, instance
-		std::cout << "Context destroyed" << std::endl;
+		OutputDebugStringA("Context destroyed\n");
 	}
 
 	void JoyEngine::HandleMessage(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)

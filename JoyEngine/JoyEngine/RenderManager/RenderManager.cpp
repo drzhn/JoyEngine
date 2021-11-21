@@ -7,6 +7,7 @@
 
 #include "MemoryManager/MemoryManager.h"
 #include "RenderManager/VulkanUtils.h"
+#include "ResourceManager/ResourceManager.h"
 
 #define GLM_FORCE_RADIANS
 #define STB_IMAGE_IMPLEMENTATION
@@ -22,6 +23,8 @@ namespace JoyEngine
 	{
 		vkQueueWaitIdle(JoyContext::Graphics->GetPresentQueue());
 		vkDeviceWaitIdle(JoyContext::Graphics->GetDevice());
+		JoyContext::Resource->UnloadResource(m_gBufferWriteSharedMaterialGuid);
+
 	}
 
 	RenderManager::~RenderManager()
@@ -151,30 +154,6 @@ namespace JoyEngine
 			VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL
 		};
 
-		//const VkAttachmentDescription positionAttachmentDescription = {
-		//	0,
-		//	VK_FORMAT_R16G16B16_SFLOAT,
-		//	VK_SAMPLE_COUNT_1_BIT, // TODO later
-		//	VK_ATTACHMENT_LOAD_OP_CLEAR,
-		//	VK_ATTACHMENT_STORE_OP_STORE,
-		//	VK_ATTACHMENT_LOAD_OP_DONT_CARE,
-		//	VK_ATTACHMENT_STORE_OP_DONT_CARE,
-		//	VK_IMAGE_LAYOUT_UNDEFINED,
-		//	VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL
-		//};
-		//
-		//const VkAttachmentDescription normalAttachmentDescription = {
-		//	0,
-		//	VK_FORMAT_R16G16B16_SFLOAT,
-		//	VK_SAMPLE_COUNT_1_BIT, // TODO later
-		//	VK_ATTACHMENT_LOAD_OP_CLEAR,
-		//	VK_ATTACHMENT_STORE_OP_STORE,
-		//	VK_ATTACHMENT_LOAD_OP_DONT_CARE,
-		//	VK_ATTACHMENT_STORE_OP_DONT_CARE,
-		//	VK_IMAGE_LAYOUT_UNDEFINED,
-		//	VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL
-		//};
-
 		VkAttachmentDescription attachments[] = {
 			colorAttachmentDescription,
 			positionGBufferAttachmentDescription,
@@ -187,13 +166,21 @@ namespace JoyEngine
 			VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL
 		};
 
-		constexpr VkAttachmentReference positionAttachmentRef = {
+		constexpr VkAttachmentReference positionGBufferAttachmentRef = {
 			1,
 			VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL
 		};
-		constexpr VkAttachmentReference normalAttachmentRef = {
+		constexpr VkAttachmentReference normalGBufferAttachmentRef = {
 			2,
 			VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL
+		};
+		constexpr VkAttachmentReference positionInputAttachmentRef = {
+			1,
+			VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
+		};
+		constexpr VkAttachmentReference normalInputAttachmentRef = {
+			2,
+			VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
 		};
 		constexpr VkAttachmentReference depthAttachmentRef = {
 			3,
@@ -201,8 +188,13 @@ namespace JoyEngine
 		};
 
 		constexpr VkAttachmentReference gbufferColorAttachmentRefs[] = {
-			positionAttachmentRef,
-			normalAttachmentRef
+			positionGBufferAttachmentRef,
+			normalGBufferAttachmentRef
+		};
+
+		constexpr VkAttachmentReference inputAttachmentRefs[] = {
+			positionInputAttachmentRef,
+			normalInputAttachmentRef
 		};
 
 
@@ -222,8 +214,8 @@ namespace JoyEngine
 			{
 				0,
 				VK_PIPELINE_BIND_POINT_GRAPHICS,
-				0,
-				nullptr,
+				2,
+				inputAttachmentRefs,
 				1,
 				&colorAttachmentRef,
 				nullptr,
@@ -238,11 +230,11 @@ namespace JoyEngine
 			{
 				VK_SUBPASS_EXTERNAL,
 				0,
-				VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT,
+				VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT,
 				VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT,
 				VK_ACCESS_MEMORY_READ_BIT,
 				VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT,
-				0
+				VK_DEPENDENCY_BY_REGION_BIT
 			},
 			{
 				0,
@@ -251,7 +243,7 @@ namespace JoyEngine
 				VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
 				VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
 				VK_ACCESS_SHADER_READ_BIT,
-				0
+				VK_DEPENDENCY_BY_REGION_BIT
 			},
 			{
 				1,
@@ -260,7 +252,7 @@ namespace JoyEngine
 				VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT,
 				VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
 				VK_ACCESS_MEMORY_READ_BIT,
-				0
+				VK_DEPENDENCY_BY_REGION_BIT
 			}
 		};
 
@@ -270,10 +262,10 @@ namespace JoyEngine
 			attachments,
 			2,
 			subpasses,
-			0,
-			nullptr);
+			3,
+			dependencies);
 
-		//m_gBufferWriteSharedMaterial = std::make_unique<SharedMaterial>(m_gBufferWriteSharedMaterialGuid);
+		m_gBufferWriteSharedMaterial = JoyContext::Resource->LoadResource<SharedMaterial>(m_gBufferWriteSharedMaterialGuid);
 	}
 
 	void RenderManager::CreateFramebuffers()
@@ -339,17 +331,20 @@ namespace JoyEngine
 	{
 		commandBuffers.resize(m_swapChainFramebuffers.size());
 
-		VkCommandBufferAllocateInfo allocInfo{};
-		allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-		allocInfo.commandPool = JoyContext::Graphics->GetCommandPool();
-		allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-		allocInfo.commandBufferCount = (uint32_t)commandBuffers.size();
+		const VkCommandBufferAllocateInfo allocInfo = {
+			VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO,
+			0,
+			JoyContext::Graphics->GetCommandPool(),
+			VK_COMMAND_BUFFER_LEVEL_PRIMARY,
+			(uint32_t)commandBuffers.size()
+		};
 
-		if (vkAllocateCommandBuffers(JoyContext::Graphics->GetDevice(), &allocInfo, commandBuffers.data()) !=
-			VK_SUCCESS)
-		{
-			throw std::runtime_error("failed to allocate command buffers!");
-		}
+		const VkResult res = vkAllocateCommandBuffers(
+			JoyContext::Graphics->GetDevice(),
+			&allocInfo,
+			commandBuffers.data());
+
+		ASSERT(res == VK_SUCCESS)
 	}
 
 	void RenderManager::WriteCommandBuffers(uint32_t imageIndex) const
@@ -361,24 +356,78 @@ namespace JoyEngine
 		{
 			throw std::runtime_error("failed to begin recording command buffer!");
 		}
-
-		VkRenderPassBeginInfo renderPassInfo{};
-		renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-		renderPassInfo.renderPass = m_renderPass->GetRenderPass();
-		renderPassInfo.framebuffer = m_swapChainFramebuffers[imageIndex];
-		renderPassInfo.renderArea.offset = {0, 0};
-		renderPassInfo.renderArea.extent = {m_swapchain->GetWidth(), m_swapchain->GetHeight()};
-
-		VkClearValue clearValues[2];
+		VkClearValue clearValues[4];
 		clearValues[0].color = {0.0f, 0.0f, 0.0f, 1.0f};
-		clearValues[1].depthStencil = {1.0f, 0};
+		clearValues[1].color = {0.0f, 0.0f, 0.0f, 1.0f};
+		clearValues[2].color = {0.0f, 0.0f, 0.0f, 1.0f};
+		clearValues[3].depthStencil = {1.0f, 0};
 
-		renderPassInfo.clearValueCount = 2;
-		renderPassInfo.pClearValues = clearValues;
+		VkRenderPassBeginInfo renderPassInfo = {
+			VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO,
+			nullptr,
+			m_renderPass->GetRenderPass(),
+			m_swapChainFramebuffers[imageIndex],
+			{
+				{0, 0},
+				{m_swapchain->GetWidth(), m_swapchain->GetHeight()}
+			},
+			4,
+			clearValues
+		};
 
 		vkCmdBeginRenderPass(commandBuffers[imageIndex], &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
 
 		ASSERT(m_currentCamera != nullptr);
+
+		vkCmdBindPipeline(
+			commandBuffers[imageIndex],
+			VK_PIPELINE_BIND_POINT_GRAPHICS,
+			m_gBufferWriteSharedMaterial->GetPipeline());
+
+		for (auto const& mr : m_meshRenderers)
+		{
+			if (!mr->IsReady()) continue;
+
+			VkBuffer vertexBuffers[] = {
+				mr->GetMesh()->GetVertexBuffer()
+			};
+			VkDeviceSize offsets[] = {0};
+			vkCmdBindVertexBuffers(
+				commandBuffers[imageIndex],
+				0,
+				1,
+				vertexBuffers,
+				offsets);
+
+			vkCmdBindIndexBuffer(
+				commandBuffers[imageIndex],
+				mr->GetMesh()->GetIndexBuffer(),
+				0,
+				VK_INDEX_TYPE_UINT32);
+
+			MVP mvp{};
+			mvp.model = mr->GetTransform()->GetModelMatrix();
+			mvp.view = m_currentCamera->GetViewMatrix();
+			mvp.proj = m_currentCamera->GetProjMatrix();
+
+			vkCmdPushConstants(
+				commandBuffers[imageIndex],
+				m_gBufferWriteSharedMaterial->GetPipelineLayout(),
+				VK_SHADER_STAGE_VERTEX_BIT,
+				0,
+				sizeof(MVP),
+				&mvp);
+
+			vkCmdDrawIndexed(
+				commandBuffers[imageIndex],
+				static_cast<uint32_t>(mr->GetMesh()->GetIndexSize()),
+				1,
+				0,
+				0,
+				0);
+		}
+
+		vkCmdNextSubpass(commandBuffers[imageIndex], VK_SUBPASS_CONTENTS_INLINE);
 
 		for (auto const& mr : m_meshRenderers)
 		{

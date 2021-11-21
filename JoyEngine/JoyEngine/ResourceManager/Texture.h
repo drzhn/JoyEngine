@@ -44,6 +44,8 @@ namespace JoyEngine
 		[[nodiscard]] VkSampler& GetSampler() noexcept { return m_textureSampler; }
 
 		[[nodiscard]] bool IsLoaded() const noexcept override { return m_isLoaded; }
+
+		[[nodiscard]] VkImageSubresourceRange* GetSubresourceRange() noexcept { return &m_subresourceRange; }
 	private:
 		void CreateImage();
 		void CreateImageView();
@@ -68,6 +70,7 @@ namespace JoyEngine
 		VkImageUsageFlags m_usageFlags = 0;
 		VkMemoryPropertyFlags m_propertiesFlags = 0;
 		VkImageAspectFlags m_aspectFlags = 0;
+		VkImageSubresourceRange m_subresourceRange;
 
 
 		VkDeviceMemory m_textureImageMemory = VK_NULL_HANDLE;

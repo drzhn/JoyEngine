@@ -220,7 +220,7 @@ namespace JoyEngine
 		depthStencil.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
 		depthStencil.depthTestEnable = VK_TRUE;
 		depthStencil.depthWriteEnable = VK_TRUE;
-		depthStencil.depthCompareOp = VK_COMPARE_OP_LESS;
+		depthStencil.depthCompareOp = VK_COMPARE_OP_LESS_OR_EQUAL;
 		depthStencil.depthBoundsTestEnable = VK_FALSE;
 		depthStencil.stencilTestEnable = VK_FALSE;
 
@@ -339,10 +339,14 @@ namespace JoyEngine
 
 		JoyContext::Resource->UnloadResource(m_shaderGuid);
 
-		vkDestroyDescriptorSetLayout(JoyContext::Graphics->GetDevice(),
-		                             m_setLayout,
-		                             JoyContext::Graphics->GetAllocationCallbacks());
-		JoyContext::DescriptorSet->UnregisterPool(m_setLayoutHash);
+		vkDestroyDescriptorSetLayout(
+			JoyContext::Graphics->GetDevice(),
+			m_setLayout,
+			JoyContext::Graphics->GetAllocationCallbacks());
+		if (m_setLayoutHash != 0)
+		{
+			JoyContext::DescriptorSet->UnregisterPool(m_setLayoutHash);
+		}
 	}
 
 	VkPipeline SharedMaterial::GetPipeline() const noexcept
@@ -359,7 +363,6 @@ namespace JoyEngine
 	{
 		switch (strHash(type.c_str()))
 		{
-		//TODO add subpassInput
 		case strHash("texture"):
 			return VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
 		case strHash("attachment"):

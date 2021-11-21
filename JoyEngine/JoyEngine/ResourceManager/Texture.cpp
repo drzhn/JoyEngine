@@ -131,6 +131,14 @@ namespace JoyEngine
 
 	void Texture::CreateImageView()
 	{
+		m_subresourceRange = {
+				m_aspectFlags,
+				0,
+				1,
+				0,
+				1
+		};
+
 		const VkImageViewCreateInfo viewInfo{
 			VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
 			nullptr,
@@ -144,13 +152,7 @@ namespace JoyEngine
 				VK_COMPONENT_SWIZZLE_IDENTITY,
 				VK_COMPONENT_SWIZZLE_IDENTITY
 			},
-			{
-				m_aspectFlags,
-				0,
-				1,
-				0,
-				1
-			}
+			m_subresourceRange
 		};
 
 		const VkResult res = vkCreateImageView(
