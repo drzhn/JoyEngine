@@ -24,9 +24,7 @@ namespace JoyEngine
 	{
 		rapidjson::Document json = JoyContext::Data->GetSerializedData(m_guid, sharedMaterial);
 
-		m_shaderGuid = GUID::StringToGuid(json["shader"].GetString());
-
-		m_shader = JoyContext::Resource->LoadResource<Shader>(m_shaderGuid);
+		m_shader = GUID::StringToGuid(json["shader"].GetString());
 
 		m_hasVertexInput = json["hasVertexInput"].GetBool();
 		m_hasMVP = json["hasMVP"].GetBool();
@@ -336,8 +334,6 @@ namespace JoyEngine
 		vkDestroyPipelineLayout(JoyContext::Graphics->GetDevice(),
 		                        m_pipelineLayout,
 		                        JoyContext::Graphics->GetAllocationCallbacks());
-
-		JoyContext::Resource->UnloadResource(m_shaderGuid);
 
 		vkDestroyDescriptorSetLayout(
 			JoyContext::Graphics->GetDevice(),

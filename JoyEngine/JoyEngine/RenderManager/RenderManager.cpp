@@ -23,8 +23,7 @@ namespace JoyEngine
 	{
 		vkQueueWaitIdle(JoyContext::Graphics->GetPresentQueue());
 		vkDeviceWaitIdle(JoyContext::Graphics->GetDevice());
-		JoyContext::Resource->UnloadResource(m_gBufferWriteSharedMaterialGuid);
-
+		m_gBufferWriteSharedMaterial.Clear();
 	}
 
 	RenderManager::~RenderManager()
@@ -265,7 +264,7 @@ namespace JoyEngine
 			3,
 			dependencies);
 
-		m_gBufferWriteSharedMaterial = JoyContext::Resource->LoadResource<SharedMaterial>(m_gBufferWriteSharedMaterialGuid);
+		m_gBufferWriteSharedMaterial = GUID::StringToGuid("869fa59b-d775-41fb-9650-d3f9e8f72269");
 	}
 
 	void RenderManager::CreateFramebuffers()

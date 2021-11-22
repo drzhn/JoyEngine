@@ -9,6 +9,7 @@
 #include "SharedMaterial.h"
 #include "ResourceManager/Buffer.h"
 #include "ResourceManager/Texture.h"
+#include "ResourceManager/ResourceHandle.h"
 #include "Utils/GUID.h"
 
 namespace JoyEngine
@@ -46,12 +47,8 @@ namespace JoyEngine
 		[[nodiscard]] bool IsLoaded() const noexcept override;
 	private:
 		void CreateDescriptorSets();
-
-		void LoadResources() const;
-
 	private :
-		GUID m_sharedMaterialGuid;
-		SharedMaterial* m_sharedMaterial = nullptr;
+		ResourceHandle<SharedMaterial> m_sharedMaterial;
 		std::vector<Binding> m_bindings;
 		std::vector<VkDescriptorSet> m_descriptorSets;
 	};

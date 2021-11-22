@@ -194,6 +194,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="JoyEngine\Common\HashDefs.h" />
+    <ClInclude Include="JoyEngine\ResourceManager\ResourceHandle.h" />
     <ClInclude Include="JoyEngine\GameplayComponents\CameraBehaviour.h" />
     <ClInclude Include="JoyEngine\InputManager\InputManager.h" />
     <ClInclude Include="JoyEngine\Common\Color.h" />

@@ -17,9 +17,7 @@ namespace JoyEngine
 	{
 		rapidjson::Document json = JoyContext::Data->GetSerializedData(guid, material);
 
-		m_sharedMaterialGuid = GUID::StringToGuid(json["sharedMaterial"].GetString());
-		m_sharedMaterial = JoyContext::Resource->LoadResource<SharedMaterial>(m_sharedMaterialGuid);
-
+		m_sharedMaterial = GUID::StringToGuid(json["sharedMaterial"].GetString());
 		std::vector<VulkanBindingDescription>& vbd = m_sharedMaterial->GetVulkanBindings();
 		m_bindings.resize(vbd.size());
 		for (int i = 0; i < vbd.size(); i++)
@@ -69,7 +67,7 @@ namespace JoyEngine
 					m_bindings[info.bindingIndex].inputAttachmentType = Normal;
 					break;
 				default:
-					ASSERT(false)
+					ASSERT(false);
 				}
 			}
 			else
@@ -94,7 +92,6 @@ namespace JoyEngine
 	Material::~Material()
 	{
 		JoyContext::DescriptorSet->Free(m_descriptorSets);
-		JoyContext::Resource->UnloadResource(m_sharedMaterialGuid);
 		for (const auto& item : m_bindings)
 		{
 			if (item.bindingDescription.type == VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER)

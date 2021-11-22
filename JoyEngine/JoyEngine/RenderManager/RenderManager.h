@@ -79,9 +79,8 @@ namespace JoyEngine
 
 	private:
 		const int MAX_FRAMES_IN_FLIGHT = 2;
-		const GUID m_gBufferWriteSharedMaterialGuid = GUID::StringToGuid("869fa59b-d775-41fb-9650-d3f9e8f72269");
-		SharedMaterial* m_gBufferWriteSharedMaterial;
-		// TODO write resource handle with loading in constructor and unloading at destructor 
+		//const GUID m_gBufferWriteSharedMaterialGuid = ;
+		ResourceHandle<SharedMaterial> m_gBufferWriteSharedMaterial;
 
 		std::unique_ptr<Swapchain> m_swapchain;
 		std::unique_ptr<RenderPass> m_renderPass;

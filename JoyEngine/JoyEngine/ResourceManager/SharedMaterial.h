@@ -11,6 +11,7 @@
 #include "Shader.h"
 #include "Utils/GUID.h"
 #include "Common/Serialization.h"
+#include "ResourceManager/ResourceHandle.h"
 
 namespace JoyEngine
 {
@@ -53,7 +54,8 @@ namespace JoyEngine
 
 		[[nodiscard]] bool IsLoaded() const noexcept override;
 	private :
-		GUID m_shaderGuid;
+		ResourceHandle<Shader> m_shader;
+
 		bool m_hasVertexInput = false;
 		bool m_hasMVP = false;
 		bool m_depthTest = false;
@@ -63,7 +65,6 @@ namespace JoyEngine
 		uint64_t m_setLayoutHash;
 		std::map<std::string, BindingInfo> m_bindings;
 		std::vector<VulkanBindingDescription> m_vulkanBindings;
-		Shader* m_shader = nullptr;
 
 		VkPipelineLayout m_pipelineLayout = VK_NULL_HANDLE;
 		VkPipeline m_graphicsPipeline = VK_NULL_HANDLE;
