@@ -40,8 +40,10 @@ namespace JoyEngine
 		{
 			std::string nameStr = binding["name"].GetString();
 			const rapidjson::Value& data = binding["data"];
-			BindingInfo info = m_sharedMaterial->GetBindingInfoByName(nameStr);
-			if (info.type == "texture")
+			BindingInfo* info = m_sharedMaterial->GetBindingInfoByName(nameStr);
+			if (info == nullptr) continue;
+
+			if (info->type == "texture")
 			{
 				ASSERT(data.IsString());
 				std::string dataString = data.GetString();
@@ -51,9 +53,9 @@ namespace JoyEngine
 					textureGuid = GUID::StringToGuid(dataString);
 					JoyContext::Resource->LoadResource<Texture>(textureGuid);
 				}
-				m_bindings[info.bindingIndex].textureGuid = textureGuid;
+				m_bindings[info->bindingIndex].textureGuid = textureGuid;
 			}
-			else if (info.type == "attachment")
+			else if (info->type == "attachment")
 			{
 				ASSERT(data.IsString());
 				std::string dataString = data.GetString();
@@ -61,10 +63,10 @@ namespace JoyEngine
 				switch (strHash(dataString.c_str()))
 				{
 				case strHash("position"):
-					m_bindings[info.bindingIndex].inputAttachmentType = Position;
+					m_bindings[info->bindingIndex].inputAttachmentType = Position;
 					break;
 				case strHash("normal"):
-					m_bindings[info.bindingIndex].inputAttachmentType = Normal;
+					m_bindings[info->bindingIndex].inputAttachmentType = Normal;
 					break;
 				default:
 					ASSERT(false);
@@ -74,13 +76,13 @@ namespace JoyEngine
 			{
 				for (int j = 0; j < JoyContext::Render->GetSwapchain()->GetSwapchainImageCount(); j++)
 				{
-					std::unique_ptr<BufferMappedPtr> ptr = m_bindings[info.bindingIndex].buffers[j]->
-						GetMappedPtr(info.offset, info.count * SerializationUtils::GetTypeSize(info.type));
+					std::unique_ptr<BufferMappedPtr> ptr = m_bindings[info->bindingIndex].buffers[j]->
+						GetMappedPtr(info->offset, info->count * SerializationUtils::GetTypeSize(info->type));
 
 					SerializationUtils::DeserializeToPtr(
-						strHash(info.type.c_str()),
+						strHash(info->type.c_str()),
 						data, ptr->GetMappedPtr(),
-						info.count);
+						info->count);
 				}
 			}
 		}

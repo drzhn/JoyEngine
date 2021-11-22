@@ -1,1 +1,1 @@
-{"type": "material", "sharedMaterial": "74eac505-944d-45af-acdf-51bcb04fee30", "bindings": [{"name": "mainTexture", "data": "56b5dd67-83fb-4987-9fcc-a693774c50d8"}, {"name": "color", "data": {"r": 1, "g": 1, "b": 1, "a": 1}}]}
+{"type": "material", "sharedMaterial": "aed323a6-0075-4388-b7c9-64a89048a7a6", "bindings": [{"name": "mainTexture", "data": "e634a0aa-5e5f-4cd0-ab99-0ac7de69c68f"}, {"name": "mainColor", "data": [1, 1, 1, 1]}, {"name": "inputPosition", "data": "position"}, {"name": "inputNormal", "data": "normal"}]}

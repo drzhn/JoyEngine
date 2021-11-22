@@ -79,8 +79,15 @@ namespace JoyEngine
 	template <>
 	inline void Read<float>(const rapidjson::Value& val, void* ptr)
 	{
-		ASSERT(val.IsFloat());
-		float f = val.GetFloat();
+		float f = 0;
+		if (val.IsFloat())
+			f = val.GetFloat();
+		else if (val.IsInt())
+			f = static_cast<float>(val.GetInt());
+		else if (val.IsUint())
+			f = static_cast<float>(val.GetUint());
+		else
+			ASSERT(false);
 		memcpy(ptr, &f, sizeof(float));
 	}
 

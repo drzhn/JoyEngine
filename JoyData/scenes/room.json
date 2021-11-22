@@ -5,9 +5,9 @@
         {
             "name": "room",
             "transform": {
-                "localPosition": [0.0, 0.0, 0.0],
+                "localPosition": [0.0, -3.0, 3.0],
                 "localRotation": [0.0, 0.0, 0.0],
-                "localScale": [1.0, 1.0, 1.0]
+                "localScale": [5.0, 5.0, 5.0]
             },
             "components": [
                 {
@@ -19,14 +19,14 @@
                     "type": "component",
                     "component": "RoomBehaviour",
                     "fields": {
-                        "m_speed": 2.0,
-                        "m_color": [0.4, 0.5, 0.8, 1.0]
+                        "m_speed": 0.05,
+                        "m_color": [ 0.4, 0.5, 0.8, 1.0 ]
                     }
                 }
             ]
         },
         {
-            "name": "roomCopy",
+            "name": "head",
             "transform": {
                 "localPosition": [0.0, 0.0, 3.0],
                 "localRotation": [0.0, 0.0, 0.0],
@@ -51,13 +51,20 @@
         {
             "name": "camera",
             "transform": {
-                "localPosition": [0.0, 2.0, -2.0],
+                "localPosition": [0.0, 3.0, -3.0],
                 "localRotation": [405.0, 0.0, 0.0],
                 "localScale": [1.0, 1.0, 1.0]
             },
             "components": [
                 {
                     "type": "camera"
+                },
+                {
+                    "type": "component",
+                    "component": "CameraBehaviour",
+                    "fields": {
+                        "m_speed": 2.0
+                    }
                 }
             ]
         }

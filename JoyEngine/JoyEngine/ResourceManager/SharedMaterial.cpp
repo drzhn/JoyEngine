@@ -384,10 +384,13 @@ namespace JoyEngine
 		return m_shader->IsLoaded();
 	}
 
-	BindingInfo SharedMaterial::GetBindingInfoByName(const std::string& name) const noexcept
+	BindingInfo* SharedMaterial::GetBindingInfoByName(const std::string& name) noexcept
 	{
-		ASSERT_DESC(m_bindings.find(name) != m_bindings.end(), "no binding with this name, check material json");
-		return m_bindings.find(name)->second;
+		if (m_bindings.find(name) == m_bindings.end())
+		{
+			return nullptr;
+		}
+		return &(m_bindings.find(name)->second);
 	}
 
 	uint64_t SharedMaterial::GetSetLayoutHash() const noexcept

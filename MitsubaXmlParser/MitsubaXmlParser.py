@@ -97,20 +97,23 @@ for asset in root:
 
 materialJson = {
     "type": "material",
-    "sharedMaterial": "74eac505-944d-45af-acdf-51bcb04fee30",
+    "sharedMaterial": "aed323a6-0075-4388-b7c9-64a89048a7a6",
     "bindings": [
         {
             "name": "mainTexture",
             "data": "7e50aa82-5696-428c-a088-538fb78c0ee6"
         },
         {
-            "name": "color",
-            "data": {
-                "r": 1,
-                "g": 1,
-                "b": 1,
-                "a": 1
-            }
+            "name": "mainColor",
+            "data": []
+        },
+        {
+            "name": "inputPosition",
+            "data": "position"
+        },
+        {
+            "name": "inputNormal",
+            "data": "normal"
         }
     ]
 }
@@ -123,31 +126,32 @@ for materialName in materials.keys():
     else:
         materialJsonCopy["bindings"][0]["data"] = ""
 
-    materialJsonCopy["bindings"][1]["data"]["r"] = materials[materialName][0][0]
-    materialJsonCopy["bindings"][1]["data"]["g"] = materials[materialName][0][1]
-    materialJsonCopy["bindings"][1]["data"]["b"] = materials[materialName][0][2]
-    materialJsonCopy["bindings"][1]["data"]["a"] = materials[materialName][0][3]
+    materialJsonCopy["bindings"][1]["data"] = [
+        materials[materialName][0][0]
+        , materials[materialName][0][1]
+        , materials[materialName][0][2]
+        , materials[materialName][0][3]]
     f.write(json.dumps(materialJsonCopy))
     f.close()
 
 gameObjectJson = {
     "name": "room",
     "transform": {
-        "localPosition": {
-            "x": 0.0,
-            "y": 0.0,
-            "z": 0.0
-        },
-        "localRotation": {
-            "x": 0.0,
-            "y": 0.0,
-            "z": 0.0
-        },
-        "localScale": {
-            "x": 1.0,
-            "y": 1.0,
-            "z": 1.0
-        }
+        "localPosition": [
+            0.0,
+            0.0,
+            0.0
+        ],
+        "localRotation": [
+            0.0,
+            0.0,
+            0.0
+        ],
+        "localScale": [
+            1.0,
+            1.0,
+            1.0
+        ],
     },
     "components": [
         {
@@ -165,25 +169,20 @@ sceneJson = {
         {
             "name": "camera",
             "transform": {
-                "localPosition": {
-                    "x": 0.0,
-                    "y": 2.0,
-                    "z": -2.0
-                },
-                "localRotation": {
-                    "x": 405.0,
-                    "y": 0.0,
-                    "z": 0.0
-                },
-                "localScale": {
-                    "x": 1.0,
-                    "y": 1.0,
-                    "z": 1.0
-                }
+                "localPosition": [1.0, 2, 1.5],
+                "localRotation": [30.0, 220, 0.0],
+                "localScale": [1.0, 1.0, 1.0]
             },
             "components": [
                 {
                     "type": "camera"
+                },
+                {
+                    "type": "component",
+                    "component": "CameraBehaviour",
+                    "fields": {
+                        "m_speed": 2.0
+                    }
                 }
             ]
         }
@@ -192,15 +191,13 @@ sceneJson = {
 
 for obj in objects:
     gameObjectJsonCopy = copy.deepcopy(gameObjectJson)
-    gameObjectJsonCopy["name"] = obj[1]
-    gameObjectJsonCopy["transform"]["localPosition"]["x"] = obj[2][0]
-    gameObjectJsonCopy["transform"]["localPosition"]["y"] = obj[2][1]
-    gameObjectJsonCopy["transform"]["localPosition"]["z"] = obj[2][2]
+gameObjectJsonCopy["name"] = obj[1]
+gameObjectJsonCopy["transform"]["localPosition"] = [obj[2][0], obj[2][1], obj[2][2]]
 
-    gameObjectJsonCopy["components"][0]["model"] = meshes[obj[0]]
-    gameObjectJsonCopy["components"][0]["material"] = materials[obj[3]][2]
+gameObjectJsonCopy["components"][0]["model"] = meshes[obj[0]]
+gameObjectJsonCopy["components"][0]["material"] = materials[obj[3]][2]
 
-    sceneJson["objects"].append(gameObjectJsonCopy)
+sceneJson["objects"].append(gameObjectJsonCopy)
 
 f = open(os.path.join(scenePath, "kitchen.json"), 'w+')
 f.write(json.dumps(sceneJson))
@@ -215,9 +212,41 @@ dataJson = {
             "path": "shaders/shader.shader"
         },
         {
+            "guid": "9953ce03-509b-4e28-a5bc-a7756b90fb7f",
+            "path": "shaders/gbufferwrite.shader"
+        },
+        {
+            "guid": "6de06b3f-87f8-486b-af95-03b51c168b4e",
+            "path": "shaders/vikinggbuffer.shader"
+        },
+        {
             "guid": "74eac505-944d-45af-acdf-51bcb04fee30",
             "path": "shared_materials/vikingSharedMaterial.json"
         },
+        {
+            "guid": "aed323a6-0075-4388-b7c9-64a89048a7a6",
+            "path": "shared_materials/vikingGbufferShaderMaterial.json"
+        },
+        {
+            "guid": "869fa59b-d775-41fb-9650-d3f9e8f72269",
+            "path": "shared_materials/gBufferShaderMaterial.json"
+        },
+        {
+            "guid": "70cfb3fd-9105-4987-b37a-ad1f74529f9d",
+            "path": "materials/vikingMaterial.json"
+        },
+        {
+            "guid": "5647451b-5e36-4c31-ace8-33952da006a1",
+            "path": "materials/vikingMaterialCopy.json"
+        },
+        {
+            "guid": "04c17a20-bdbd-4743-9c8b-b781ec016da5",
+            "path": "materials/vikingGbufferMaterial1.json"
+        },
+        {
+            "guid": "b20dac6b-ef36-40db-b937-ea62fd89a39f",
+            "path": "materials/vikingGbufferMaterial2.json"
+        }
     ]
 }
 

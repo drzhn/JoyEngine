@@ -46,7 +46,7 @@ namespace JoyEngine
 		[[nodiscard]] VkPipeline GetPipeline() const noexcept;
 
 		[[nodiscard]] VkPipelineLayout GetPipelineLayout() const noexcept;
-		[[nodiscard]] BindingInfo GetBindingInfoByName(const std::string& name) const noexcept;
+		[[nodiscard]] BindingInfo* GetBindingInfoByName(const std::string& name) noexcept;
 		[[nodiscard]] uint64_t GetSetLayoutHash() const noexcept;
 		[[nodiscard]] std::vector<VulkanBindingDescription>& GetVulkanBindings();
 
