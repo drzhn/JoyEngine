@@ -52,7 +52,7 @@ namespace JoyEngine
 
 	void JoyEngine::Init() const noexcept
 	{
-		Time::Init();
+		Time::Init(m_deltaTimeHandler);
 
 		m_memoryManager->Init();
 		m_descriptorSetManager->Init();

@@ -28,12 +28,16 @@ namespace JoyEngine
 
 		[[nodiscard]] glm::vec3 GetScale() const noexcept;
 
-		[[nodiscard]] glm::mat4 GetModelMatrix();
+		[[nodiscard]] glm::mat4 GetModelMatrix() const;
 
+	private:
+		void UpdateModelMatrix();
 	private:
 		glm::vec3 m_localPosition;
 		glm::quat m_localRotation;
 		glm::vec3 m_localScale;
+
+		glm::mat4 m_modelMatrix;
 	};
 }
 

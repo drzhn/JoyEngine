@@ -43,9 +43,9 @@ namespace JoyEngine
 
 		void DrawFrame();
 
-		void RegisterMeshRenderer(MeshRenderer* meshRenderer);
+		void RegisterSharedMaterial(SharedMaterial* sharedMaterial);
 
-		void UnregisterMeshRenderer(MeshRenderer* meshRenderer);
+		void UnregisterSharedMaterial(SharedMaterial* sharedMaterial);
 
 		void RegisterCamera(Camera* camera);
 
@@ -89,7 +89,7 @@ namespace JoyEngine
 		std::unique_ptr<Texture> m_normalAttachment;
 
 
-		std::set<MeshRenderer*> m_meshRenderers;
+		std::set<SharedMaterial*> m_sharedMaterials;
 		Camera* m_currentCamera;
 
 		std::vector<VkFramebuffer> m_swapChainFramebuffers;

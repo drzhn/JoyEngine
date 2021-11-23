@@ -16,9 +16,9 @@ namespace JoyEngine
 	void Transform::SetPosition(glm::vec3 pos) noexcept
 	{
 		m_localPosition = pos;
+		UpdateModelMatrix();
 	}
 
-	glm::vec3 Transform::GetPosition() const noexcept { return m_localPosition; }
 
 	void Transform::SetRotation(glm::vec3 rot) noexcept
 	{
@@ -27,25 +27,38 @@ namespace JoyEngine
 			glm::radians(rot.y),
 			glm::radians(rot.z)
 		));
+		UpdateModelMatrix();
 	}
 
 	void Transform::SetRotation(glm::quat rot) noexcept
 	{
 		m_localRotation = rot;
+		UpdateModelMatrix();
 	}
 
-	glm::quat Transform::GetRotation() const noexcept { return m_localRotation; }
+	void Transform::SetScale(glm::vec3 scale) noexcept
+	{
+		m_localScale = scale;
+		UpdateModelMatrix();
+	}
 
-	void Transform::SetScale(glm::vec3 scale) noexcept { m_localScale = scale; }
-
-	glm::vec3 Transform::GetScale() const noexcept { return m_localScale; }
-
-	glm::mat4 Transform::GetModelMatrix()
+	void Transform::UpdateModelMatrix()
 	{
 		const glm::mat4 translationMatrix = glm::translate(glm::mat4(1.0f), m_localPosition);
 		const glm::mat4 rotationMatrix = glm::toMat4(m_localRotation);
 		const glm::mat4 scaleMatrix = glm::scale(glm::mat4(1.0f), m_localScale);
 
-		return translationMatrix * rotationMatrix * scaleMatrix;
+		m_modelMatrix = translationMatrix * rotationMatrix * scaleMatrix;
+	}
+
+	glm::vec3 Transform::GetPosition() const noexcept { return m_localPosition; }
+
+	glm::quat Transform::GetRotation() const noexcept { return m_localRotation; }
+
+	glm::vec3 Transform::GetScale() const noexcept { return m_localScale; }
+
+	glm::mat4 Transform::GetModelMatrix() const
+	{
+		return m_modelMatrix;
 	}
 }

@@ -4,6 +4,7 @@
 
 #include <rapidjson/document.h>
 
+#include "Common/HashDefs.h"
 #include "Common/SerializationUtils.h"
 #include "GraphicsManager/GraphicsManager.h"
 #include "DataManager/DataManager.h"

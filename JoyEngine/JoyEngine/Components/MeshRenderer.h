@@ -10,6 +10,8 @@
 #include "ResourceManager/Material.h"
 
 namespace JoyEngine {
+    class Material;
+
     class MeshRenderer : public Component {
     public:
         MeshRenderer() = default;

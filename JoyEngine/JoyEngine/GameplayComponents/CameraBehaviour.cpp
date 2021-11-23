@@ -18,10 +18,9 @@ namespace JoyEngine
 		m_enabled = false;
 	}
 
-	float currentAngle = 0;
 	void CameraBehaviour::Update()
 	{
-		currentAngle += (JoyContext::Input->GetKeyDown(KeyCode::KEYCODE_T) ? Time::GetDeltaTime() : 0) -
+		float currentAngle = (JoyContext::Input->GetKeyDown(KeyCode::KEYCODE_T) ? Time::GetDeltaTime() : 0) -
 			(JoyContext::Input->GetKeyDown(KeyCode::KEYCODE_Y) ? Time::GetDeltaTime() : 0);
 		glm::vec3 vec = glm::vec3(
 			(JoyContext::Input->GetKeyDown(KeyCode::KEYCODE_A) ? Time::GetDeltaTime() : 0) -
@@ -31,12 +30,14 @@ namespace JoyEngine
 			(JoyContext::Input->GetKeyDown(KeyCode::KEYCODE_W) ? Time::GetDeltaTime() : 0) -
 			(JoyContext::Input->GetKeyDown(KeyCode::KEYCODE_S) ? Time::GetDeltaTime() : 0));
 
-		const glm::vec3 vecWorld = vec;// m_transform->GetModelMatrix()* glm::vec4(vec, 0);
+		const glm::vec3 vecWorld = m_transform->GetModelMatrix()* glm::vec4(vec, 0);
 
-		//m_transform->SetPosition(
-		//	m_transform->GetPosition() + vecWorld
-		//);
-		//m_transform->SetRotation(
-		//	glm::angleAxis(currentAngle, glm::vec3(0, 1, 0)));
+		m_transform->SetPosition(
+			m_transform->GetPosition() + vecWorld
+		);
+		m_transform->SetRotation(
+			glm::angleAxis(currentAngle, glm::vec3(0, 1, 0))*
+			m_transform->GetRotation()
+		);
 	}
 }

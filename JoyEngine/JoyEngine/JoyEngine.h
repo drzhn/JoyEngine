@@ -1,6 +1,7 @@
 #ifndef JOY_ENGINE_H
 #define JOY_ENGINE_H
 
+#include <functional>
 #include <memory>
 
 #include "windows.h"
@@ -23,13 +24,20 @@ namespace JoyEngine
 
 	class RenderManager;
 
-	class IWindowMessageHandler
+	class IWindowHandler
 	{
 	public:
 		virtual void HandleMessage(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) = 0;
+
+		void SetDeltaTimeHandler(const std::function<void(float)> handler)
+		{
+			m_deltaTimeHandler = handler;
+		}
+	protected:
+		std::function<void(float)> m_deltaTimeHandler;
 	};
 
-	class JoyEngine final : public IWindowMessageHandler
+	class JoyEngine final : public IWindowHandler
 	{
 	public:
 		JoyEngine() = delete;

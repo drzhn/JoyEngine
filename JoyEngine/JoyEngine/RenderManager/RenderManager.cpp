@@ -301,18 +301,18 @@ namespace JoyEngine
 		}
 	}
 
-	void RenderManager::RegisterMeshRenderer(MeshRenderer* meshRenderer)
+	void RenderManager::RegisterSharedMaterial(SharedMaterial* meshRenderer)
 	{
-		m_meshRenderers.insert(meshRenderer);
+		m_sharedMaterials.insert(meshRenderer);
 	}
 
-	void RenderManager::UnregisterMeshRenderer(MeshRenderer* meshRenderer)
+	void RenderManager::UnregisterSharedMaterial(SharedMaterial* meshRenderer)
 	{
-		if (m_meshRenderers.find(meshRenderer) == m_meshRenderers.end())
+		if (m_sharedMaterials.find(meshRenderer) == m_sharedMaterials.end())
 		{
 			ASSERT(false);
 		}
-		m_meshRenderers.erase(meshRenderer);
+		m_sharedMaterials.erase(meshRenderer);
 	}
 
 	void RenderManager::RegisterCamera(Camera* camera)
@@ -377,115 +377,122 @@ namespace JoyEngine
 		vkCmdBeginRenderPass(commandBuffers[imageIndex], &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
 
 		ASSERT(m_currentCamera != nullptr);
-
+		glm::mat4 view = m_currentCamera->GetViewMatrix();
+		glm::mat4 proj = m_currentCamera->GetProjMatrix();
 		vkCmdBindPipeline(
 			commandBuffers[imageIndex],
 			VK_PIPELINE_BIND_POINT_GRAPHICS,
 			m_gBufferWriteSharedMaterial->GetPipeline());
 
-		for (auto const& mr : m_meshRenderers)
+		for (auto const& sm : m_sharedMaterials)
 		{
-			if (!mr->IsReady()) continue;
+			for (const auto& mr : sm->GetMeshRenderers())
+			{
+				if (!mr->IsReady()) continue;
 
-			VkBuffer vertexBuffers[] = {
-				mr->GetMesh()->GetVertexBuffer()
-			};
-			VkDeviceSize offsets[] = {0};
-			vkCmdBindVertexBuffers(
-				commandBuffers[imageIndex],
-				0,
-				1,
-				vertexBuffers,
-				offsets);
+				VkBuffer vertexBuffers[] = {
+					mr->GetMesh()->GetVertexBuffer()
+				};
+				VkDeviceSize offsets[] = {0};
+				vkCmdBindVertexBuffers(
+					commandBuffers[imageIndex],
+					0,
+					1,
+					vertexBuffers,
+					offsets);
 
-			vkCmdBindIndexBuffer(
-				commandBuffers[imageIndex],
-				mr->GetMesh()->GetIndexBuffer(),
-				0,
-				VK_INDEX_TYPE_UINT32);
+				vkCmdBindIndexBuffer(
+					commandBuffers[imageIndex],
+					mr->GetMesh()->GetIndexBuffer(),
+					0,
+					VK_INDEX_TYPE_UINT32);
 
-			MVP mvp{};
-			mvp.model = mr->GetTransform()->GetModelMatrix();
-			mvp.view = m_currentCamera->GetViewMatrix();
-			mvp.proj = m_currentCamera->GetProjMatrix();
+				MVP mvp{};
+				mvp.model = mr->GetTransform()->GetModelMatrix();
+				mvp.view = view;
+				mvp.proj = proj;
 
-			vkCmdPushConstants(
-				commandBuffers[imageIndex],
-				m_gBufferWriteSharedMaterial->GetPipelineLayout(),
-				VK_SHADER_STAGE_VERTEX_BIT,
-				0,
-				sizeof(MVP),
-				&mvp);
+				vkCmdPushConstants(
+					commandBuffers[imageIndex],
+					m_gBufferWriteSharedMaterial->GetPipelineLayout(),
+					VK_SHADER_STAGE_VERTEX_BIT,
+					0,
+					sizeof(MVP),
+					&mvp);
 
-			vkCmdDrawIndexed(
-				commandBuffers[imageIndex],
-				static_cast<uint32_t>(mr->GetMesh()->GetIndexSize()),
-				1,
-				0,
-				0,
-				0);
+				vkCmdDrawIndexed(
+					commandBuffers[imageIndex],
+					static_cast<uint32_t>(mr->GetMesh()->GetIndexSize()),
+					1,
+					0,
+					0,
+					0);
+			}
 		}
 
 		vkCmdNextSubpass(commandBuffers[imageIndex], VK_SUBPASS_CONTENTS_INLINE);
 
-		for (auto const& mr : m_meshRenderers)
+		for (auto const& sm : m_sharedMaterials)
 		{
-			if (!mr->IsReady()) continue;
-
-			VkBuffer vertexBuffers[] = {
-				mr->GetMesh()->GetVertexBuffer()
-			};
-			VkDeviceSize offsets[] = {0};
-			vkCmdBindVertexBuffers(
-				commandBuffers[imageIndex],
-				0,
-				1,
-				vertexBuffers,
-				offsets);
-
-			vkCmdBindIndexBuffer(
-				commandBuffers[imageIndex],
-				mr->GetMesh()->GetIndexBuffer(),
-				0,
-				VK_INDEX_TYPE_UINT32);
-
 			vkCmdBindPipeline(
 				commandBuffers[imageIndex],
 				VK_PIPELINE_BIND_POINT_GRAPHICS,
-				mr->GetMaterial()->GetSharedMaterial()->GetPipeline());
+				sm->GetPipeline());
 
-			auto sets = mr->GetMaterial()->GetDescriptorSets();
-			vkCmdBindDescriptorSets(
-				commandBuffers[imageIndex],
-				VK_PIPELINE_BIND_POINT_GRAPHICS,
-				mr->GetMaterial()->GetSharedMaterial()->GetPipelineLayout(),
-				0,
-				1,
-				&sets[imageIndex],
-				0, nullptr);
+			for (const auto& mr : sm->GetMeshRenderers())
+			{
+				if (!mr->IsReady()) continue;
 
-			MVP mvp{};
-			mvp.model = mr->GetTransform()->GetModelMatrix();
-			mvp.view = m_currentCamera->GetViewMatrix();
-			mvp.proj = m_currentCamera->GetProjMatrix();
+				VkBuffer vertexBuffers[] = {
+					mr->GetMesh()->GetVertexBuffer()
+				};
+				VkDeviceSize offsets[] = {0};
+				vkCmdBindVertexBuffers(
+					commandBuffers[imageIndex],
+					0,
+					1,
+					vertexBuffers,
+					offsets);
 
-			vkCmdPushConstants(
-				commandBuffers[imageIndex],
-				mr->GetMaterial()->GetSharedMaterial()->GetPipelineLayout(),
-				VK_SHADER_STAGE_VERTEX_BIT,
-				0,
-				sizeof(MVP),
-				&mvp);
+				vkCmdBindIndexBuffer(
+					commandBuffers[imageIndex],
+					mr->GetMesh()->GetIndexBuffer(),
+					0,
+					VK_INDEX_TYPE_UINT32);
 
-			vkCmdDrawIndexed(
-				commandBuffers[imageIndex],
-				static_cast<uint32_t>(mr->GetMesh()->GetIndexSize()),
-				1,
-				0,
-				0,
-				0);
+
+				auto sets = mr->GetMaterial()->GetDescriptorSets();
+				vkCmdBindDescriptorSets(
+					commandBuffers[imageIndex],
+					VK_PIPELINE_BIND_POINT_GRAPHICS,
+					sm->GetPipelineLayout(),
+					0,
+					1,
+					&sets[imageIndex],
+					0, nullptr);
+
+				MVP mvp{};
+				mvp.model = mr->GetTransform()->GetModelMatrix();
+				mvp.view = view;
+				mvp.proj = proj;
+
+				vkCmdPushConstants(
+					commandBuffers[imageIndex],
+					sm->GetPipelineLayout(),
+					VK_SHADER_STAGE_VERTEX_BIT,
+					0,
+					sizeof(MVP),
+					&mvp);
+
+				vkCmdDrawIndexed(
+					commandBuffers[imageIndex],
+					static_cast<uint32_t>(mr->GetMesh()->GetIndexSize()),
+					1,
+					0,
+					0,
+					0);
+			}
 		}
-
 		vkCmdEndRenderPass(commandBuffers[imageIndex]);
 
 		if (vkEndCommandBuffer(commandBuffers[imageIndex]) != VK_SUCCESS)

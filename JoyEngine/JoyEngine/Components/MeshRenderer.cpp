@@ -3,18 +3,18 @@
 #include "JoyContext.h"
 
 #include "ResourceManager/ResourceManager.h"
-#include "RenderManager/RenderManager.h"
 #include "Common/Resource.h"
+#include "ResourceManager/SharedMaterial.h"
 
 namespace JoyEngine {
     void MeshRenderer::Enable() {
         ASSERT(m_mesh != nullptr && m_material != nullptr);
-        JoyContext::Render->RegisterMeshRenderer(this);
+        m_material->GetSharedMaterial()->RegisterMeshRenderer(this);
         m_enabled = true;
     }
 
     void MeshRenderer::Disable() {
-        JoyContext::Render->UnregisterMeshRenderer(this);
+        m_material->GetSharedMaterial()->UnregisterMeshRenderer(this);
         m_enabled = false;
     }
 

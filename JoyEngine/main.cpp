@@ -67,9 +67,10 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
 	}
 
 	JoyEngine::JoyEngine* graphicsContext = new JoyEngine::JoyEngine(hInstance, hwnd);
+	WindowHandler::RegisterMessageHandler(graphicsContext, hwnd);
+
 	graphicsContext->Init();
 
-	WindowHandler::RegisterMessageHandler(graphicsContext, hwnd);
 
 	ShowWindow(hwnd, nCmdShow);
 

@@ -14,6 +14,14 @@
 
 namespace JoyEngine
 {
+	struct VulkanBindingDescription
+	{
+		VkDescriptorType type;
+		size_t size;
+	};
+
+	class SharedMaterial;
+
 	enum InputAttachmentType
 	{
 		Position,

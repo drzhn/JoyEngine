@@ -5,6 +5,7 @@
 #include <rapidjson/document.h>
 
 #include "JoyContext.h"
+#include "Common/HashDefs.h"
 #include "Common/SerializationUtils.h"
 #include "DataManager/DataManager.h"
 #include "ResourceManager/ResourceManager.h"
@@ -18,6 +19,7 @@ namespace JoyEngine
 	{
 		Initialize();
 		CreateGraphicsPipeline();
+		JoyContext::Render->RegisterSharedMaterial(this);
 	}
 
 	void SharedMaterial::Initialize()
@@ -343,6 +345,7 @@ namespace JoyEngine
 		{
 			JoyContext::DescriptorSet->UnregisterPool(m_setLayoutHash);
 		}
+		JoyContext::Render->UnregisterSharedMaterial(this);
 	}
 
 	VkPipeline SharedMaterial::GetPipeline() const noexcept
@@ -382,6 +385,25 @@ namespace JoyEngine
 	bool SharedMaterial::IsLoaded() const noexcept
 	{
 		return m_shader->IsLoaded();
+	}
+
+	void SharedMaterial::RegisterMeshRenderer(MeshRenderer* meshRenderer)
+	{
+		m_meshRenderers.insert(meshRenderer);
+	}
+
+	void SharedMaterial::UnregisterMeshRenderer(MeshRenderer* meshRenderer)
+	{
+		if (m_meshRenderers.find(meshRenderer) == m_meshRenderers.end())
+		{
+			ASSERT(false);
+		}
+		m_meshRenderers.erase(meshRenderer);
+	}
+
+	std::set<MeshRenderer*>& SharedMaterial::GetMeshRenderers()
+	{
+		return m_meshRenderers;
 	}
 
 	BindingInfo* SharedMaterial::GetBindingInfoByName(const std::string& name) noexcept

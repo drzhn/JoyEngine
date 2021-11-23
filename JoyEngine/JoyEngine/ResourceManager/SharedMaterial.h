@@ -10,28 +10,25 @@
 #include "Common/Resource.h"
 #include "Shader.h"
 #include "Utils/GUID.h"
-#include "Common/Serialization.h"
+#include "Components/MeshRenderer.h"
 #include "ResourceManager/ResourceHandle.h"
 
 namespace JoyEngine
 {
+	class MeshRenderer;
+	struct VulkanBindingDescription;
 	enum PipelineType
 	{
 		MainColor,
 		GBufferWrite
 	};
+
 	struct BindingInfo
 	{
 		uint32_t bindingIndex;
 		std::string type;
 		uint32_t count;
 		size_t offset;
-	};
-
-	struct VulkanBindingDescription
-	{
-		VkDescriptorType type;
-		size_t size;
 	};
 
 	class SharedMaterial final : public Resource
@@ -53,7 +50,16 @@ namespace JoyEngine
 		static VkDescriptorType GetTypeFromStr(const std::string& type) noexcept;
 
 		[[nodiscard]] bool IsLoaded() const noexcept override;
+
+		void RegisterMeshRenderer(MeshRenderer* meshRenderer);
+
+		void UnregisterMeshRenderer(MeshRenderer* meshRenderer);
+
+		std::set<MeshRenderer*>& GetMeshRenderers();
+
 	private :
+		std::set<MeshRenderer*> m_meshRenderers;
+
 		ResourceHandle<Shader> m_shader;
 
 		bool m_hasVertexInput = false;
