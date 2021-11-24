@@ -6,6 +6,7 @@ namespace JoyEngine {
 	float Time::m_time = 0;
 	uint32_t Time::m_frameCount = 0;
 	float Time::m_timeFromLastDeltaTimeCounter = 0;
+	uint32_t Time::m_framesFromLastDeltaTimeCounter = 0;
 	std::function<void(float currentDeltaTime)> Time::m_deltaTimeHandler;
 
 	std::chrono::time_point<std::chrono::high_resolution_clock> Time::m_startTime;
@@ -25,10 +26,12 @@ namespace JoyEngine {
 		m_frameCount++;
 
 		m_timeFromLastDeltaTimeCounter += m_deltaTime;
+		m_framesFromLastDeltaTimeCounter++;
 		if (m_timeFromLastDeltaTimeCounter >= m_deltaTimeCounterDelay)
 		{
+			m_deltaTimeHandler(m_timeFromLastDeltaTimeCounter / static_cast<float>(m_framesFromLastDeltaTimeCounter));
 			m_timeFromLastDeltaTimeCounter = 0;
-			m_deltaTimeHandler(m_deltaTime);
+			m_framesFromLastDeltaTimeCounter = 0;
 		}
 	}
 	float Time::GetDeltaTime() noexcept {

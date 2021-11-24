@@ -14,8 +14,9 @@ namespace JoyEngine {
 		static float GetTime() noexcept;
 		static float GetFrameCount() noexcept;
 	private:
-		static constexpr float m_deltaTimeCounterDelay = 0.1f;
+		static constexpr float m_deltaTimeCounterDelay = 0.3f;
 		static float m_timeFromLastDeltaTimeCounter;
+		static uint32_t m_framesFromLastDeltaTimeCounter;
 
 		static float m_deltaTime;
 		static float m_time;

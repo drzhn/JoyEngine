@@ -153,6 +153,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="JoyEngine\Components\Light.cpp" />
     <ClCompile Include="JoyEngine\GameplayComponents\CameraBehaviour.cpp" />
     <ClCompile Include="JoyEngine\InputManager\InputManager.cpp" />
     <ClCompile Include="JoyEngine\Common\Serialization.cpp" />
@@ -194,6 +195,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="JoyEngine\Common\HashDefs.h" />
+    <ClInclude Include="JoyEngine\Components\Light.h" />
     <ClInclude Include="JoyEngine\ResourceManager\ResourceHandle.h" />
     <ClInclude Include="JoyEngine\GameplayComponents\CameraBehaviour.h" />
     <ClInclude Include="JoyEngine\InputManager\InputManager.h" />

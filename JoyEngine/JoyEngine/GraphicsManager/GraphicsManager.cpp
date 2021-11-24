@@ -131,6 +131,8 @@ namespace JoyEngine
 		{
 			throw std::runtime_error("failed to find a suitable GPU!");
 		}
+		VkPhysicalDeviceProperties props;
+		vkGetPhysicalDeviceProperties(m_physicalDevice, &props);
 	}
 
 	void GraphicsManager::FindQueueFamilies()
