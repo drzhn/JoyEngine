@@ -73,7 +73,7 @@ namespace JoyEngine
 
 		void WriteCommandBuffers(uint32_t imageIndex) const;
 
-		void ResetCommandBuffers(uint32_t imageIndex);
+		void ResetCommandBuffers(uint32_t imageIndex) const;
 
 		void CreateSyncObjects();
 

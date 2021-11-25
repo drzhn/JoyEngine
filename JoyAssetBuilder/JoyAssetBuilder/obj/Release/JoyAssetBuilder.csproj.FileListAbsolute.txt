@@ -10,3 +10,14 @@ D:\CppProjects\JoyEngine\JoyAssetBuilder\JoyAssetBuilder\JoyAssetBuilder\obj\Rel
 D:\CppProjects\JoyEngine\JoyAssetBuilder\JoyAssetBuilder\JoyAssetBuilder\obj\Release\JoyAssetBuilder.csproj.CoreCompileInputs.cache
 D:\CppProjects\JoyEngine\JoyAssetBuilder\JoyAssetBuilder\JoyAssetBuilder\obj\Release\JoyAssetBuilder.exe
 D:\CppProjects\JoyEngine\JoyAssetBuilder\JoyAssetBuilder\JoyAssetBuilder\obj\Release\JoyAssetBuilder.pdb
+D:\CppProjects\JoyEngine\JoyAssetBuilder\JoyAssetBuilder\bin\Release\JoyAssetBuilder.exe.config
+D:\CppProjects\JoyEngine\JoyAssetBuilder\JoyAssetBuilder\bin\Release\JoyAssetBuilder.exe
+D:\CppProjects\JoyEngine\JoyAssetBuilder\JoyAssetBuilder\bin\Release\JoyAssetBuilder.pdb
+D:\CppProjects\JoyEngine\JoyAssetBuilder\JoyAssetBuilder\obj\Release\JoyAssetBuilder.csproj.AssemblyReference.cache
+D:\CppProjects\JoyEngine\JoyAssetBuilder\JoyAssetBuilder\obj\Release\JoyAssetBuilder.csproj.SuggestedBindingRedirects.cache
+D:\CppProjects\JoyEngine\JoyAssetBuilder\JoyAssetBuilder\obj\Release\JoyAssetBuilder.MainWindow.resources
+D:\CppProjects\JoyEngine\JoyAssetBuilder\JoyAssetBuilder\obj\Release\JoyAssetBuilder.Properties.Resources.resources
+D:\CppProjects\JoyEngine\JoyAssetBuilder\JoyAssetBuilder\obj\Release\JoyAssetBuilder.csproj.GenerateResource.cache
+D:\CppProjects\JoyEngine\JoyAssetBuilder\JoyAssetBuilder\obj\Release\JoyAssetBuilder.csproj.CoreCompileInputs.cache
+D:\CppProjects\JoyEngine\JoyAssetBuilder\JoyAssetBuilder\obj\Release\JoyAssetBuilder.exe
+D:\CppProjects\JoyEngine\JoyAssetBuilder\JoyAssetBuilder\obj\Release\JoyAssetBuilder.pdb

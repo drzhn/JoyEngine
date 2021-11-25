@@ -10,17 +10,44 @@ namespace JoyAssetBuilder
 {
     public class ShaderBuilder
     {
-        enum ShaderType
+        [Flags]
+        private enum ShaderType : uint
         {
-            Vertex = 0,
-            Fragment = 1
+            Vertex = 1 << 0,
+            Fragment = 1 << 1
+        };
+
+
+        private const string dllPath = @"D:\CppProjects\JoyEngine\JoyAssetBuilder\x64\Release\JoyShaderBuilderLib.dll";
+
+
+        private struct ShaderDefine
+        {
+            public uint ShaderUsage;
+            public string DefineString;
+        }
+
+        private static Dictionary<string, ShaderDefine> defines = new Dictionary<string, ShaderDefine>()
+        {
+            {
+                "JOY_VARIABLES", new ShaderDefine()
+                {
+                    ShaderUsage = (uint)(ShaderType.Vertex | ShaderType.Fragment),
+                    DefineString = Properties.Resources.JOY_VARIABLES
+                }
+            },
+            {
+                "GBUFFER_TEXTURES", new ShaderDefine()
+                {
+                    ShaderUsage = (uint)(ShaderType.Fragment),
+                    DefineString = Properties.Resources.GBUFFER_TEXTURES
+                }
+            }
         };
 
         private const StringSplitOptions noEmpty = StringSplitOptions.RemoveEmptyEntries;
 
-        const string dllPath = @"D:\CppProjects\JoyEngine\JoyAssetBuilder\x64\Release\JoyShaderBuilderLib.dll";
-
-        static void ReadInputOrOutput(string body, ref List<string> vars)
+        private static void ReadInputOrOutput(string body, ref List<string> vars)
         {
             Char[] separators = new[] { ';' };
             foreach (string varStr in body.Split(separators, noEmpty))
@@ -91,12 +118,14 @@ namespace JoyAssetBuilder
             const string fragOutputAttr = "frag_output";
             const string vertShaderAttr = "vertex_shader";
             const string fragShaderAttr = "fragment_shader";
+            const string definesAttr = "defines";
 
 
             List<string> directives = new List<string>();
             List<string> verInputs = new List<string>();
             List<string> vertToFragInputs = new List<string>();
             List<string> fragOutputs = new List<string>();
+            List<string> definesList = new List<string>();
             string vertexShader = "";
             string fragmentShader = "";
 
@@ -167,6 +196,20 @@ namespace JoyAssetBuilder
                         ReadInputOrOutput(body, ref fragOutputs);
                     }
 
+                    if (header == definesAttr)
+                    {
+                        ReadInputOrOutput(body, ref definesList);
+
+                        foreach (string define in definesList)
+                        {
+                            if (!defines.ContainsKey(define))
+                            {
+                                message = Path.GetFileName(shaderPath) + ": Unknown define " + define + Environment.NewLine;
+                                return false;
+                            }
+                        }
+                    }
+
                     if (header == vertShaderAttr)
                     {
                         vertexShader = body;
@@ -220,6 +263,16 @@ namespace JoyAssetBuilder
             }
 
             vertexShaderStr.Append('\n');
+            foreach (string define in definesList)
+            {
+                ShaderDefine d = defines[define];
+                if ((d.ShaderUsage & (uint)ShaderType.Vertex) > 0)
+                {
+                    vertexShaderStr.AppendFormat("{0}\n", d.DefineString);
+                }
+            }
+
+            vertexShaderStr.Append('\n');
             foreach (var line in vertexShader.Split(
                          new string[] { Environment.NewLine },
                          StringSplitOptions.None
@@ -228,7 +281,7 @@ namespace JoyAssetBuilder
                 vertexShaderStr.AppendFormat("{0}\n", line);
             }
 
-            //Console.WriteLine(vertexShaderStr);
+            Console.WriteLine(vertexShaderStr);
 
 
             StringBuilder fragmentShaderStr = new StringBuilder();
@@ -250,7 +303,16 @@ namespace JoyAssetBuilder
             }
 
             fragmentShaderStr.Append('\n');
+            foreach (string define in definesList)
+            {
+                ShaderDefine d = defines[define];
+                if ((d.ShaderUsage & (uint)ShaderType.Fragment) > 0)
+                {
+                    fragmentShaderStr.AppendFormat("{0}\n", d.DefineString);
+                }
+            }
 
+            fragmentShaderStr.Append('\n');
             foreach (var line in fragmentShader.Split(
                          new string[] { Environment.NewLine },
                          StringSplitOptions.None
@@ -259,7 +321,7 @@ namespace JoyAssetBuilder
                 fragmentShaderStr.AppendFormat("{0}\n", line);
             }
 
-            //Console.WriteLine(fragmentShaderStr);
+            Console.WriteLine(fragmentShaderStr);
 
             InitializeCompiler();
 
@@ -275,12 +337,14 @@ namespace JoyAssetBuilder
 
             if (vResult != 0)
             {
-                message = Path.GetFileName(shaderPath) + ": Error compiling vertex shader\n" + vErrorMessage + Environment.NewLine;
+                message = Path.GetFileName(shaderPath) + ": Error compiling vertex shader\n" + vErrorMessage +
+                          Environment.NewLine;
                 return false;
             }
             else if (fResult != 0)
             {
-                message = Path.GetFileName(shaderPath) + ": Error compiling fragment shader\n" + fErrorMessage + Environment.NewLine;
+                message = Path.GetFileName(shaderPath) + ": Error compiling fragment shader\n" + fErrorMessage +
+                          Environment.NewLine;
                 return false;
             }
             else

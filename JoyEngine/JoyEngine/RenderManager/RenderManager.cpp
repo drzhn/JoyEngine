@@ -1,6 +1,5 @@
 #include "RenderManager.h"
 
-#include <chrono>
 #include <memory>
 
 #include "JoyContext.h"
@@ -461,7 +460,7 @@ namespace JoyEngine
 					VK_INDEX_TYPE_UINT32);
 
 
-				auto sets = mr->GetMaterial()->GetDescriptorSets();
+				std::vector<VkDescriptorSet> sets = mr->GetMaterial()->GetDescriptorSets();
 				vkCmdBindDescriptorSets(
 					commandBuffers[imageIndex],
 					VK_PIPELINE_BIND_POINT_GRAPHICS,
@@ -501,7 +500,7 @@ namespace JoyEngine
 		}
 	}
 
-	void RenderManager::ResetCommandBuffers(uint32_t imageIndex)
+	void RenderManager::ResetCommandBuffers(uint32_t imageIndex) const
 	{
 		vkResetCommandBuffer(commandBuffers[imageIndex], 0);
 	}

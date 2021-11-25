@@ -18,8 +18,8 @@ shaderc_compilation_result_t result;
 
 enum ShaderType
 {
-	Vertex=0,
-	Fragment=1
+	Vertex = 1 << 0,
+	Fragment = 1 << 1
 };
 
 extern "C" __declspec(dllexport) void __cdecl InitializeCompiler()
