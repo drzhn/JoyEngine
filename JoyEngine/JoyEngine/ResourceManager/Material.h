@@ -14,29 +14,15 @@
 
 namespace JoyEngine
 {
-	struct VulkanBindingDescription
-	{
-		VkDescriptorType type;
-		size_t size;
-	};
-
-	class SharedMaterial;
-
 	enum InputAttachmentType
 	{
 		Position,
 		Normal
 	};
 
-	struct Binding
+	struct MaterialBinding : BindingBase
 	{
-		VulkanBindingDescription bindingDescription;
-
-		// buffers are not shared, who creates them is responsible for destruction
-		std::vector<std::unique_ptr<Buffer>> buffers;
-		// textures are shared resources, so we need to create them through ResourceManagers
-		GUID textureGuid;
-		InputAttachmentType inputAttachmentType;
+		size_t size;
 	};
 
 	class Material final : public Resource
@@ -57,7 +43,7 @@ namespace JoyEngine
 		void CreateDescriptorSets();
 	private :
 		ResourceHandle<SharedMaterial> m_sharedMaterial;
-		std::vector<Binding> m_bindings;
+		std::vector<MaterialBinding> m_bindings;
 		std::vector<VkDescriptorSet> m_descriptorSets;
 	};
 }

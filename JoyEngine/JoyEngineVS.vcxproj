@@ -168,6 +168,7 @@
     <ClCompile Include="JoyEngine\MemoryManager\AsyncLoader.cpp" />
     <ClCompile Include="JoyEngine\MemoryManager\GPUStackAllocator.cpp" />
     <ClCompile Include="JoyEngine\MemoryManager\MemoryManager.cpp" />
+    <ClCompile Include="JoyEngine\RenderManager\CommonDescriptorSetProvider.cpp" />
     <ClCompile Include="JoyEngine\RenderManager\Framebuffer.cpp" />
     <ClCompile Include="JoyEngine\RenderManager\RenderManager.cpp" />
     <ClCompile Include="JoyEngine\RenderManager\RenderPass.cpp" />
@@ -196,6 +197,7 @@
   <ItemGroup>
     <ClInclude Include="JoyEngine\Common\HashDefs.h" />
     <ClInclude Include="JoyEngine\Components\Light.h" />
+    <ClInclude Include="JoyEngine\RenderManager\CommonDescriptorSetProvider.h" />
     <ClInclude Include="JoyEngine\ResourceManager\ResourceHandle.h" />
     <ClInclude Include="JoyEngine\GameplayComponents\CameraBehaviour.h" />
     <ClInclude Include="JoyEngine\InputManager\InputManager.h" />

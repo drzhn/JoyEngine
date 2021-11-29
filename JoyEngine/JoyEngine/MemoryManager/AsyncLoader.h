@@ -76,9 +76,9 @@ namespace JoyEngine
 		explicit AsyncLoader(VkQueue transferQueue);
 		~AsyncLoader();
 		void Update();
-		void LoadDataToBuffer(std::ifstream& stream, uint64_t offset, uint64_t bufferSize,
-			VkBuffer gpuBuffer, const std::function<void()>& callback);
-		void LoadDataToImage(std::ifstream& stream, uint64_t offset,
+		void LoadDataToBuffer(std::ifstream& stream, uint32_t offset, uint64_t bufferSize,
+		                      VkBuffer gpuBuffer, const std::function<void()>& callback);
+		void LoadDataToImage(std::ifstream& stream, uint32_t offset,
 			uint32_t width,
 			uint32_t height,
 			VkImage gpuImage, const std::function<void()>& callback);

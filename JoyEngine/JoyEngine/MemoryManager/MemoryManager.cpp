@@ -126,13 +126,13 @@ namespace JoyEngine
 		CopyBuffer(stagingBuffer.GetBuffer(), gpuBuffer, bufferSize);
 	}
 
-	void MemoryManager::LoadDataToBufferAsync(std::ifstream& stream, uint64_t offset, uint64_t bufferSize,
+	void MemoryManager::LoadDataToBufferAsync(std::ifstream& stream, uint32_t offset, uint64_t bufferSize,
 	                                          VkBuffer gpuBuffer, const std::function<void()>& callback) const
 	{
 		m_dataLoader->LoadDataToBuffer(stream, offset, bufferSize, gpuBuffer, callback);
 	}
 
-	void MemoryManager::LoadDataToImageAsync(std::ifstream& stream, uint64_t offset,
+	void MemoryManager::LoadDataToImageAsync(std::ifstream& stream, uint32_t offset,
 	                                         uint32_t width,
 	                                         uint32_t height,
 	                                         VkImage gpuImage, const std::function<void()>& callback) const

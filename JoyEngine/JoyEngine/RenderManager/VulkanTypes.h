@@ -82,6 +82,14 @@ namespace JoyEngine
 		glm::mat4 view;
 		glm::mat4 proj;
 	};
+
+	struct JoyData
+	{
+		glm::vec3 cameraWorldPos;
+		glm::mat4 cameraProjMatrix;
+		float time;
+		float deltaTime;
+	};
 }
 
 #endif //VULKANTYPES_H

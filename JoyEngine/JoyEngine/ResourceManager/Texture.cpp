@@ -61,7 +61,7 @@ namespace JoyEngine
 		m_isLoaded = true;
 	}
 
-	void Texture::InitializeTexture(std::ifstream& stream, uint64_t offset)
+	void Texture::InitializeTexture(std::ifstream& stream, uint32_t offset)
 	{
 		CreateImage();
 		CreateImageView();

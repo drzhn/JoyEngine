@@ -33,7 +33,7 @@ namespace JoyEngine
 
 		void LoadDataAsync(
 			std::ifstream& stream,
-			uint64_t offset, 
+			uint32_t offset,
 			const std::function<void()>& callback);
 
 		[[nodiscard]] std::unique_ptr<BufferMappedPtr> GetMappedPtr(VkDeviceSize offset, VkDeviceSize size) const;

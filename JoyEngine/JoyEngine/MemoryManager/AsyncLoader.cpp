@@ -250,7 +250,7 @@ namespace JoyEngine
 	}
 
 	void AsyncLoader::LoadDataToBuffer(
-		std::ifstream& stream, uint64_t offset, uint64_t bufferSize, VkBuffer gpuBuffer,
+		std::ifstream& stream, uint32_t offset, uint64_t bufferSize, VkBuffer gpuBuffer,
 		const std::function<void()>& callback)
 	{
 		m_commandsQueue.push_back(
@@ -258,7 +258,7 @@ namespace JoyEngine
 	}
 
 	void AsyncLoader::LoadDataToImage(
-		std::ifstream& stream, uint64_t offset, uint32_t width, uint32_t height,
+		std::ifstream& stream, uint32_t offset, uint32_t width, uint32_t height,
 		VkImage gpuImage, const std::function<void()>& callback)
 	{
 		m_commandsQueue.push_back(

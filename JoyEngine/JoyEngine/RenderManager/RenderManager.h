@@ -12,6 +12,7 @@
 
 #include <vulkan/vulkan.h>
 
+#include "CommonDescriptorSetProvider.h"
 #include "ResourceManager/Texture.h"
 
 #include "Components/MeshRenderer.h"
@@ -58,11 +59,7 @@ namespace JoyEngine
 		[[nodiscard]] float GetAspect() const noexcept;
 		[[nodiscard]] Texture* GetGBufferPositionTexture() const noexcept;
 		[[nodiscard]] Texture* GetGBufferNormalTexture() const noexcept;
-
-		[[nodiscard]] uint32_t GetMainColorSubpassIndex() const noexcept { return 1; }
-		[[nodiscard]] uint32_t GetGBufferWriteSubpassIndex() const noexcept { return 0; }
-		[[nodiscard]] uint32_t GetMainColorSubpassColorAttachmentsCount() const noexcept { return 1; }
-		[[nodiscard]] uint32_t GetGBufferWriteSubpassColorAttachmentsCount() const noexcept { return 2; }
+		SharedBindingData* GetBindingDataForDefine(uint32_t defineHash) const;
 
 	private:
 		void CreateRenderPass();
@@ -79,8 +76,8 @@ namespace JoyEngine
 
 	private:
 		const int MAX_FRAMES_IN_FLIGHT = 2;
-		//const GUID m_gBufferWriteSharedMaterialGuid = ;
 		ResourceHandle<SharedMaterial> m_gBufferWriteSharedMaterial;
+		std::unique_ptr<CommonDescriptorSetProvider> m_commonDescriptorSetProvider;
 
 		std::unique_ptr<Swapchain> m_swapchain;
 		std::unique_ptr<RenderPass> m_renderPass;

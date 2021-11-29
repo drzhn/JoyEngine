@@ -26,11 +26,11 @@ namespace JoyEngine
 
 		void LoadDataToBufferAsync(
 			std::ifstream& stream,
-			uint64_t offset,
+			uint32_t offset,
 			uint64_t bufferSize, VkBuffer gpuBuffer, const std::function<void()>& callback) const;
 
 		void LoadDataToImageAsync(
-			std::ifstream& stream, uint64_t offset, uint32_t width, uint32_t height,
+			std::ifstream& stream, uint32_t offset, uint32_t width, uint32_t height,
 			VkImage gpuImage,
 			const std::function<void()>& callback) const;
 

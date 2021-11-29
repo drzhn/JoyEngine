@@ -23,10 +23,11 @@ namespace JoyEngine
 		m_bindings.resize(vbd.size());
 		for (int i = 0; i < vbd.size(); i++)
 		{
-			m_bindings[i].bindingDescription = vbd[i];
+			m_bindings[i].type = vbd[i].type;
+			m_bindings[i].size = vbd[i].size;
 			if (vbd[i].type == VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER)
 			{
-				for (int j = 0; j < JoyContext::Render->GetSwapchain()->GetSwapchainImageCount(); j++)
+				for (uint32_t j = 0; j < JoyContext::Render->GetSwapchain()->GetSwapchainImageCount(); j++)
 				{
 					m_bindings[i].buffers.emplace_back(std::make_unique<Buffer>(
 						vbd[i].size,
@@ -56,26 +57,9 @@ namespace JoyEngine
 				}
 				m_bindings[info->bindingIndex].textureGuid = textureGuid;
 			}
-			else if (info->type == "attachment")
-			{
-				ASSERT(data.IsString());
-				std::string dataString = data.GetString();
-				ASSERT(!dataString.empty())
-				switch (strHash(dataString.c_str()))
-				{
-				case strHash("position"):
-					m_bindings[info->bindingIndex].inputAttachmentType = Position;
-					break;
-				case strHash("normal"):
-					m_bindings[info->bindingIndex].inputAttachmentType = Normal;
-					break;
-				default:
-					ASSERT(false);
-				}
-			}
 			else
 			{
-				for (int j = 0; j < JoyContext::Render->GetSwapchain()->GetSwapchainImageCount(); j++)
+				for (uint32_t j = 0; j < JoyContext::Render->GetSwapchain()->GetSwapchainImageCount(); j++)
 				{
 					std::unique_ptr<BufferMappedPtr> ptr = m_bindings[info->bindingIndex].buffers[j]->
 						GetMappedPtr(info->offset, info->count * SerializationUtils::GetTypeSize(info->type));
@@ -97,7 +81,7 @@ namespace JoyEngine
 		JoyContext::DescriptorSet->Free(m_descriptorSets);
 		for (const auto& item : m_bindings)
 		{
-			if (item.bindingDescription.type == VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER)
+			if (item.type == VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER)
 			{
 				if (!item.textureGuid.IsNull())
 				{
@@ -129,7 +113,7 @@ namespace JoyEngine
 
 			for (int j = 0; j < m_descriptorSets.size(); j++)
 			{
-				switch (m_bindings[i].bindingDescription.type)
+				switch (m_bindings[i].type)
 				{
 				case VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER:
 					{
@@ -144,34 +128,34 @@ namespace JoyEngine
 						imageInfoPtr = &imageInfo;
 						break;
 					}
-				case VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT:
-					{
-						Texture* texture = nullptr;
-						switch (m_bindings[i].inputAttachmentType)
-						{
-						case Position:
-							texture = JoyContext::Render->GetGBufferPositionTexture();
-							break;
-						case Normal:
-							texture = JoyContext::Render->GetGBufferNormalTexture();
-							break;
-						default:
-							ASSERT(false);
-						}
-						imageInfo = {
-							texture->GetSampler(),
-							texture->GetImageView(),
-							VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
-						};
-						imageInfoPtr = &imageInfo;
-						break;
-					}
+				//case VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT:
+				//	{
+				//		Texture* texture = nullptr;
+				//		switch (m_bindings[i].inputAttachmentType)
+				//		{
+				//		case Position:
+				//			texture = JoyContext::Render->GetGBufferPositionTexture();
+				//			break;
+				//		case Normal:
+				//			texture = JoyContext::Render->GetGBufferNormalTexture();
+				//			break;
+				//		default:
+				//			ASSERT(false);
+				//		}
+				//		imageInfo = {
+				//			texture->GetSampler(),
+				//			texture->GetImageView(),
+				//			VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
+				//		};
+				//		imageInfoPtr = &imageInfo;
+				//		break;
+				//	}
 				case VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER:
 					{
 						bufferInfo = {
 							m_bindings[i].buffers[j]->GetBuffer(),
 							0,
-							m_bindings[i].bindingDescription.size,
+							m_bindings[i].size,
 
 						};
 						bufferInfoPtr = &bufferInfo;
@@ -189,7 +173,7 @@ namespace JoyEngine
 					static_cast<uint32_t>(i),
 					0,
 					1,
-					m_bindings[i].bindingDescription.type,
+					m_bindings[i].type,
 					imageInfoPtr,
 					bufferInfoPtr,
 					texelBufferViewPtr
@@ -220,7 +204,7 @@ namespace JoyEngine
 
 		for (const auto& item : m_bindings)
 		{
-			if (item.bindingDescription.type == VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER)
+			if (item.type == VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER)
 			{
 				if (!item.textureGuid.IsNull())
 				{

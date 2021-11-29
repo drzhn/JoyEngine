@@ -23,6 +23,7 @@ namespace JoyEngine {
 
     private:
         uint32_t m_refCount = 0;
+    protected:
         const GUID m_guid;
     };
 }

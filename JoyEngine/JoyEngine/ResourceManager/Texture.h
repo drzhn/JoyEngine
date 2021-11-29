@@ -29,7 +29,7 @@ namespace JoyEngine
 		~Texture() final;
 
 		void InitializeTexture(const unsigned char* data);
-		void InitializeTexture(std::ifstream& stream, uint64_t offset);
+		void InitializeTexture(std::ifstream& stream, uint32_t offset);
 
 		void LoadDataAsync(
 			std::ifstream& stream,

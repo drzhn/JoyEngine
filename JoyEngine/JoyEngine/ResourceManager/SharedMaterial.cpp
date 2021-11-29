@@ -8,14 +8,13 @@
 #include "Common/HashDefs.h"
 #include "Common/SerializationUtils.h"
 #include "DataManager/DataManager.h"
-#include "ResourceManager/ResourceManager.h"
 #include "ResourceManager/DescriptorSetManager.h"
 #include "RenderManager/VulkanTypes.h"
 #include "RenderManager/RenderManager.h"
 
 namespace JoyEngine
 {
-	SharedMaterial::SharedMaterial(GUID guid) : Resource(guid), m_guid(guid)
+	SharedMaterial::SharedMaterial(GUID guid) : Resource(guid)
 	{
 		Initialize();
 		CreateGraphicsPipeline();
@@ -32,110 +31,116 @@ namespace JoyEngine
 		m_hasMVP = json["hasMVP"].GetBool();
 		m_depthTest = json["depthTest"].GetBool();
 		m_depthWrite = json["depthWrite"].GetBool();
-		if (json["pipelineType"].GetString() == std::string("MainColor"))
-		{
-			m_pipelineType = MainColor;
-		}
-		else if (json["pipelineType"].GetString() == std::string("GBufferWrite"))
-		{
-			m_pipelineType = GBufferWrite;
-		}
-		else
-		{
-			ASSERT_DESC(false, "unsopported pipeline type");
-		}
 
-		const auto bindingsArray = json["bindings"].GetArray();
-		const uint32_t bindingsArraySize = bindingsArray.Size();
+		m_colorAttachmentsCount = json["colorAttachmentsCount"].GetUint();
+		m_subpassIndex = json["subpassIndex"].GetUint();
 
-		std::vector<VkDescriptorSetLayoutBinding> bindings(bindingsArraySize);
-		std::vector<VkDescriptorType> types(bindingsArraySize);
-		std::vector<size_t> bindingCurrentOffsets(bindingsArraySize, 0);
-
-		int32_t maxBindingIndex = -1;
-		for (uint32_t i = 0; i < bindingsArraySize; i++)
 		{
-			std::string typeStr = bindingsArray[i]["type"].GetString();
-			std::string nameStr = bindingsArray[i]["name"].GetString();
-			int32_t bindingIndex = bindingsArray[i]["index"].GetInt();
-			uint32_t count = bindingsArray[i]["count"].GetUint();
+			const auto bindingsArray = json["bindings"].GetArray();
+			const uint32_t bindingsArraySize = bindingsArray.Size();
 
-			if (bindingIndex > maxBindingIndex)
+			std::vector<VkDescriptorSetLayoutBinding> bindings(bindingsArraySize);
+			std::vector<VkDescriptorType> types(bindingsArraySize);
+			std::vector<size_t> bindingCurrentOffsets(bindingsArraySize, 0);
+
+			int32_t maxBindingIndex = -1;
+			for (uint32_t i = 0; i < bindingsArraySize; i++)
 			{
-				maxBindingIndex = bindingIndex;
-			}
+				std::string typeStr = bindingsArray[i]["type"].GetString();
+				std::string nameStr = bindingsArray[i]["name"].GetString();
+				int32_t bindingIndex = bindingsArray[i]["index"].GetInt();
+				uint32_t count = bindingsArray[i]["count"].GetUint();
 
-			m_bindings.insert({
-				nameStr, {
-					static_cast<uint32_t>(bindingIndex),
-					typeStr,
-					count,
-					bindingCurrentOffsets[bindingIndex]
+				if (bindingIndex > maxBindingIndex)
+				{
+					maxBindingIndex = bindingIndex;
 				}
-			});
-			const VkDescriptorType type = GetTypeFromStr(typeStr);
-			if (type == VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER)
-			{
-				bindingCurrentOffsets[bindingIndex] += SerializationUtils::GetTypeSize(typeStr) * count;
+
+				m_bindings.insert({
+					nameStr, {
+						static_cast<uint32_t>(bindingIndex),
+						typeStr,
+						count,
+						bindingCurrentOffsets[bindingIndex]
+					}
+				});
+				const VkDescriptorType type = GetTypeFromStr(typeStr);
+				if (type == VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER)
+				{
+					bindingCurrentOffsets[bindingIndex] += SerializationUtils::GetTypeSize(typeStr) * count;
+				}
+
+				types[bindingIndex] = type;
+				VkShaderStageFlags stageFlagBits = 0;
+				if (type == VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT)
+				{
+					stageFlagBits = VK_SHADER_STAGE_FRAGMENT_BIT;
+				}
+				else
+				{
+					stageFlagBits = VK_SHADER_STAGE_FRAGMENT_BIT | VK_SHADER_STAGE_VERTEX_BIT;
+				}
+				const uint32_t descriptorCount = 1;
+				bindings[bindingIndex] = {
+					static_cast<uint32_t>(bindingIndex),
+					type,
+					descriptorCount,
+					stageFlagBits,
+					nullptr
+				};
 			}
 
-			types[bindingIndex] = type;
-			VkShaderStageFlags stageFlagBits = 0;
-			if (type == VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT)
+			uint64_t hash = 0;
+			int bindingsCount = maxBindingIndex + 1;
+
+			m_vulkanBindings.resize(bindingsCount);
+			for (uint32_t i = 0; i < bindingsCount; i++)
 			{
-				stageFlagBits = VK_SHADER_STAGE_FRAGMENT_BIT;
+				uint64_t binding_hash = i
+					| bindings[i].descriptorType << 8
+					| bindings[i].descriptorCount << 16
+					| bindings[i].stageFlags << 24;
+				hash ^= binding_hash;
+
+				m_vulkanBindings[i] = {
+					bindings[i].descriptorType,
+					bindingCurrentOffsets[i]
+				};
 			}
-			else
-			{
-				stageFlagBits = VK_SHADER_STAGE_FRAGMENT_BIT | VK_SHADER_STAGE_VERTEX_BIT;
-			}
-			const uint32_t descriptorCount = 1;
-			bindings[bindingIndex] = {
-				static_cast<uint32_t>(bindingIndex),
-				type,
-				descriptorCount,
-				stageFlagBits,
-				nullptr
+
+			VkDescriptorSetLayoutCreateInfo layoutInfo{
+				VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO,
+				nullptr,
+				0,
+				static_cast<uint32_t>(maxBindingIndex + 1),
+				bindings.data()
 			};
+
+			VkResult res = vkCreateDescriptorSetLayout(
+				JoyContext::Graphics->GetDevice(),
+				&layoutInfo,
+				JoyContext::Graphics->GetAllocationCallbacks(),
+				&m_setLayout);
+			ASSERT(res == VK_SUCCESS);
+			if (bindingsCount > 0)
+			{
+				JoyContext::DescriptorSet->RegisterPool(hash, m_setLayout, types);
+			}
+			m_setLayoutHash = hash;
 		}
 
-		uint64_t hash = 0;
-		int bindingsCount = maxBindingIndex + 1;
-
-		m_vulkanBindings.resize(bindingsCount);
-		for (uint32_t i = 0; i < bindingsCount; i++)
+		if (!json.HasMember("bindingDefines")) return;
+		const auto bindingsDefinesArray = json["bindingDefines"].GetArray();
+		const uint32_t bindingDefinesArraySize = bindingsDefinesArray.Size();
+		for (uint32_t i =0; i < bindingDefinesArraySize; i++)
 		{
-			uint64_t binding_hash = i
-				| bindings[i].descriptorType << 8
-				| bindings[i].descriptorCount << 16
-				| bindings[i].stageFlags << 24;
-			hash ^= binding_hash;
-
-			m_vulkanBindings[i] = {
-				bindings[i].descriptorType,
-				bindingCurrentOffsets[i]
-			};
+			//for (auto m = bindingsDefinesArray[i].MemberBegin(); m < bindingsDefinesArray[i].MemberEnd(); m++)
+			//{
+			//	std::string n = m->name.GetString();
+			//}
+			std::string define = bindingsDefinesArray[i].GetString();
+			m_bindingDefines.push_back(strHash(define.c_str()));
 		}
-
-		VkDescriptorSetLayoutCreateInfo layoutInfo{
-			VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO,
-			nullptr,
-			0,
-			static_cast<uint32_t>(maxBindingIndex + 1),
-			bindings.data()
-		};
-
-		VkResult res = vkCreateDescriptorSetLayout(
-			JoyContext::Graphics->GetDevice(),
-			&layoutInfo,
-			JoyContext::Graphics->GetAllocationCallbacks(),
-			&m_setLayout);
-		ASSERT(res == VK_SUCCESS);
-		if (bindingsCount > 0)
-		{
-			JoyContext::DescriptorSet->RegisterPool(hash, m_setLayout, types);
-		}
-		m_setLayoutHash = hash;
 	}
 
 	void SharedMaterial::CreateGraphicsPipeline()
@@ -254,17 +259,7 @@ namespace JoyEngine
 		colorBlending.sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
 		colorBlending.logicOpEnable = VK_FALSE;
 		colorBlending.logicOp = VK_LOGIC_OP_COPY; // Optional
-		switch (m_pipelineType)
-		{
-		case MainColor:
-			colorBlending.attachmentCount = JoyContext::Render->GetMainColorSubpassColorAttachmentsCount();
-			break;
-		case GBufferWrite:
-			colorBlending.attachmentCount = JoyContext::Render->GetGBufferWriteSubpassColorAttachmentsCount();
-			break;
-		default:
-			ASSERT(false);
-		}
+		colorBlending.attachmentCount = m_colorAttachmentsCount;
 		colorBlending.pAttachments = colorBlendAttachments;
 		colorBlending.blendConstants[0] = 0.0f; // Optional
 		colorBlending.blendConstants[1] = 0.0f; // Optional
@@ -277,12 +272,25 @@ namespace JoyEngine
 			sizeof(MVP)
 		};
 
+		std::array<VkDescriptorSetLayout, 4> layouts;
+		layouts[0] = m_setLayout;
+		uint32_t maxLayoutIndex = 0;
+		for (const auto& def : m_bindingDefines)
+		{
+			SharedBindingData* data = JoyContext::Render->GetBindingDataForDefine(def);
+			if (data->setIndex > maxLayoutIndex)
+			{
+				maxLayoutIndex = data->setIndex;
+			}
+			layouts[data->setIndex] = data->setLayout;
+		}
+
 		VkPipelineLayoutCreateInfo pipelineLayoutInfo{
 			VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO,
 			nullptr,
 			0,
-			1,
-			&m_setLayout,
+			maxLayoutIndex+1,
+			layouts.data(),
 			1,
 			&pushConstantRange
 		};
@@ -306,17 +314,7 @@ namespace JoyEngine
 		pipelineInfo.layout = m_pipelineLayout;
 		pipelineInfo.renderPass = JoyContext::Render->GetMainRenderPass();
 		pipelineInfo.pDepthStencilState = &depthStencil;
-		switch (m_pipelineType)
-		{
-		case MainColor:
-			pipelineInfo.subpass = JoyContext::Render->GetMainColorSubpassIndex();
-			break;
-		case GBufferWrite:
-			pipelineInfo.subpass = JoyContext::Render->GetGBufferWriteSubpassIndex();
-			break;
-		default:
-			ASSERT(false);
-		}
+		pipelineInfo.subpass = m_subpassIndex;
 		pipelineInfo.basePipelineHandle = VK_NULL_HANDLE;
 
 		res = vkCreateGraphicsPipelines(JoyContext::Graphics->GetDevice(),
@@ -404,6 +402,11 @@ namespace JoyEngine
 	std::set<MeshRenderer*>& SharedMaterial::GetMeshRenderers()
 	{
 		return m_meshRenderers;
+	}
+
+	std::vector<uint32_t>& SharedMaterial::GetBindingDefines()
+	{
+		return m_bindingDefines;
 	}
 
 	BindingInfo* SharedMaterial::GetBindingInfoByName(const std::string& name) noexcept

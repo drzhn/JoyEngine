@@ -72,7 +72,7 @@ namespace JoyEngine
 		return std::move(ptr);
 	}
 
-	void Buffer::LoadDataAsync(std::ifstream& stream, uint64_t offset, const std::function<void()>& callback)
+	void Buffer::LoadDataAsync(std::ifstream& stream, uint32_t offset, const std::function<void()>& callback)
 	{
 		ASSERT(m_properties & VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
 		m_onLoadedExternalCallback = callback;

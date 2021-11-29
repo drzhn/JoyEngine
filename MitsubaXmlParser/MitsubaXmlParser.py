@@ -106,14 +106,6 @@ materialJson = {
         {
             "name": "mainColor",
             "data": []
-        },
-        {
-            "name": "inputPosition",
-            "data": "position"
-        },
-        {
-            "name": "inputNormal",
-            "data": "normal"
         }
     ]
 }
@@ -191,13 +183,13 @@ sceneJson = {
 
 for obj in objects:
     gameObjectJsonCopy = copy.deepcopy(gameObjectJson)
-gameObjectJsonCopy["name"] = obj[1]
-gameObjectJsonCopy["transform"]["localPosition"] = [obj[2][0], obj[2][1], obj[2][2]]
+    gameObjectJsonCopy["name"] = obj[1]
+    gameObjectJsonCopy["transform"]["localPosition"] = [obj[2][0], obj[2][1], obj[2][2]]
 
-gameObjectJsonCopy["components"][0]["model"] = meshes[obj[0]]
-gameObjectJsonCopy["components"][0]["material"] = materials[obj[3]][2]
+    gameObjectJsonCopy["components"][0]["model"] = meshes[obj[0]]
+    gameObjectJsonCopy["components"][0]["material"] = materials[obj[3]][2]
 
-sceneJson["objects"].append(gameObjectJsonCopy)
+    sceneJson["objects"].append(gameObjectJsonCopy)
 
 f = open(os.path.join(scenePath, "kitchen.json"), 'w+')
 f.write(json.dumps(sceneJson))

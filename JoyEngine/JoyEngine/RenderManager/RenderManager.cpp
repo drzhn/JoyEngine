@@ -264,6 +264,7 @@ namespace JoyEngine
 			dependencies);
 
 		m_gBufferWriteSharedMaterial = GUID::StringToGuid("869fa59b-d775-41fb-9650-d3f9e8f72269");
+		m_commonDescriptorSetProvider = std::make_unique<CommonDescriptorSetProvider>();
 	}
 
 	void RenderManager::CreateFramebuffers()
@@ -317,6 +318,7 @@ namespace JoyEngine
 	void RenderManager::RegisterCamera(Camera* camera)
 	{
 		m_currentCamera = camera;
+		m_commonDescriptorSetProvider->SetCamera(camera);
 	}
 
 	void RenderManager::UnregisterCamera(Camera* camera)
@@ -378,6 +380,7 @@ namespace JoyEngine
 		ASSERT(m_currentCamera != nullptr);
 		glm::mat4 view = m_currentCamera->GetViewMatrix();
 		glm::mat4 proj = m_currentCamera->GetProjMatrix();
+
 		vkCmdBindPipeline(
 			commandBuffers[imageIndex],
 			VK_PIPELINE_BIND_POINT_GRAPHICS,
@@ -406,10 +409,11 @@ namespace JoyEngine
 					0,
 					VK_INDEX_TYPE_UINT32);
 
-				MVP mvp{};
-				mvp.model = mr->GetTransform()->GetModelMatrix();
-				mvp.view = view;
-				mvp.proj = proj;
+				MVP mvp{
+					mr->GetTransform()->GetModelMatrix(),
+					view,
+					proj
+				};
 
 				vkCmdPushConstants(
 					commandBuffers[imageIndex],
@@ -437,6 +441,19 @@ namespace JoyEngine
 				commandBuffers[imageIndex],
 				VK_PIPELINE_BIND_POINT_GRAPHICS,
 				sm->GetPipeline());
+
+			for (const auto& def : sm->GetBindingDefines())
+			{
+				SharedBindingData* data = m_commonDescriptorSetProvider->GetBindingData(def);
+				vkCmdBindDescriptorSets(
+					commandBuffers[imageIndex],
+					VK_PIPELINE_BIND_POINT_GRAPHICS,
+					sm->GetPipelineLayout(),
+					data->setIndex,
+					1,
+					&data->descriptorSets[imageIndex],
+					0, nullptr);
+			}
 
 			for (const auto& mr : sm->GetMeshRenderers())
 			{
@@ -470,10 +487,11 @@ namespace JoyEngine
 					&sets[imageIndex],
 					0, nullptr);
 
-				MVP mvp{};
-				mvp.model = mr->GetTransform()->GetModelMatrix();
-				mvp.view = view;
-				mvp.proj = proj;
+				MVP mvp{
+					mr->GetTransform()->GetModelMatrix(),
+					view,
+					proj
+				};
 
 				vkCmdPushConstants(
 					commandBuffers[imageIndex],
@@ -556,6 +574,9 @@ namespace JoyEngine
 		{
 			throw std::runtime_error("failed to acquire swap chain image!");
 		}
+		m_commonDescriptorSetProvider->UpdateDescriptorSetData(imageIndex);
+		ResetCommandBuffers(imageIndex);
+		WriteCommandBuffers(imageIndex);
 
 		// Check if a previous frame is using this image (i.e. there is its fence to wait on)
 		if (m_imagesInFlight[imageIndex] != VK_NULL_HANDLE)
@@ -565,9 +586,7 @@ namespace JoyEngine
 			                &m_imagesInFlight[imageIndex],
 			                VK_TRUE,
 			                UINT64_MAX);
-			ResetCommandBuffers(imageIndex);
 		}
-		WriteCommandBuffers(imageIndex);
 
 		// Mark the image as now being in use by this frame
 		m_imagesInFlight[imageIndex] = m_inFlightFences[currentFrame];
@@ -634,5 +653,10 @@ namespace JoyEngine
 	Texture* RenderManager::GetGBufferNormalTexture() const noexcept
 	{
 		return m_normalAttachment.get();
+	}
+
+	SharedBindingData* RenderManager::GetBindingDataForDefine(uint32_t defineHash) const
+	{
+		return m_commonDescriptorSetProvider->GetBindingData(defineHash);
 	}
 }

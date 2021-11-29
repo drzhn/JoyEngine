@@ -7,20 +7,27 @@
 
 #include <vulkan/vulkan.h>
 
+#include "Buffer.h"
 #include "Common/Resource.h"
 #include "Shader.h"
+#include "Texture.h"
 #include "Utils/GUID.h"
-#include "Components/MeshRenderer.h"
 #include "ResourceManager/ResourceHandle.h"
 
 namespace JoyEngine
 {
 	class MeshRenderer;
-	struct VulkanBindingDescription;
-	enum PipelineType
+
+	enum ShaderDefineType
 	{
-		MainColor,
-		GBufferWrite
+		JOY_VARIABLES,
+		GBUFFER_TEXTURES
+	};
+
+	struct VulkanBindingDescription
+	{
+		VkDescriptorType type;
+		size_t size;
 	};
 
 	struct BindingInfo
@@ -29,6 +36,18 @@ namespace JoyEngine
 		std::string type;
 		uint32_t count;
 		size_t offset;
+	};
+
+	struct BindingBase
+	{
+		VkDescriptorType type;
+
+		// buffers are not shared, who creates them is responsible for destruction
+		std::vector<std::unique_ptr<Buffer>> buffers;
+		// for attachment binding
+		Texture* texture = nullptr;
+		// textures are shared resources, so we need to create them through ResourceManagers
+		GUID textureGuid;
 	};
 
 	class SharedMaterial final : public Resource
@@ -56,6 +75,7 @@ namespace JoyEngine
 		void UnregisterMeshRenderer(MeshRenderer* meshRenderer);
 
 		std::set<MeshRenderer*>& GetMeshRenderers();
+		std::vector<uint32_t>& GetBindingDefines();
 
 	private :
 		std::set<MeshRenderer*> m_meshRenderers;
@@ -66,19 +86,18 @@ namespace JoyEngine
 		bool m_hasMVP = false;
 		bool m_depthTest = false;
 		bool m_depthWrite = false;
+		uint32_t m_colorAttachmentsCount;
+		uint32_t m_subpassIndex;
 
 		VkDescriptorSetLayout m_setLayout = VK_NULL_HANDLE;
 		uint64_t m_setLayoutHash;
 		std::map<std::string, BindingInfo> m_bindings;
 		std::vector<VulkanBindingDescription> m_vulkanBindings;
 
+		std::vector<uint32_t> m_bindingDefines;
+
 		VkPipelineLayout m_pipelineLayout = VK_NULL_HANDLE;
 		VkPipeline m_graphicsPipeline = VK_NULL_HANDLE;
-
-		PipelineType m_pipelineType;
-
-	private:
-		GUID m_guid;
 
 	private:
 		void Initialize();

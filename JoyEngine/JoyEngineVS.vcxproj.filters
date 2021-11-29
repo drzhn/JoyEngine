@@ -132,6 +132,9 @@
     <ClCompile Include="JoyEngine\Components\Light.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="JoyEngine\RenderManager\CommonDescriptorSetProvider.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="WindowHandler.h">
@@ -288,6 +291,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="JoyEngine\Components\Light.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="JoyEngine\RenderManager\CommonDescriptorSetProvider.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

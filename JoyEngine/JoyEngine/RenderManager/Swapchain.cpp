@@ -71,7 +71,7 @@ namespace JoyEngine
 		m_swapChainImages.resize(imageCount);
 		vkGetSwapchainImagesKHR(JoyContext::Graphics->GetDevice(), m_swapChain, &imageCount, m_swapChainImages.data());
 
-		m_swapchainImageCount = m_swapChainImages.size();
+		m_swapchainImageCount = imageCount;
 		m_swapChainImageFormat = surfaceFormat.format;
 		m_width = extent.width;
 		m_height = extent.height;

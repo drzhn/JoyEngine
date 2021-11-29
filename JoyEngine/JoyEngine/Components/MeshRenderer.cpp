@@ -4,7 +4,6 @@
 
 #include "ResourceManager/ResourceManager.h"
 #include "Common/Resource.h"
-#include "ResourceManager/SharedMaterial.h"
 
 namespace JoyEngine {
     void MeshRenderer::Enable() {
